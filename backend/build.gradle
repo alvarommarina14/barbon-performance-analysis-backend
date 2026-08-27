@@ -35,7 +35,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    implementation 'org.flywaydb:flyway-core'
+    // Boot 4 splits auto-configuration per integration. Depending on flyway-core alone gives
+    // the library but not the auto-configuration, and migrations silently never run.
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
 
