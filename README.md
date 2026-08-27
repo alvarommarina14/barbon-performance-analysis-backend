@@ -51,6 +51,13 @@ afterwards, the contract changed and the client has to catch up — which is the
 ## Tests
 
 ```bash
-cd backend && ./gradlew test   # needs Docker: Testcontainers starts a real Postgres
+cd backend && ./gradlew test   # Testcontainers starts a real Postgres
 cd frontend && pnpm typecheck
+```
+
+When the Docker daemon is not available, point the suite at an already-running Postgres
+instead. It must be an empty database the tests may truncate:
+
+```bash
+COURT_PROOF_TEST_DB_URL=jdbc:postgresql://localhost:5432/courtproof_test COURT_PROOF_TEST_DB_USER=courtproof COURT_PROOF_TEST_DB_PASSWORD=courtproof   ./gradlew test
 ```
