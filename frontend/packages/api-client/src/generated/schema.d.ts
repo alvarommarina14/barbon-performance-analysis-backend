@@ -138,33 +138,33 @@ export interface components {
         };
         CoachSummary: {
             /** Format: uuid */
-            profileId?: string;
+            profileId: string;
             bookingUrl?: string;
         };
         CurrentUserResponse: {
             /** Format: uuid */
-            id?: string;
-            email?: string;
-            name?: string;
+            id: string;
+            email: string;
+            name: string;
             /** @enum {string} */
-            role?: "PLAYER" | "COACH" | "ADMIN";
+            role: "PLAYER" | "COACH" | "ADMIN";
             avatarUrl?: string;
-            timezone?: string;
+            timezone: string;
             player?: components["schemas"]["PlayerSummary"];
             coach?: components["schemas"]["CoachSummary"];
         };
         LoginResponse: {
-            accessToken?: string;
-            refreshToken?: string;
+            accessToken: string;
+            refreshToken: string;
             /** Format: int64 */
             expiresInSeconds?: number;
-            user?: components["schemas"]["CurrentUserResponse"];
+            user: components["schemas"]["CurrentUserResponse"];
         };
         PlayerSummary: {
             /** Format: uuid */
-            profileId?: string;
+            profileId: string;
             /** @enum {string} */
-            membershipTier?: "BASE" | "PRO";
+            membershipTier: "BASE" | "PRO";
             /** Format: int32 */
             currentWeek?: number;
             hasCoach?: boolean;
@@ -173,8 +173,8 @@ export interface components {
             refreshToken: string;
         };
         TokenPairResponse: {
-            accessToken?: string;
-            refreshToken?: string;
+            accessToken: string;
+            refreshToken: string;
             /** Format: int64 */
             expiresInSeconds?: number;
         };
@@ -185,18 +185,18 @@ export interface components {
         };
         CoachCard: {
             /** Format: uuid */
-            profileId?: string;
-            name?: string;
+            profileId: string;
+            name: string;
             avatarUrl?: string;
             bookingUrl?: string;
         };
         PlayerHomeResponse: {
             /** Format: uuid */
-            profileId?: string;
-            name?: string;
+            profileId: string;
+            name: string;
             avatarUrl?: string;
             /** @enum {string} */
-            membershipTier?: "BASE" | "PRO";
+            membershipTier: "BASE" | "PRO";
             /** Format: int32 */
             currentWeek?: number;
             /** Format: int32 */
@@ -209,14 +209,14 @@ export interface components {
         };
         ClientSummary: {
             /** Format: uuid */
-            profileId?: string;
+            profileId: string;
             /** Format: uuid */
-            userId?: string;
-            name?: string;
-            email?: string;
+            userId: string;
+            name: string;
+            email: string;
             avatarUrl?: string;
             /** @enum {string} */
-            membershipTier?: "BASE" | "PRO";
+            membershipTier: "BASE" | "PRO";
             /** Format: int32 */
             currentWeek?: number;
             /** Format: date-time */

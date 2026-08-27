@@ -1,6 +1,7 @@
 package com.barbonperformance.courtproof.player;
 
 import com.barbonperformance.courtproof.user.MembershipTier;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -18,10 +19,10 @@ public final class PlayerHomeDtos {
      *                   without hard-coding the four
      */
     public record PlayerHomeResponse(
-            UUID profileId,
-            String name,
+            @NotNull UUID profileId,
+            @NotNull String name,
             String avatarUrl,
-            MembershipTier membershipTier,
+            @NotNull MembershipTier membershipTier,
             int currentWeek,
             int cycleWeeks,
             LocalDate cycleStartedAt,
@@ -31,8 +32,8 @@ public final class PlayerHomeDtos {
 
     /** Null while the player has not been taken on by a coach. */
     public record CoachCard(
-            UUID profileId,
-            String name,
+            @NotNull UUID profileId,
+            @NotNull String name,
             String avatarUrl,
             String bookingUrl) {
     }

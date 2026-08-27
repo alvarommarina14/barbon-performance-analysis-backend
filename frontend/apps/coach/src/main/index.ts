@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
+import { tokenVault } from './tokenVault';
 
 const isDev = !app.isPackaged;
 
@@ -51,6 +52,11 @@ ipcMain.handle('dialog:pickVideoFile', async () => {
 
   return result.canceled ? null : (result.filePaths[0] ?? null);
 });
+
+// Session storage stays in the main process: the renderer never touches the encrypted file.
+ipcMain.handle('session:read', () => tokenVault.read());
+ipcMain.handle('session:write', (_event, payload: string) => tokenVault.write(payload));
+ipcMain.handle('session:clear', () => tokenVault.clear());
 
 app.whenReady().then(() => {
   createWindow();

@@ -4,6 +4,7 @@ import com.barbonperformance.courtproof.user.MembershipTier;
 import com.barbonperformance.courtproof.user.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
@@ -32,40 +33,40 @@ public final class AuthDtos {
      * @param expiresInSeconds lifetime of the access token, so clients can refresh ahead of a 401
      */
     public record TokenPairResponse(
-            String accessToken,
-            String refreshToken,
+            @NotNull String accessToken,
+            @NotNull String refreshToken,
             long expiresInSeconds) {
     }
 
     public record LoginResponse(
-            String accessToken,
-            String refreshToken,
+            @NotNull String accessToken,
+            @NotNull String refreshToken,
             long expiresInSeconds,
-            CurrentUserResponse user) {
+            @NotNull CurrentUserResponse user) {
     }
 
     public record CurrentUserResponse(
-            UUID id,
-            String email,
-            String name,
-            UserRole role,
+            @NotNull UUID id,
+            @NotNull String email,
+            @NotNull String name,
+            @NotNull UserRole role,
             String avatarUrl,
-            String timezone,
+            @NotNull String timezone,
             PlayerSummary player,
             CoachSummary coach) {
     }
 
     /** Present only when the user is a PLAYER. */
     public record PlayerSummary(
-            UUID profileId,
-            MembershipTier membershipTier,
+            @NotNull UUID profileId,
+            @NotNull MembershipTier membershipTier,
             int currentWeek,
             boolean hasCoach) {
     }
 
     /** Present only when the user is a COACH. */
     public record CoachSummary(
-            UUID profileId,
+            @NotNull UUID profileId,
             String bookingUrl) {
     }
 }
