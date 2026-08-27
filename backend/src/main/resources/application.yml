@@ -45,3 +45,12 @@ springdoc:
 logging:
   level:
     com.barbonperformance.courtproof: DEBUG
+
+courtproof:
+  security:
+    # Development key only. Every deployment supplies its own through the environment.
+    jwt-secret: ${JWT_SECRET:ZGV2ZWxvcG1lbnQtb25seS1zZWNyZXQtZG8tbm90LXVzZS1pbi1wcm9kdWN0aW9uLTI1Ng==}
+    # Short: a stolen access token cannot be revoked, only outlived.
+    access-token-ttl: 15m
+    refresh-token-ttl: 30d
+    organization-slug: barbon-performance
