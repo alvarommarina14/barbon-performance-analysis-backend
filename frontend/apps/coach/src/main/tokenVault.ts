@@ -1,0 +1,42 @@
+import { readFile, unlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { app, safeStorage } from 'electron';
+
+const FILE = () => join(app.getPath('userData'), 'session.bin');
+
+/**
+ * The coach's refresh token is a 30-day session on a desktop that may be shared. Electron's
+ * safeStorage encrypts it with the OS keychain (DPAPI on Windows, Keychain on macOS), so it
+ * is not sitting in plain text next to the app's other data.
+ *
+ * When the OS offers no encryption backend, safeStorage would silently store plaintext, so
+ * nothing is persisted at all — the coach logs in each launch instead.
+ */
+export const tokenVault = {
+  async read(): Promise<string | null> {
+    if (!safeStorage.isEncryptionAvailable()) {
+      return null;
+    }
+    try {
+      const encrypted = await readFile(FILE());
+      return safeStorage.decryptString(encrypted);
+    } catch {
+      return null;
+    }
+  },
+
+  async write(payload: string): Promise<void> {
+    if (!safeStorage.isEncryptionAvailable()) {
+      return;
+    }
+    await writeFile(FILE(), safeStorage.encryptString(payload));
+  },
+
+  async clear(): Promise<void> {
+    try {
+      await unlink(FILE());
+    } catch {
+      // Already gone.
+    }
+  },
+};
