@@ -1,0 +1,33 @@
+package com.barbonperformance.courtproof.config;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * The generated spec is the contract the TypeScript clients are built from
+ * (see {@code pnpm gen:api}), so it is configured explicitly rather than left to defaults.
+ */
+@Configuration
+public class OpenApiConfig {
+
+    private static final String BEARER_SCHEME = "bearerAuth";
+
+    @Bean
+    OpenAPI courtProofOpenApi() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Court Proof API")
+                        .description("Barbon Performance video analysis platform")
+                        .version("v1"))
+                .components(new Components().addSecuritySchemes(BEARER_SCHEME, new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")))
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
+    }
+}
