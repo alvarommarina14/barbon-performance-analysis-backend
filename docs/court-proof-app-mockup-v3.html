@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Court Proof — Softr App Mockup v3 | Barbon Performance</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0a0a0a; --dark:#141414; --dark2:#1a1a1a; --card:#1e1e1e; --card2:#232323;
+    --line:rgba(255,255,255,.09);
+    --accent:#c8ff00; --accent-read:#b8e600; --accent-dim:#a8d600;
+    --white:#f5f5f5; --text:#e0e0e0; --gray:#8d8d8d; --gray-light:#bbb;
+    --danger:#ff5a5a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--black);color:var(--text);
+    -webkit-font-smoothing:antialiased;padding-bottom:100px;font-size:16px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+
+  /* ===== SOFTR-STYLE APP HEADER ===== */
+  .appbar{position:sticky;top:0;z-index:60;background:var(--dark);border-bottom:1px solid var(--line)}
+  .appbar-in{max-width:920px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .bp-mark{font-family:'Bebas Neue',sans-serif;font-size:23px;line-height:1;letter-spacing:1px;
+    color:var(--white);border-bottom:3px solid var(--accent);padding-bottom:2px}
+  .bp-mark i{color:var(--accent);font-style:italic}
+  .brand-name{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2.5px;color:var(--white)}
+  .brand-name span{color:var(--accent)}
+  .avatar{display:flex;align-items:center;gap:9px}
+  .circle{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--black);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .uname{font-size:14px;color:var(--gray-light)}
+
+  /* ===== NAV ===== */
+  .navbar{position:sticky;top:59px;z-index:55;background:var(--black);border-bottom:1px solid var(--line)}
+  .navbar-in{max-width:920px;margin:0 auto;padding:0 20px;display:flex;gap:4px;
+    overflow-x:auto;scrollbar-width:none}
+  .navbar-in::-webkit-scrollbar{display:none}
+  .nav{background:none;border:0;border-bottom:3px solid transparent;font-family:'DM Sans',sans-serif;
+    font-size:14px;font-weight:700;letter-spacing:.6px;color:var(--gray);padding:16px 16px 13px;
+    cursor:pointer;white-space:nowrap;transition:color .15s}
+  .nav:hover{color:var(--white)}
+  .nav.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+  .screen{display:none}
+  .screen.on{display:block}
+
+  /* ===== PAGE HEAD ===== */
+  .phead{padding:38px 0 4px}
+  .eyebrow{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:2.2px;
+    text-transform:uppercase;color:var(--accent);border:1px solid rgba(200,255,0,.25);
+    background:rgba(200,255,0,.07);padding:6px 13px;border-radius:100px;margin-bottom:18px}
+  h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(38px,7.5vw,60px);
+    line-height:.97;letter-spacing:1px;color:var(--white)}
+  h1 em{color:var(--accent);font-style:normal}
+  .lede{margin-top:14px;font-size:16px;color:var(--gray-light);line-height:1.6;max-width:62ch}
+
+  /* ===== BUTTONS ===== */
+  .btn{display:inline-block;background:var(--accent);color:var(--black);font-weight:700;
+    font-size:15px;letter-spacing:.6px;padding:17px 30px;border-radius:6px;text-decoration:none;
+    border:0;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+  .btn:hover{background:var(--accent-dim)}
+  .btn-ghost{background:transparent;color:var(--accent);border:1.5px solid rgba(200,255,0,.4)}
+  .btn-ghost:hover{background:rgba(200,255,0,.1)}
+  .rowbtns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+
+  /* ===== WEEK BANNER (Home) ===== */
+  .weekcard{margin-top:26px;border:1px solid rgba(200,255,0,.32);border-radius:12px;
+    background:linear-gradient(180deg,rgba(200,255,0,.10),rgba(200,255,0,.02));overflow:hidden}
+  .weekcard-top{padding:26px 26px 22px}
+  .wk-lab{font-size:12px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;color:var(--accent)}
+  .wk-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,7vw,48px);letter-spacing:1.2px;
+    color:var(--white);margin-top:10px;line-height:1}
+  .wk-sub{font-size:16px;color:var(--gray-light);margin-top:10px;line-height:1.5}
+  .wk-sub b{color:var(--white)}
+  .wk-bar{display:flex;height:8px;background:var(--dark2);border-top:1px solid var(--line)}
+  .wk-seg{flex:1;border-right:1px solid var(--black)}
+  .wk-seg:last-child{border-right:0}
+  .wk-seg.done{background:rgba(200,255,0,.35)}
+  .wk-seg.now{background:var(--accent)}
+
+  /* ===== BIG NAV TILES ===== */
+  .tiles{display:grid;grid-template-columns:1fr;gap:14px;margin-top:26px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:26px 24px;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;width:100%;
+    display:flex;align-items:center;gap:22px;transition:border-color .15s,background .15s}
+  .tile:hover{border-color:rgba(200,255,0,.45);background:var(--card2)}
+  .tile .ico{width:60px;height:60px;flex:none;border-radius:12px;background:rgba(200,255,0,.1);
+    border:1px solid rgba(200,255,0,.25);display:flex;align-items:center;justify-content:center;font-size:28px}
+  .tile .tx{flex:1}
+  .tile h4{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1.4px;
+    color:var(--white);line-height:1.05}
+  .tile p{font-size:15px;color:var(--gray);margin-top:6px;line-height:1.45}
+  .tile .arw{font-size:26px;color:var(--accent);flex:none}
+
+  /* ===== SECTION ===== */
+  section{margin-top:40px}
+  .sec-head{background:var(--dark2);border:1px solid var(--line);border-bottom:0;
+    border-radius:9px 9px 0 0;padding:15px 19px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+  .sec-head h3{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:23px;
+    letter-spacing:1.8px;color:var(--white);line-height:1}
+  .sec-note{font-size:13px;color:var(--gray);margin-left:auto}
+  .sec-body{border:1px solid var(--line);border-radius:0 0 9px 9px;background:var(--dark);padding:24px 20px}
+
+  /* ===== CYCLE RAIL ===== */
+  .rail{border:1px solid var(--line);border-radius:11px;background:var(--dark);overflow:hidden;margin-top:26px}
+  .rail-head{padding:14px 19px;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .rail-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray)}
+  .rail-meta{font-size:13px;color:var(--gray-light)}
+  .rail-meta b{color:var(--accent)}
+  .rail-track{display:grid;grid-template-columns:repeat(4,1fr)}
+  .phase{padding:22px 12px;text-align:center;border-right:1px solid var(--line);position:relative}
+  .phase:last-child{border-right:0}
+  .phase .num{font-size:10.5px;letter-spacing:1.6px;color:var(--gray);text-transform:uppercase}
+  .phase .name{font-family:'Bebas Neue',sans-serif;font-size:25px;letter-spacing:1.6px;
+    color:#585858;margin-top:7px;line-height:1}
+  .phase .sets{font-size:12px;color:#585858;margin-top:6px}
+  .phase.done .name,.phase.done .sets{color:var(--gray)}
+  .phase.now{background:rgba(200,255,0,.07)}
+  .phase.now::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--accent)}
+  .phase.now .name,.phase.now .num{color:var(--accent)}
+  .phase.now .sets{color:var(--text)}
+
+  /* ===== VIDEO ===== */
+  .player{aspect-ratio:16/9;background:#000;border:1px solid var(--line);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+  .play{width:64px;height:64px;border-radius:50%;background:var(--accent);
+    display:flex;align-items:center;justify-content:center}
+  .play::after{content:'';border-left:20px solid var(--black);border-top:13px solid transparent;
+    border-bottom:13px solid transparent;margin-left:5px}
+  .player span{font-size:13px;color:var(--gray)}
+  .marks{margin-top:18px;display:flex;flex-direction:column;gap:2px}
+  .mark{display:flex;gap:15px;align-items:baseline;padding:14px 16px;background:var(--card);
+    border-left:3px solid var(--accent);border-radius:0 6px 6px 0}
+  .stamp{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;color:var(--accent);flex:none}
+  .mark p{font-size:15px;line-height:1.55}
+  .mark p b{color:var(--white)}
+
+  /* ===== DAY CARDS ===== */
+  .days{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .day{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px 22px;
+    text-decoration:none;display:block;cursor:pointer;transition:border-color .15s}
+  .day:hover{border-color:rgba(200,255,0,.45)}
+  .day .tag{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--accent)}
+  .day h4{font-size:19px;font-weight:700;color:var(--white);margin-top:8px;line-height:1.3}
+  .day .sub{font-size:14px;color:var(--gray);margin-top:10px;line-height:1.5}
+  .day.rehab .tag{color:var(--accent-read)}
+
+  /* ===== FORM / LOG ===== */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:20px 18px}
+  .plab{font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
+    color:var(--gray);margin-bottom:15px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:14px;color:var(--gray-light);margin-bottom:7px}
+  .field .box{background:var(--dark2);border:1px solid var(--line);border-radius:6px;
+    padding:14px 13px;font-size:15px;color:#6a6a6a}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gray);
+    font-weight:700;padding:0 8px 11px 0;border-bottom:1px solid var(--line)}
+  td{padding:13px 8px 13px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  td.num{font-variant-numeric:tabular-nums;color:var(--white);font-weight:700}
+  .locked{display:inline-flex;gap:6px;font-size:12px;color:var(--gray);margin-top:14px}
+
+  /* ===== DRILLS ===== */
+  .tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+  .tab{font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:100px;
+    border:1px solid var(--line);background:var(--dark2);color:var(--gray-light);cursor:pointer;
+    font-family:'DM Sans',sans-serif;transition:all .15s}
+  .tab:hover{border-color:rgba(200,255,0,.35);color:var(--white)}
+  .tab.on{background:var(--accent);color:var(--black);border-color:var(--accent)}
+  .drills{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:15px}
+  .drill{background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .thumb{aspect-ratio:16/9;background:#000;position:relative;display:flex;align-items:center;
+    justify-content:center;border-bottom:1px solid var(--line)}
+  .thumb .play{width:40px;height:40px}
+  .thumb .play::after{border-left-width:13px;border-top-width:8px;border-bottom-width:8px;margin-left:3px}
+  .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.8);font-size:11px;
+    padding:3px 7px;border-radius:3px;color:var(--white)}
+  .drill .body{padding:15px 15px 17px}
+  .drill h5{font-size:15.5px;font-weight:700;color:var(--white);line-height:1.35}
+  .drill .cue{font-size:13.5px;color:var(--accent-read);margin-top:8px;line-height:1.45}
+
+  /* ===== FILES ===== */
+  .files{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px}
+  .file{display:flex;gap:15px;align-items:center;background:var(--card);border:1px solid var(--line);
+    border-radius:9px;padding:19px 18px;text-decoration:none;transition:border-color .15s}
+  .file:hover{border-color:rgba(200,255,0,.45)}
+  .fic{width:44px;height:52px;flex:none;border:1px solid rgba(200,255,0,.35);border-radius:4px;
+    background:rgba(200,255,0,.08);display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;color:var(--accent)}
+  .file h5{font-size:16px;font-weight:700;color:var(--white)}
+  .file p{font-size:13px;color:var(--gray);margin-top:5px}
+
+  /* ===== BOOKING ===== */
+  .booking{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+  .when{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1.2px;color:var(--white);
+    margin-top:8px;line-height:1}
+  .tz{font-size:14px;color:var(--gray);margin-top:8px}
+
+  /* ===== NOTES ===== */
+  .note{border-left:3px solid var(--accent);background:var(--card);padding:18px 20px;
+    margin-bottom:11px;border-radius:0 8px 8px 0}
+  .note.old{border-left-color:#444;opacity:.85}
+  .note .date{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--accent)}
+  .note.old .date{color:var(--gray)}
+  .note p{font-size:15px;line-height:1.6;margin-top:9px}
+
+  /* ===== RED FLAGS ===== */
+  .flags .sec-head{background:#1c1010;border-color:rgba(255,90,90,.24)}
+  .flags .sec-head h3{color:#ffdede}
+  .flags .dot{background:var(--danger);border-radius:2px}
+  .flags .sec-body{border-color:rgba(255,90,90,.24);background:rgba(255,90,90,.03)}
+  .flag{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid rgba(255,90,90,.12);
+    font-size:15px;line-height:1.55}
+  .flag:last-child{border-bottom:0}
+  .flag::before{content:'!';color:var(--danger);font-weight:700;flex:none;font-size:17px}
+  .flag b{color:#ffdede}
+
+  footer{margin-top:56px;border-top:1px solid var(--line);padding:28px 0 8px;
+    text-align:center;font-size:13px;color:var(--gray)}
+  footer .sl{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;
+    color:var(--accent);margin-bottom:12px}
+
+  /* ===== DATA MAP ===== */
+  .maptoggle{position:fixed;right:18px;bottom:18px;z-index:80;background:var(--dark2);
+    color:var(--gray-light);border:1px solid var(--line);font-family:'DM Sans',sans-serif;
+    font-size:12.5px;font-weight:700;padding:14px 20px;border-radius:100px;cursor:pointer}
+  .maptoggle:hover{border-color:rgba(200,255,0,.4);color:var(--white)}
+  .maptoggle.on{background:var(--accent);color:var(--black);border-color:var(--accent)}
+  .nmap{display:none;font-size:12px;line-height:1.6;color:#7fd4ff;background:rgba(0,140,220,.09);
+    border:1px dashed rgba(120,200,255,.35);border-radius:6px;padding:10px 13px;margin-bottom:15px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .nmap b{color:#b8e7ff}
+  body.showmap .nmap{display:block}
+
+  @media(max-width:640px){
+    .split{grid-template-columns:1fr}
+    .rail-track{grid-template-columns:repeat(2,1fr)}
+    .phase{border-bottom:1px solid var(--line)}
+    .brand-name,.uname{display:none}
+    .sec-note{margin-left:0;width:100%}
+    .navbar{top:57px}
+    .nav{padding:15px 12px 12px;font-size:13.5px}
+    .tile{padding:22px 18px;gap:16px}
+    .tile .ico{width:52px;height:52px;font-size:24px}
+    .tile h4{font-size:26px}
+    .booking .btn{width:100%;text-align:center}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<!-- ===== APP HEADER (Softr header block) ===== -->
+<div class="appbar">
+  <div class="appbar-in">
+    <div class="brand">
+      <span class="bp-mark">B<i>P</i></span>
+      <span class="brand-name">BARBON<span>PERFORMANCE</span></span>
+    </div>
+    <div class="avatar">
+      <span class="uname">Bob Abraham</span>
+      <span class="circle">BA</span>
+    </div>
+  </div>
+</div>
+
+<div class="navbar">
+  <div class="navbar-in">
+    <button class="nav on" data-go="home">Home</button>
+    <button class="nav" data-go="tennis">Tennis</button>
+    <button class="nav" data-go="sc">Strength &amp; Conditioning</button>
+    <button class="nav" data-go="warm">Warm-up &amp; Recovery</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ================= HOME ================= -->
+<div class="screen on" id="home">
+  <div class="phead">
+    <span class="eyebrow">Court Proof</span>
+    <h1>Welcome back,<br><em>Bob.</em></h1>
+  </div>
+
+  <div class="nmap" style="margin-top:22px"><b>Softr:</b> User Profile block · <b>Notion:</b> Clients.first_name — filtered to the logged-in user's email</div>
+
+  <div class="weekcard">
+    <div class="weekcard-top">
+      <div class="wk-lab">You are on</div>
+      <div class="wk-title">Week 2 — Volume</div>
+      <div class="wk-sub">More sets, building work capacity. <b>3 × 10–12 reps</b> at <b>RPE 6–7</b> — you should finish each set with 2–3 reps left in the tank.</div>
+    </div>
+    <div class="wk-bar">
+      <div class="wk-seg done"></div><div class="wk-seg now"></div>
+      <div class="wk-seg"></div><div class="wk-seg"></div>
+    </div>
+  </div>
+  <div class="nmap"><b>Softr:</b> List block, 1 record · <b>Notion:</b> Clients.current_week → lookup into Cycle_Phases (phase_name, goal, sets_reps, rpe_range). You change one number per client per week — nothing else.</div>
+
+  <div class="nmap"><b>Softr:</b> List block, card layout, filtered by logged-in user · <b>Notion:</b> Dashboard_Tiles (title, subtitle, icon, target_page, order, client) — a base-tier client has no S&amp;C row, so the button never renders</div>
+  <div class="tiles">
+    <button class="tile" data-go="tennis">
+      <span class="ico">🎾</span>
+      <span class="tx"><h4>Tennis</h4><p>Your video analysis, your drills, and your session log</p></span>
+      <span class="arw">→</span>
+    </button>
+    <button class="tile" data-go="sc">
+      <span class="ico">🏋️</span>
+      <span class="tx"><h4>Strength &amp; Conditioning</h4><p>Your 4-week cycle and your training days</p></span>
+      <span class="arw">→</span>
+    </button>
+    <button class="tile" data-go="warm">
+      <span class="ico">🔥</span>
+      <span class="tx"><h4>Warm-up &amp; Recovery</h4><p>Before you play and after you come off court</p></span>
+      <span class="arw">→</span>
+    </button>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="dot"></span><h3>Book your call</h3>
+      <span class="sec-note">Included in your membership</span></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> Custom Code / Embed block (Cal.com or Calendly) + List block for the next call · <b>Notion:</b> Clients.booking_url, Clients.next_call_date</div>
+      <div class="booking">
+        <div>
+          <div class="plab">Your next call</div>
+          <div class="when">Tue 28 Apr · 6:00 PM</div>
+          <div class="tz">30 min · Zoom link arrives by email</div>
+        </div>
+        <a href="#" class="btn">Book or reschedule</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="dot"></span><h3>Latest from Federico</h3>
+      <span class="sec-note">21 April</span></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> List block, sorted date ↓, filtered by logged-in user · <b>Notion:</b> Notes (client, date, body) — you add a row, it appears in their app</div>
+      <div class="note">
+        <div class="date">21 April</div>
+        <p>Elbow's at a 2 all week — that's the direction we want. Week 2 adds a set, so expect it to feel longer, not heavier. Keep the RDL weight where it was.</p>
+      </div>
+      <div class="note old">
+        <div class="date">16 April</div>
+        <p>Watched the clips you sent from Sunday. Contact point is already further forward. Don't chase it — let it happen from the footwork.</p>
+      </div>
+      <div class="note old">
+        <div class="date">13 April</div>
+        <p>Program's live. Start with the rehab day tomorrow so the elbow gets a light day first. Message me after the first strength session.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ================= TENNIS ================= -->
+<div class="screen" id="tennis">
+  <div class="phead">
+    <span class="eyebrow">Court Proof</span>
+    <h1>Tennis</h1>
+    <p class="lede">Your stroke analysis and the drills built from it. Watch the analysis once all the way through, then come back to the drills before each hitting session.</p>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="dot"></span><h3>Your video analysis</h3>
+      <span class="sec-note">Recorded 12 Apr · 14 min</span></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> List Details block + Video field · <b>Notion:</b> Analyses (client, video_url, recorded_date, duration, summary) — YouTube unlisted URL, Softr renders the player</div>
+      <div class="player"><div class="play"></div><span>Forehand &amp; serve breakdown — Federico</span></div>
+      <div class="nmap" style="margin-top:16px"><b>Softr:</b> List block below the video · <b>Notion:</b> Analysis_Findings (analysis, timestamp, title, detail, order)</div>
+      <div class="marks">
+        <div class="mark"><span class="stamp">0:42</span><p><b>Forehand contact point</b> — you're meeting the ball behind your front hip. That's why the elbow absorbs the load instead of the shoulder.</p></div>
+        <div class="mark"><span class="stamp">4:15</span><p><b>Serve — trunk rotation</b> — almost all arm. We fix this with the Pallof Press and the thoracic work on your strength day.</p></div>
+        <div class="mark"><span class="stamp">9:30</span><p><b>Recovery step</b> — you're planting flat after the split step. Movement drills 3 and 4 target this.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="dot"></span><h3>Your drill library</h3>
+      <span class="sec-note">6 drills assigned to you</span></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> List block, grid layout, category filter enabled · <b>Notion:</b> Drill_Assignments (client, video → Video_Library, order, coach_note) — the join table. Video_Library stays untouched and shared across every client.</div>
+      <div class="tabs">
+        <button class="tab on">All</button><button class="tab">Forehand</button>
+        <button class="tab">Backhand</button><button class="tab">Serve</button>
+        <button class="tab">Movement</button>
+      </div>
+      <div class="drills">
+        <div class="drill"><div class="thumb"><div class="play"></div><span class="dur">2:14</span></div>
+          <div class="body"><h5>Contact point in front</h5><p class="cue">Catch it at the front hip, not behind</p></div></div>
+        <div class="drill"><div class="thumb"><div class="play"></div><span class="dur">3:40</span></div>
+          <div class="body"><h5>Drop feed — low to high</h5><p class="cue">Brush up the back of the ball</p></div></div>
+        <div class="drill"><div class="thumb"><div class="play"></div><span class="dur">1:52</span></div>
+          <div class="body"><h5>Shadow swing with band</h5><p class="cue">Rotate from the trunk, not the arm</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="dot"></span><h3>Log your session</h3>
+      <span class="sec-note">Takes 20 seconds</span></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> Form block (writes to Notion) + List block (read-only history) · <b>Notion:</b> Sessions (client, date, session_type, what_you_did, rpe, elbow_pain, notes). Client is auto-filled from the logged-in user — they never pick it.</div>
+      <div class="split">
+        <div class="panel">
+          <div class="plab">Log a session</div>
+          <div class="field"><label>What did you do?</label><div class="box">Tennis — hitting session ▾</div></div>
+          <div class="field"><label>Weights or details</label><div class="box">90 min, cross-court forehands…</div></div>
+          <div class="field"><label>How hard did it feel? (RPE 1–10)</label><div class="box">7 ▾</div></div>
+          <div class="field"><label>Elbow pain during or after? (0–10)</label><div class="box">2 ▾</div></div>
+          <button class="btn" style="width:100%;margin-top:8px">Send to Federico</button>
+        </div>
+        <div class="panel">
+          <div class="plab">Your last sessions</div>
+          <table>
+            <thead><tr><th>Date</th><th>Session</th><th>RPE</th><th>Elbow</th></tr></thead>
+            <tbody>
+              <tr><td>21 Apr</td><td>Rehab</td><td class="num">5</td><td class="num">2</td></tr>
+              <tr><td>20 Apr</td><td>Tennis</td><td class="num">7</td><td class="num">3</td></tr>
+              <tr><td>18 Apr</td><td>Strength</td><td class="num">6</td><td class="num">2</td></tr>
+              <tr><td>16 Apr</td><td>Rehab</td><td class="num">5</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+          <span class="locked">🔒 Read-only — Bob sees his history, can't edit it</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ================= S&C ================= -->
+<div class="screen" id="sc">
+  <div class="phead">
+    <span class="eyebrow">Pro membership</span>
+    <h1>Strength &amp;<br><em>conditioning</em></h1>
+    <p class="lede">Built around your tennis elbow. The rehab treats the elbow directly — the strength work is what stops it coming back.</p>
+
+    <div class="rail">
+      <div class="rail-head">
+        <span class="rail-title">Your 4-week cycle</span>
+        <span class="rail-meta">Started <b>13 Apr</b> · then repeat</span>
+      </div>
+      <div class="rail-track">
+        <div class="phase done"><div class="num">Week 1</div><div class="name">Base</div><div class="sets">2 × 8–10 · RPE 5–6</div></div>
+        <div class="phase now"><div class="num">Week 2 — now</div><div class="name">Volume</div><div class="sets">3 × 10–12 · RPE 6–7</div></div>
+        <div class="phase"><div class="num">Week 3</div><div class="name">Intensity</div><div class="sets">3 × 6–8 · RPE 7–8</div></div>
+        <div class="phase"><div class="num">Week 4</div><div class="name">Deload</div><div class="sets">2 × 8 · RPE 4–5</div></div>
+      </div>
+    </div>
+    <div class="nmap" style="margin-top:15px"><b>Softr:</b> List block, 4 records, highlight on current · <b>Notion:</b> Cycle_Phases (week_number, phase_name, goal, sets_reps, rpe_range) — one global table, all clients share it. Highlight comes from Clients.current_week.</div>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="dot"></span><h3>Your training days</h3>
+      <span class="sec-note">Do each one twice a week, spread out</span></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> List block → click through to List Details page · <b>Notion:</b> Training_Days (client, day_label, title, focus, duration, order) → Day_Exercises (day, exercise → Video_Library, sets_reps_wk1–4, cue_override, order)</div>
+      <div class="days">
+        <a class="day rehab"><div class="tag">Day A</div><h4>Rehab — forearm &amp; scapular</h4>
+          <div class="sub">~25 min · banded · same routine every week · 7 exercises</div></a>
+        <a class="day"><div class="tag">Day B</div><h4>Strength — full session</h4>
+          <div class="sub">~45 min · RPE-based · follows the 4-week cycle · 8 exercises</div></a>
+      </div>
+      <div class="rowbtns">
+        <a href="#" class="btn btn-ghost">Print the full program (PDF)</a>
+        <a href="#" class="btn btn-ghost">How to pick your weight — RPE guide</a>
+      </div>
+      <div class="nmap" style="margin-top:18px"><b>Softr:</b> File/Link buttons · <b>Notion:</b> Clients.program_pdf (file) + a global RPE guide file. PDFs are ~60 KB — well under any limit.</div>
+    </div>
+  </section>
+
+  <section class="flags">
+    <div class="sec-head"><span class="dot"></span><h3>Red flags — read first</h3></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> List block, red styling · <b>Notion:</b> Red_Flags (title, detail, order, scope) — global by default, with the option to add a client-specific one</div>
+      <div class="flag"><p><b>Numbness, tingling or weakness in the hand or fingers.</b> Not normal for tennis elbow. Could be nerve involvement — see a doctor.</p></div>
+      <div class="flag"><p><b>Pain getting worse despite reducing load.</b> See a sports medicine doctor or PT.</p></div>
+      <div class="flag"><p><b>Sharp or electric pain during any rehab exercise.</b> Stop and message me.</p></div>
+      <div class="flag"><p><b>Six weeks in and no clear improvement.</b> Time to see a Physical Therapist.</p></div>
+    </div>
+  </section>
+</div>
+
+<!-- ================= WARM-UP ================= -->
+<div class="screen" id="warm">
+  <div class="phead">
+    <span class="eyebrow">Every session</span>
+    <h1>Warm-up &amp;<br><em>recovery</em></h1>
+    <p class="lede">Eight minutes before, ten minutes after. This is the part people skip and then wonder why the elbow flares.</p>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="dot"></span><h3>Your protocols</h3>
+      <span class="sec-note">Print them or keep them on your phone</span></div>
+    <div class="sec-body">
+      <div class="nmap"><b>Softr:</b> List block with file download + video links · <b>Notion:</b> Protocols (title, subtitle, type: warmup/recovery, pdf_file, video_url, scope) — global rows every client sees, no per-client setup</div>
+      <div class="files">
+        <a href="#" class="file"><div class="fic">PDF</div><div><h5>On-court warm-up</h5><p>8 min · before every session</p></div></a>
+        <a href="#" class="file"><div class="fic">PDF</div><div><h5>Post-play recovery</h5><p>10 min · within an hour of playing</p></div></a>
+      </div>
+      <div class="marks" style="margin-top:16px">
+        <div class="mark"><span class="stamp">▸</span><p><b>Follow along — warm-up</b> · 8 min · do this with the video the first three times, then from memory.</p></div>
+        <div class="mark"><span class="stamp">▸</span><p><b>Follow along — recovery</b> · 10 min · after tennis, not after strength.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="sl">Play Better. Stay Healthy. Play Longer.</div>
+  <div>Barbon Performance · barbonperformanceco@gmail.com · @barbon.performance</div>
+</footer>
+
+</div>
+
+<button class="maptoggle" id="mt">Show Notion data map</button>
+
+<script>
+  function go(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('on',s.id===id)});
+    document.querySelectorAll('.nav').forEach(function(n){n.classList.toggle('on',n.dataset.go===id)});
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('[data-go]').forEach(function(el){
+    el.addEventListener('click',function(){go(el.dataset.go)});
+  });
+  var b=document.getElementById('mt');
+  b.addEventListener('click',function(){
+    var on=document.body.classList.toggle('showmap');
+    b.classList.toggle('on',on);
+    b.textContent=on?'Hide Notion data map':'Show Notion data map';
+  });
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+    });
+  });
+</script>
+</body>
+</html>
