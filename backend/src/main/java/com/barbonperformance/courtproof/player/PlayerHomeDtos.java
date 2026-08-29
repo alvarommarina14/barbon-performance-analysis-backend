@@ -11,13 +11,6 @@ public final class PlayerHomeDtos {
     private PlayerHomeDtos() {
     }
 
-    /**
-     * What the mockup's player home shows above the fold. The video, drills and strength
-     * tiles land here in later phases.
-     *
-     * @param cycleWeeks total weeks in the strength cycle, so the client renders "2 / 4"
-     *                   without hard-coding the four
-     */
     public record PlayerHomeResponse(
             @NotNull UUID profileId,
             @NotNull String name,
@@ -30,7 +23,6 @@ public final class PlayerHomeDtos {
             CoachCard coach) {
     }
 
-    /** Null while the player has not been taken on by a coach. */
     public record CoachCard(
             @NotNull UUID profileId,
             @NotNull String name,

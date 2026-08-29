@@ -12,16 +12,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-/**
- * Integration tests run against a real Postgres, so Flyway migrations and the Hibernate
- * schema validation are exercised exactly as they are in production. One database serves
- * the whole suite and is wiped between tests.
- *
- * <p>By default Testcontainers starts that database. Setting {@code COURT_PROOF_TEST_DB_URL}
- * (plus {@code _USER} and {@code _PASSWORD}) points the suite at an already-running Postgres
- * instead — the escape hatch for machines where the Docker daemon is unavailable. The tests
- * themselves cannot tell the difference; they truncate rather than assume an empty database.
- */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public abstract class AbstractIntegrationTest {
@@ -68,7 +58,6 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected TestFixtures fixtures;
 
-    /** Talks to the running server over real HTTP, so the security filter chain is in play. */
     protected RestTestClient client;
 
     @BeforeEach

@@ -51,10 +51,6 @@ public class AuthService {
         this.properties = properties;
     }
 
-    /**
-     * Self-registration creates a PLAYER with no coach attached. Coaches and admins are
-     * created deliberately, not through a public form.
-     */
     @Transactional
     public LoginResponse register(RegisterRequest request) {
         String email = AppUser.normalizeEmail(request.email());

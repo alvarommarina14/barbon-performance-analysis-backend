@@ -39,10 +39,6 @@ function createWindow(): BrowserWindow {
   return window;
 }
 
-/**
- * The coach edits feedback videos in Coach's Eye or DaVinci and comes back with an MP4 on
- * disk. Picking that file is the one thing the renderer cannot do on its own.
- */
 ipcMain.handle('dialog:pickVideoFile', async () => {
   const result = await dialog.showOpenDialog({
     title: 'Select the edited feedback video',

@@ -2,10 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 
-/**
- * Phase 1 coach surface: who your clients are. The pending analysis queue, which is what the
- * coach actually opens the app for, lands in Phase 2.
- */
 export default function ClientListScreen() {
   const { user, logout } = useAuth();
 

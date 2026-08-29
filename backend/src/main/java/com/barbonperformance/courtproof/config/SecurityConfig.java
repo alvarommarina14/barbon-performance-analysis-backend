@@ -19,10 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/**
- * Stateless API secured with bearer tokens. Roles are enforced per endpoint with
- * {@code @PreAuthorize}, not here — the rules live next to the handler they protect.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -62,10 +58,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    /**
-     * The Electron renderer calls the API from a dev-server or {@code file://} origin, so CORS
-     * has to allow it. Native mobile requests carry no Origin header and are unaffected.
-     */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

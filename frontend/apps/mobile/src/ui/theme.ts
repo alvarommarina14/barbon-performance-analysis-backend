@@ -1,7 +1,6 @@
 import { colors, fonts, radii, spacing } from '@court-proof/core';
 import { StyleSheet } from 'react-native';
 
-/** Pieces the mockup repeats on every screen. */
 export const theme = StyleSheet.create({
   screen: {
     flex: 1,

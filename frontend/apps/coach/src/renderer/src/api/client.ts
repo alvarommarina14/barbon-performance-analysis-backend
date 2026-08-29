@@ -1,6 +1,5 @@
 import { createApiClient, type TokenPair, type TokenStore } from '@court-proof/api-client';
 
-/** Backed by Electron's safeStorage through the preload bridge. */
 const vaultTokenStore: TokenStore = {
   async read() {
     const raw = await window.courtProof.session.read();

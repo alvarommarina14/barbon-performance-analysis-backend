@@ -3,10 +3,6 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { secureTokenStore } from './tokenStore';
 
-/**
- * A physical Android device cannot reach the host's localhost, so in development the base
- * URL is derived from the Metro host the app was loaded from.
- */
 function developmentBaseUrl(): string {
   const hostUri = Constants.expoConfig?.hostUri ?? Constants.expoGoConfig?.debuggerHost;
   const host = hostUri?.split(':')[0];
@@ -20,7 +16,6 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? developmentBaseUr
 
 let sessionExpiredHandler: () => void = () => {};
 
-/** Set by the auth provider so an expired session bounces the user back to the login screen. */
 export function onSessionExpired(handler: () => void) {
   sessionExpiredHandler = handler;
 }

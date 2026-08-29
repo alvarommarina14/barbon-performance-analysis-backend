@@ -66,7 +66,6 @@ public class AppUser {
         this.timezone = timezone;
     }
 
-    /** Emails are compared case-insensitively, which the unique index relies on. */
     public static String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
     }

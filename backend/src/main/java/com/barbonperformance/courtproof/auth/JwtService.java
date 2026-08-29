@@ -16,10 +16,6 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
 
-/**
- * Issues and verifies the short-lived access token. Refresh tokens are opaque and handled by
- * {@link RefreshTokenService} — they are deliberately not JWTs, because a JWT cannot be revoked.
- */
 @Service
 public class JwtService {
 
@@ -50,7 +46,6 @@ public class JwtService {
         return accessTokenTtl;
     }
 
-    /** Empty when the token is malformed, tampered with or expired. */
     public Optional<AuthenticatedUser> verify(String token) {
         try {
             Claims claims = Jwts.parser()

@@ -12,19 +12,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/**
- * Errors are returned as RFC 7807 problem details, which springdoc puts in the OpenAPI spec
- * and both clients can render without guessing at a shape.
- */
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
     private static final String BASE_TYPE = "https://courtproof.app/problems/";
 
-    /**
-     * Field-level validation failures. The clients render these next to the input that
-     * caused them, so the field names have to survive into the response.
-     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ProblemDetail handleValidation(MethodArgumentNotValidException e) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -47,10 +39,6 @@ public class ApiExceptionHandler {
         return problem(HttpStatus.CONFLICT, "Conflict", e.getMessage(), "conflict");
     }
 
-    /**
-     * Deliberately vague: telling a caller whether the email exists turns the login form into
-     * an account enumeration oracle.
-     */
     @ExceptionHandler(BadCredentialsException.class)
     ProblemDetail handleBadCredentials(BadCredentialsException e) {
         return problem(HttpStatus.UNAUTHORIZED, "Invalid credentials",

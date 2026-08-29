@@ -14,17 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Rotating refresh tokens.
- *
- * <p>A token is a 256-bit random string; only its SHA-256 hash is stored, so a dump of the
- * table hands over no live sessions. Every refresh revokes the token presented and issues a
- * new one in the same family.
- *
- * <p>Presenting an already-revoked token means either a replay or a stolen token being used
- * alongside the legitimate client. There is no way to tell which, so the whole family is
- * revoked and the user has to log in again. That is the intended trade-off.
- */
 @Service
 public class RefreshTokenService {
 
@@ -40,7 +29,6 @@ public class RefreshTokenService {
         this.properties = properties;
     }
 
-    /** The raw token is returned once and never stored. */
     @Transactional
     public String issue(AppUser user, UUID familyId) {
         String raw = randomToken();
@@ -54,21 +42,11 @@ public class RefreshTokenService {
         return raw;
     }
 
-    /** Starts a new family. Used at login. */
     @Transactional
     public String issueNewFamily(AppUser user) {
         return issue(user, UUID.randomUUID());
     }
 
-    /**
-     * Swaps a valid refresh token for a fresh one.
-     *
-     * <p>{@code noRollbackFor} is load-bearing: reuse detection revokes the family and then
-     * throws, and a rollback would quietly undo exactly the revocation that makes the
-     * detection worth having. The other failure paths write nothing, so committing is a no-op.
-     *
-     * @throws InvalidRefreshTokenException when the token is unknown, expired or already used
-     */
     @Transactional(noRollbackFor = InvalidRefreshTokenException.class)
     public Rotation rotate(String rawToken) {
         Instant now = Instant.now();

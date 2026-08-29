@@ -5,7 +5,6 @@ import { api, onSessionExpired, tokenStore } from '../api/client';
 type CurrentUser = components['schemas']['CurrentUserResponse'];
 
 interface AuthState {
-  /** Null once the check has run and found no session. Undefined while it is still running. */
   user: CurrentUser | null | undefined;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;

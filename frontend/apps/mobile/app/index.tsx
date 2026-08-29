@@ -3,7 +3,6 @@ import { Redirect } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '@/auth/AuthContext';
 
-/** Entry point: decides between the login screen and the player home. */
 export default function Index() {
   const { user } = useAuth();
 
