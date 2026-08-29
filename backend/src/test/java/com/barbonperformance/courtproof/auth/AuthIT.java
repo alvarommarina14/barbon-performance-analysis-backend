@@ -3,11 +3,11 @@ package com.barbonperformance.courtproof.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.barbonperformance.courtproof.AbstractIntegrationTest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.LoginRequest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.LoginResponse;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.RefreshRequest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.RegisterRequest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.TokenPairResponse;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.LoginRequest;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.LoginResponse;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.RefreshRequest;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.RegisterRequest;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.TokenPairResponse;
 import com.barbonperformance.courtproof.user.domain.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;

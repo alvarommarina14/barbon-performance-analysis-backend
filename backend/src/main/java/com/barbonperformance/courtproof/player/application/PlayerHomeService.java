@@ -1,7 +1,7 @@
 package com.barbonperformance.courtproof.player.application;
 
-import com.barbonperformance.courtproof.player.dto.PlayerHomeDtos.CoachCard;
-import com.barbonperformance.courtproof.player.dto.PlayerHomeDtos.PlayerHomeResponse;
+import com.barbonperformance.courtproof.player.application.dto.PlayerHomeDtos.CoachCard;
+import com.barbonperformance.courtproof.player.application.dto.PlayerHomeDtos.PlayerHomeResponse;
 import com.barbonperformance.courtproof.shared.domain.NotFoundException;
 import com.barbonperformance.courtproof.user.domain.CoachProfile;
 import com.barbonperformance.courtproof.user.domain.PlayerProfile;

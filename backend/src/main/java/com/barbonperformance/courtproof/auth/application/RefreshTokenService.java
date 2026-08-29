@@ -1,9 +1,9 @@
 package com.barbonperformance.courtproof.auth.application;
 
+import com.barbonperformance.courtproof.auth.SecurityProperties;
 import com.barbonperformance.courtproof.auth.domain.InvalidRefreshTokenException;
 import com.barbonperformance.courtproof.auth.domain.RefreshToken;
 import com.barbonperformance.courtproof.auth.domain.RefreshTokens;
-import com.barbonperformance.courtproof.auth.security.SecurityProperties;
 import com.barbonperformance.courtproof.user.domain.AppUser;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

@@ -1,15 +1,15 @@
 package com.barbonperformance.courtproof.auth.application;
 
+import com.barbonperformance.courtproof.auth.SecurityProperties;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.CoachSummary;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.CurrentUserResponse;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.LoginRequest;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.LoginResponse;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.PlayerSummary;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.RegisterRequest;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.TokenPairResponse;
+import com.barbonperformance.courtproof.auth.domain.AccessTokens;
 import com.barbonperformance.courtproof.auth.domain.InvalidRefreshTokenException;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.CoachSummary;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.CurrentUserResponse;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.LoginRequest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.LoginResponse;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.PlayerSummary;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.RegisterRequest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.TokenPairResponse;
-import com.barbonperformance.courtproof.auth.security.JwtService;
-import com.barbonperformance.courtproof.auth.security.SecurityProperties;
 import com.barbonperformance.courtproof.organization.domain.Organization;
 import com.barbonperformance.courtproof.organization.domain.Organizations;
 import com.barbonperformance.courtproof.shared.domain.ConflictException;
@@ -35,20 +35,20 @@ public class AuthService {
     private final CoachProfiles coachProfiles;
     private final Organizations organizations;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final AccessTokens accessTokens;
     private final RefreshTokenService refreshTokens;
     private final SecurityProperties properties;
 
     public AuthService(AppUsers users, PlayerProfiles playerProfiles,
             CoachProfiles coachProfiles, Organizations organizations,
-            PasswordEncoder passwordEncoder, JwtService jwtService,
+            PasswordEncoder passwordEncoder, AccessTokens accessTokens,
             RefreshTokenService refreshTokens, SecurityProperties properties) {
         this.users = users;
         this.playerProfiles = playerProfiles;
         this.coachProfiles = coachProfiles;
         this.organizations = organizations;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
+        this.accessTokens = accessTokens;
         this.refreshTokens = refreshTokens;
         this.properties = properties;
     }
@@ -100,9 +100,9 @@ public class AuthService {
     public TokenPairResponse refresh(String rawRefreshToken) {
         RefreshTokenService.Rotation rotation = refreshTokens.rotate(rawRefreshToken);
         return new TokenPairResponse(
-                jwtService.issueAccessToken(rotation.user()),
+                accessTokens.issue(rotation.user()),
                 rotation.refreshToken(),
-                jwtService.accessTokenTtl().toSeconds());
+                accessTokens.ttl().toSeconds());
     }
 
     @Transactional
@@ -119,9 +119,9 @@ public class AuthService {
 
     private LoginResponse issueSession(AppUser user) {
         return new LoginResponse(
-                jwtService.issueAccessToken(user),
+                accessTokens.issue(user),
                 refreshTokens.issueNewFamily(user),
-                jwtService.accessTokenTtl().toSeconds(),
+                accessTokens.ttl().toSeconds(),
                 describe(user));
     }
 
