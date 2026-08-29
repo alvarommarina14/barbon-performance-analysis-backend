@@ -1,14 +1,14 @@
 package com.barbonperformance.courtproof.support;
 
-import com.barbonperformance.courtproof.organization.Organization;
-import com.barbonperformance.courtproof.organization.OrganizationRepository;
-import com.barbonperformance.courtproof.user.AppUser;
-import com.barbonperformance.courtproof.user.AppUserRepository;
-import com.barbonperformance.courtproof.user.CoachProfile;
-import com.barbonperformance.courtproof.user.CoachProfileRepository;
-import com.barbonperformance.courtproof.user.PlayerProfile;
-import com.barbonperformance.courtproof.user.PlayerProfileRepository;
-import com.barbonperformance.courtproof.user.UserRole;
+import com.barbonperformance.courtproof.organization.domain.Organization;
+import com.barbonperformance.courtproof.organization.domain.Organizations;
+import com.barbonperformance.courtproof.user.domain.AppUser;
+import com.barbonperformance.courtproof.user.domain.AppUsers;
+import com.barbonperformance.courtproof.user.domain.CoachProfile;
+import com.barbonperformance.courtproof.user.domain.CoachProfiles;
+import com.barbonperformance.courtproof.user.domain.PlayerProfile;
+import com.barbonperformance.courtproof.user.domain.PlayerProfiles;
+import com.barbonperformance.courtproof.user.domain.UserRole;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,14 +18,14 @@ public class TestFixtures {
 
     public static final String ORGANIZATION_SLUG = "barbon-performance";
 
-    private final OrganizationRepository organizations;
-    private final AppUserRepository users;
-    private final CoachProfileRepository coachProfiles;
-    private final PlayerProfileRepository playerProfiles;
+    private final Organizations organizations;
+    private final AppUsers users;
+    private final CoachProfiles coachProfiles;
+    private final PlayerProfiles playerProfiles;
     private final PasswordEncoder passwordEncoder;
 
-    public TestFixtures(OrganizationRepository organizations, AppUserRepository users,
-            CoachProfileRepository coachProfiles, PlayerProfileRepository playerProfiles,
+    public TestFixtures(Organizations organizations, AppUsers users,
+            CoachProfiles coachProfiles, PlayerProfiles playerProfiles,
             PasswordEncoder passwordEncoder) {
         this.organizations = organizations;
         this.users = users;

@@ -91,6 +91,68 @@ barbon-tennis-performance/
 └── docs/             # ADRs, and the mockup as living reference
 ```
 
+## Backend structure
+
+Ports and adapters (hexagonal), with the **module on the outside and the layers inside it**.
+A module is a slice of the product; the packages inside it are the layers.
+
+```
+com.barbonperformance.courtproof
+├── shared/
+│   ├── domain/         NotFoundException, ConflictException
+│   ├── controller/     ApiExceptionHandler, ProblemDetails
+│   └── config/         OpenApiConfig
+├── organization/
+│   ├── domain/         Organization · Organizations (port)
+│   └── persistence/    OrganizationJpaRepository, JpaOrganizations (adapter)
+├── user/
+│   ├── domain/         AppUser, PlayerProfile, CoachProfile, UserRole, MembershipTier
+│   │                   AppUsers, PlayerProfiles, CoachProfiles (ports)
+│   └── persistence/    *JpaRepository + Jpa* adapters
+├── auth/
+│   ├── controller/     AuthController, AuthExceptionHandler
+│   ├── dto/            AuthDtos
+│   ├── application/    AuthService, RefreshTokenService
+│   ├── domain/         RefreshToken, AuthenticatedUser, InvalidRefreshTokenException
+│   │                   RefreshTokens (port)
+│   ├── persistence/    RefreshTokenJpaRepository, JpaRefreshTokens
+│   └── security/       JwtService, JwtAuthenticationFilter, SecurityConfig, SecurityProperties
+├── coach/
+│   └── controller/ dto/ application/       reads user/domain through its ports
+└── player/
+    └── controller/ dto/ application/       reads user/domain through its ports
+```
+
+Every module from Phase 2 onward repeats the same skeleton, plus a `gateway/` package for the
+driven adapters that talk to a third party — `video/gateway/CloudflareStreamAdapter`,
+`video/gateway/R2ObjectStorage`. The port those implement lives in `video/domain/`, which is what
+lets the analysis use cases be tested against WireMock, or against a hand-written fake, without
+the HTTP client in the way.
+
+### The rules
+
+- **`domain/` depends on nothing around it.** It holds the entities and the **ports**: interfaces
+  named for what the module needs (`AppUsers`, `RefreshTokens`, later `StreamGateway`), owned by
+  the domain rather than by the technology behind them.
+- **`persistence/` and `gateway/` are adapters** and are package-private. Nothing outside the
+  package can reference an adapter, only the port it implements.
+- **`application/` orchestrates ports** and is where `@Transactional` lives. It never touches an
+  adapter or a controller.
+- **`controller/` is a driving adapter**: HTTP in, DTO out, no persistence.
+- **Spring Data exists only inside `persistence/`.** A `JpaRepository` is an implementation
+  detail; the rest of the codebase sees the port.
+
+### Entities keep their JPA annotations
+
+A deliberate trade-off. The persistence-free version of this — plain domain objects, separate
+`@Entity` classes, MapStruct in both directions — roughly doubles the classes per module and
+makes every `join fetch` a remapping exercise. What actually buys the decoupling here is the
+**port**, not the absence of `@Entity`, because the parts of Phase 2 that need to be swapped and
+faked are Cloudflare and R2, not Postgres.
+
+`ArchitectureTest` (ArchUnit) enforces all of the above, including that the module slices stay
+free of cycles. It fails the build, so the structure cannot rot quietly.
+
 ## Data model
 
 A direct translation of the annotated "Notion data map" in the mockup to Postgres. Every table

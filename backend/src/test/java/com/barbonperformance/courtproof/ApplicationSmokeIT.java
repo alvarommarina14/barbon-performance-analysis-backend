@@ -2,14 +2,14 @@ package com.barbonperformance.courtproof;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.barbonperformance.courtproof.organization.OrganizationRepository;
+import com.barbonperformance.courtproof.organization.domain.Organizations;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class ApplicationSmokeIT extends AbstractIntegrationTest {
 
     @Autowired
-    private OrganizationRepository organizations;
+    private Organizations organizations;
 
     @Test
     void flywayCreatesTheBaselineSchemaAndSeedsTheOrganisation() {
