@@ -9,10 +9,6 @@ import com.barbonperformance.courtproof.user.CoachProfile;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 
-/**
- * The player and coach surfaces are separate apps, but they share one API. These tests pin
- * down that a role cannot reach across.
- */
 class RoleGuardIT extends AbstractIntegrationTest {
 
     private static final String PASSWORD = "a-long-enough-password";

@@ -8,10 +8,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * The generated spec is the contract the TypeScript clients are built from
- * (see {@code pnpm gen:api}), so it is configured explicitly rather than left to defaults.
- */
 @Configuration
 public class OpenApiConfig {
 

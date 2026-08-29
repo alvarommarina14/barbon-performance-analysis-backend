@@ -12,10 +12,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 
-/**
- * Booking is not built: {@code bookingUrl} points at Cal.com, embedded the same way the
- * mockup does it.
- */
 @Entity
 @Table(name = "coach_profile")
 public class CoachProfile {

@@ -13,9 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Coaches and admins have no public registration endpoint, so tests create them directly.
- */
 @Component
 public class TestFixtures {
 

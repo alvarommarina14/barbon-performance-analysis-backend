@@ -14,11 +14,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Reads the bearer token and, when it verifies, puts an {@link AuthenticatedUser} in the
- * security context. A bad token is not an error here — the request simply stays anonymous and
- * the authorisation rules reject it, which keeps the 401 in one place.
- */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 

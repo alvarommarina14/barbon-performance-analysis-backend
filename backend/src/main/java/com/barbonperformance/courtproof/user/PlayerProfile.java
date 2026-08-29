@@ -20,7 +20,6 @@ import java.util.UUID;
 @Table(name = "player_profile")
 public class PlayerProfile {
 
-    /** The strength cycle in the mockup runs four weeks. */
     public static final int CYCLE_WEEKS = 4;
 
     @Id
@@ -35,7 +34,6 @@ public class PlayerProfile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private AppUser user;
 
-    /** Null until a coach takes the player on. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coach_id")
     private CoachProfile coach;

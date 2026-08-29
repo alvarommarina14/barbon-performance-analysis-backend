@@ -32,7 +32,6 @@ public class RefreshToken {
     @Column(name = "token_hash", nullable = false, unique = true)
     private String tokenHash;
 
-    /** Every token minted from the same login shares a family, so reuse can revoke all of them. */
     @Column(name = "family_id", nullable = false)
     private UUID familyId;
 

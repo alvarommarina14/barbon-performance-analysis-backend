@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
-/** Request and response shapes for {@code /api/v1/auth}. */
 public final class AuthDtos {
 
     private AuthDtos() {
@@ -29,9 +28,6 @@ public final class AuthDtos {
     public record RefreshRequest(@NotBlank String refreshToken) {
     }
 
-    /**
-     * @param expiresInSeconds lifetime of the access token, so clients can refresh ahead of a 401
-     */
     public record TokenPairResponse(
             @NotNull String accessToken,
             @NotNull String refreshToken,
@@ -56,7 +52,6 @@ public final class AuthDtos {
             CoachSummary coach) {
     }
 
-    /** Present only when the user is a PLAYER. */
     public record PlayerSummary(
             @NotNull UUID profileId,
             @NotNull MembershipTier membershipTier,
@@ -64,7 +59,6 @@ public final class AuthDtos {
             boolean hasCoach) {
     }
 
-    /** Present only when the user is a COACH. */
     public record CoachSummary(
             @NotNull UUID profileId,
             String bookingUrl) {

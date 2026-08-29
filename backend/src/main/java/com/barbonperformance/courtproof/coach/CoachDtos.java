@@ -10,7 +10,6 @@ public final class CoachDtos {
     private CoachDtos() {
     }
 
-    /** One row of the coach's client list. */
     public record ClientSummary(
             @NotNull UUID profileId,
             @NotNull UUID userId,

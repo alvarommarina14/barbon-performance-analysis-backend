@@ -20,7 +20,6 @@ public class CoachService {
         this.playerProfiles = playerProfiles;
     }
 
-    /** Scoped to the signed-in coach: a coach never sees another coach's clients. */
     @Transactional(readOnly = true)
     public List<ClientSummary> clients(UUID coachUserId) {
         UUID coachProfileId = coachProfiles.findByUserId(coachUserId)
