@@ -1,5 +1,6 @@
 package com.barbonperformance.courtproof.auth.security;
 
+import com.barbonperformance.courtproof.auth.domain.AccessTokens;
 import com.barbonperformance.courtproof.auth.domain.AuthenticatedUser;
 import com.barbonperformance.courtproof.user.domain.AppUser;
 import com.barbonperformance.courtproof.user.domain.UserRole;
@@ -17,7 +18,7 @@ import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JwtService {
+class JwtAccessTokens implements AccessTokens {
 
     static final String CLAIM_ROLE = "role";
     static final String CLAIM_EMAIL = "email";
@@ -25,12 +26,13 @@ public class JwtService {
     private final SecretKey key;
     private final Duration accessTokenTtl;
 
-    public JwtService(SecurityProperties properties) {
+    JwtAccessTokens(SecurityProperties properties) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.jwtSecret()));
         this.accessTokenTtl = properties.accessTokenTtl();
     }
 
-    public String issueAccessToken(AppUser user) {
+    @Override
+    public String issue(AppUser user) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(user.getId().toString())
@@ -42,10 +44,8 @@ public class JwtService {
                 .compact();
     }
 
-    public Duration accessTokenTtl() {
-        return accessTokenTtl;
-    }
-
+    // Empty when the token is malformed, tampered with or expired.
+    @Override
     public Optional<AuthenticatedUser> verify(String token) {
         try {
             Claims claims = Jwts.parser()
@@ -61,5 +61,10 @@ public class JwtService {
         } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Duration ttl() {
+        return accessTokenTtl;
     }
 }
