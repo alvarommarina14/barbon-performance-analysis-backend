@@ -54,3 +54,14 @@ courtproof:
     access-token-ttl: 15m
     refresh-token-ttl: 30d
     organization-slug: barbon-performance
+  video:
+    api-base-url: ${CLOUDFLARE_API_BASE_URL:https://api.cloudflare.com/client/v4}
+    account-id: ${CLOUDFLARE_ACCOUNT_ID:development-account}
+    api-token: ${CLOUDFLARE_API_TOKEN:development-token}
+    # Set in the Cloudflare Stream webhook settings; the callback is rejected without it.
+    webhook-secret: ${CLOUDFLARE_WEBHOOK_SECRET:development-webhook-secret}
+    # Long enough for the player to finish watching, short enough that a leaked URL dies.
+    playback-token-ttl: 2h
+    # How far a webhook's signed timestamp may drift before the delivery is refused.
+    webhook-tolerance: 5m
+    max-duration-seconds: 600

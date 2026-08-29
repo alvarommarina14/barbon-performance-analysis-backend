@@ -1,6 +1,8 @@
 package com.barbonperformance.courtproof;
 
 import com.barbonperformance.courtproof.support.TestFixtures;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +22,12 @@ public abstract class AbstractIntegrationTest {
 
     private static final PostgreSQLContainer POSTGRES;
 
+    // Cloudflare Stream has no emulator, so the API is stubbed. Every test that touches the
+    // video flow states the Cloudflare response it expects to be working against.
+    protected static final WireMockServer CLOUDFLARE = new WireMockServer(0);
+
     static {
+        CLOUDFLARE.start();
         if (EXTERNAL_URL == null) {
             POSTGRES = new PostgreSQLContainer("postgres:17-alpine");
             POSTGRES.start();
@@ -29,8 +36,14 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
+    @AfterAll
+    static void stopCloudflare() {
+        CLOUDFLARE.resetAll();
+    }
+
     @DynamicPropertySource
     static void datasource(DynamicPropertyRegistry registry) {
+        registry.add("courtproof.video.api-base-url", () -> CLOUDFLARE.baseUrl());
         if (EXTERNAL_URL != null) {
             registry.add("spring.datasource.url", () -> EXTERNAL_URL);
             registry.add("spring.datasource.username",
@@ -65,6 +78,9 @@ public abstract class AbstractIntegrationTest {
         // Everything identity-related hangs off app_user, so one cascading truncate clears it.
         // organization is left alone: it is seeded by the baseline migration.
         jdbcTemplate.execute("TRUNCATE TABLE app_user CASCADE");
+        // video_asset hangs off organization, not app_user, so the cascade above misses it.
+        jdbcTemplate.execute("TRUNCATE TABLE video_asset CASCADE");
+        CLOUDFLARE.resetAll();
 
         this.client = RestTestClient.bindToServer()
                 .baseUrl("http://localhost:" + port)
