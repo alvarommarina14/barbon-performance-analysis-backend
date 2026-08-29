@@ -1,7 +1,7 @@
 package com.barbonperformance.courtproof.auth.dto;
 
-import com.barbonperformance.courtproof.user.MembershipTier;
-import com.barbonperformance.courtproof.user.UserRole;
+import com.barbonperformance.courtproof.user.domain.MembershipTier;
+import com.barbonperformance.courtproof.user.domain.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -8,7 +8,7 @@ import com.barbonperformance.courtproof.auth.dto.AuthDtos.LoginResponse;
 import com.barbonperformance.courtproof.auth.dto.AuthDtos.RefreshRequest;
 import com.barbonperformance.courtproof.auth.dto.AuthDtos.RegisterRequest;
 import com.barbonperformance.courtproof.auth.dto.AuthDtos.TokenPairResponse;
-import com.barbonperformance.courtproof.user.UserRole;
+import com.barbonperformance.courtproof.user.domain.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 

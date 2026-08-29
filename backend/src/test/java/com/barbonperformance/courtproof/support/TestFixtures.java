@@ -1,14 +1,18 @@
 package com.barbonperformance.courtproof.support;
 
-import com.barbonperformance.courtproof.organization.Organization;
-import com.barbonperformance.courtproof.organization.OrganizationRepository;
-import com.barbonperformance.courtproof.user.AppUser;
-import com.barbonperformance.courtproof.user.AppUserRepository;
-import com.barbonperformance.courtproof.user.CoachProfile;
-import com.barbonperformance.courtproof.user.CoachProfileRepository;
-import com.barbonperformance.courtproof.user.PlayerProfile;
-import com.barbonperformance.courtproof.user.PlayerProfileRepository;
-import com.barbonperformance.courtproof.user.UserRole;
+import com.barbonperformance.courtproof.organization.domain.Organization;
+import com.barbonperformance.courtproof.organization.persistence.OrganizationRepository;
+import com.barbonperformance.courtproof.organization.persistence.OrganizationRepository;
+import com.barbonperformance.courtproof.user.domain.AppUser;
+import com.barbonperformance.courtproof.user.persistence.AppUserRepository;
+import com.barbonperformance.courtproof.user.domain.CoachProfile;
+import com.barbonperformance.courtproof.user.persistence.CoachProfileRepository;
+import com.barbonperformance.courtproof.user.domain.PlayerProfile;
+import com.barbonperformance.courtproof.user.persistence.PlayerProfileRepository;
+import com.barbonperformance.courtproof.user.domain.UserRole;
+import com.barbonperformance.courtproof.user.persistence.AppUserRepository;
+import com.barbonperformance.courtproof.user.persistence.CoachProfileRepository;
+import com.barbonperformance.courtproof.user.persistence.PlayerProfileRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
