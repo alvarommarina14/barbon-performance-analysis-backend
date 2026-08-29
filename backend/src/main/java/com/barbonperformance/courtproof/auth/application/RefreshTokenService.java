@@ -2,7 +2,7 @@ package com.barbonperformance.courtproof.auth.application;
 
 import com.barbonperformance.courtproof.auth.domain.InvalidRefreshTokenException;
 import com.barbonperformance.courtproof.auth.domain.RefreshToken;
-import com.barbonperformance.courtproof.auth.persistence.RefreshTokenRepository;
+import com.barbonperformance.courtproof.auth.domain.RefreshTokens;
 import com.barbonperformance.courtproof.auth.security.SecurityProperties;
 import com.barbonperformance.courtproof.user.domain.AppUser;
 import java.nio.charset.StandardCharsets;
@@ -23,11 +23,11 @@ public class RefreshTokenService {
     private static final Logger log = LoggerFactory.getLogger(RefreshTokenService.class);
     private static final int TOKEN_BYTES = 32;
 
-    private final RefreshTokenRepository refreshTokens;
+    private final RefreshTokens refreshTokens;
     private final SecurityProperties properties;
     private final SecureRandom random = new SecureRandom();
 
-    public RefreshTokenService(RefreshTokenRepository refreshTokens, SecurityProperties properties) {
+    public RefreshTokenService(RefreshTokens refreshTokens, SecurityProperties properties) {
         this.refreshTokens = refreshTokens;
         this.properties = properties;
     }

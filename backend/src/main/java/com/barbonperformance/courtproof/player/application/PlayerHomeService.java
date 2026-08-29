@@ -5,8 +5,7 @@ import com.barbonperformance.courtproof.player.dto.PlayerHomeDtos.PlayerHomeResp
 import com.barbonperformance.courtproof.shared.domain.NotFoundException;
 import com.barbonperformance.courtproof.user.domain.CoachProfile;
 import com.barbonperformance.courtproof.user.domain.PlayerProfile;
-import com.barbonperformance.courtproof.user.persistence.PlayerProfileRepository;
-import com.barbonperformance.courtproof.user.persistence.PlayerProfileRepository;
+import com.barbonperformance.courtproof.user.domain.PlayerProfiles;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PlayerHomeService {
 
-    private final PlayerProfileRepository playerProfiles;
+    private final PlayerProfiles playerProfiles;
 
-    public PlayerHomeService(PlayerProfileRepository playerProfiles) {
+    public PlayerHomeService(PlayerProfiles playerProfiles) {
         this.playerProfiles = playerProfiles;
     }
 

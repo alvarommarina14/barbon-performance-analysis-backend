@@ -11,20 +11,16 @@ import com.barbonperformance.courtproof.auth.dto.AuthDtos.TokenPairResponse;
 import com.barbonperformance.courtproof.auth.security.JwtService;
 import com.barbonperformance.courtproof.auth.security.SecurityProperties;
 import com.barbonperformance.courtproof.organization.domain.Organization;
-import com.barbonperformance.courtproof.organization.persistence.OrganizationRepository;
-import com.barbonperformance.courtproof.organization.persistence.OrganizationRepository;
+import com.barbonperformance.courtproof.organization.domain.Organizations;
 import com.barbonperformance.courtproof.shared.domain.ConflictException;
 import com.barbonperformance.courtproof.shared.domain.NotFoundException;
 import com.barbonperformance.courtproof.user.domain.AppUser;
-import com.barbonperformance.courtproof.user.persistence.AppUserRepository;
+import com.barbonperformance.courtproof.user.domain.AppUsers;
 import com.barbonperformance.courtproof.user.domain.CoachProfile;
-import com.barbonperformance.courtproof.user.persistence.CoachProfileRepository;
+import com.barbonperformance.courtproof.user.domain.CoachProfiles;
 import com.barbonperformance.courtproof.user.domain.PlayerProfile;
-import com.barbonperformance.courtproof.user.persistence.PlayerProfileRepository;
+import com.barbonperformance.courtproof.user.domain.PlayerProfiles;
 import com.barbonperformance.courtproof.user.domain.UserRole;
-import com.barbonperformance.courtproof.user.persistence.AppUserRepository;
-import com.barbonperformance.courtproof.user.persistence.CoachProfileRepository;
-import com.barbonperformance.courtproof.user.persistence.PlayerProfileRepository;
 import java.util.UUID;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,17 +30,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
-    private final AppUserRepository users;
-    private final PlayerProfileRepository playerProfiles;
-    private final CoachProfileRepository coachProfiles;
-    private final OrganizationRepository organizations;
+    private final AppUsers users;
+    private final PlayerProfiles playerProfiles;
+    private final CoachProfiles coachProfiles;
+    private final Organizations organizations;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokens;
     private final SecurityProperties properties;
 
-    public AuthService(AppUserRepository users, PlayerProfileRepository playerProfiles,
-            CoachProfileRepository coachProfiles, OrganizationRepository organizations,
+    public AuthService(AppUsers users, PlayerProfiles playerProfiles,
+            CoachProfiles coachProfiles, Organizations organizations,
             PasswordEncoder passwordEncoder, JwtService jwtService,
             RefreshTokenService refreshTokens, SecurityProperties properties) {
         this.users = users;
@@ -62,7 +58,7 @@ public class AuthService {
         String email = AppUser.normalizeEmail(request.email());
         String slug = properties.organizationSlug();
 
-        if (users.existsByOrganizationSlugAndEmail(slug, email)) {
+        if (users.emailIsTaken(slug, email)) {
             throw new ConflictException("That email is already registered");
         }
 
@@ -87,7 +83,7 @@ public class AuthService {
     @Transactional
     public LoginResponse login(LoginRequest request) {
         AppUser user = users
-                .findByOrganizationSlugAndEmail(
+                .findByEmail(
                         properties.organizationSlug(), AppUser.normalizeEmail(request.email()))
                 .orElseThrow(() -> new BadCredentialsException("Unknown email"));
 
