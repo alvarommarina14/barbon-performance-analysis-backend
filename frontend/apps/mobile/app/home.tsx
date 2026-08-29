@@ -7,10 +7,6 @@ import { api } from '@/api/client';
 import { useAuth } from '@/auth/AuthContext';
 import { theme } from '@/ui/theme';
 
-/**
- * Phase 1 home: who you are and where you are in the cycle. The video, drills and strength
- * tiles from the mockup arrive in Phases 2 to 4.
- */
 export default function HomeScreen() {
   const { user, logout } = useAuth();
 

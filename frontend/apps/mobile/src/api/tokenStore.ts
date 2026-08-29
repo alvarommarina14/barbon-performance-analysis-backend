@@ -3,10 +3,6 @@ import * as SecureStore from 'expo-secure-store';
 
 const KEY = 'court-proof.session';
 
-/**
- * Tokens live in the device keychain, not in AsyncStorage: a refresh token is a 30-day
- * session and the phone goes courtside in a bag.
- */
 export const secureTokenStore: TokenStore = {
   async read() {
     const raw = await SecureStore.getItemAsync(KEY);

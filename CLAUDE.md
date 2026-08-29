@@ -11,7 +11,8 @@ for both UX and copy. Read them before building a screen or an endpoint.
 records, enums, interfaces, methods, fields, constants or tests — and never write `@param`,
 `@return`, `@throws`, `@see` or `{@link}` tags. Do not reintroduce one into a file that has none,
 and do not "helpfully" document a method you are only passing through. TSDoc `/** */` blocks in
-the frontend are covered by the same rule.
+the frontend are covered by the same rule. Generated files are exempt — nobody edits
+`packages/api-client/src/generated/`, `pnpm gen:api` rewrites it.
 
 A `//` comment is allowed, but only when it records something the code genuinely cannot say: a
 decision with a non-obvious trade-off, a workaround for external behaviour, a constraint that

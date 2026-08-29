@@ -5,11 +5,9 @@ import type { TokenPair, TokenStore } from './tokens';
 export interface ApiClientOptions {
   baseUrl: string;
   tokenStore: TokenStore;
-  /** Called when the refresh token is rejected and the user has to log in again. */
   onSessionExpired?: () => void;
 }
 
-/** Endpoints that must not carry an Authorization header or trigger a refresh. */
 const ANONYMOUS_PATHS = ['/api/v1/auth/login', '/api/v1/auth/register', '/api/v1/auth/refresh'];
 
 function isAnonymous(url: string): boolean {

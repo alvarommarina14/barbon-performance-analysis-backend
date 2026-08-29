@@ -6,7 +6,6 @@ import { secureTokenStore } from '@/api/tokenStore';
 type CurrentUser = components['schemas']['CurrentUserResponse'];
 
 interface AuthState {
-  /** Null once the check has run and found no session. Undefined while it is still running. */
   user: CurrentUser | null | undefined;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
@@ -94,7 +93,6 @@ export function useAuth(): AuthState {
   return context;
 }
 
-/** The backend answers with RFC 7807 problem details; surface the human-readable part. */
 function problemDetail(error: unknown): string | undefined {
   if (error && typeof error === 'object' && 'detail' in error) {
     const detail = (error as { detail?: unknown }).detail;

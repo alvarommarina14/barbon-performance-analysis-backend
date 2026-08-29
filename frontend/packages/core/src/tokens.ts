@@ -1,9 +1,3 @@
-/**
- * Design tokens lifted from court-proof-app-mockup-v3.html.
- *
- * The mockup is the design system: when a colour or a font changes there, it changes here,
- * and both clients follow. Nothing should hard-code a hex value outside this file.
- */
 
 export const colors = {
   black: '#0a0a0a',
@@ -21,9 +15,7 @@ export const colors = {
 } as const;
 
 export const fonts = {
-  /** Headings and numerals — condensed, uppercase. */
   display: 'BebasNeue',
-  /** Body copy. */
   body: 'DMSans',
 } as const;
 

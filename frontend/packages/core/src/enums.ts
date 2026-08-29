@@ -1,8 +1,3 @@
-/**
- * Enum values shared with the backend. These are duplicated from the OpenAPI spec on purpose:
- * they are used in switch statements and UI maps, where a string union from the generated
- * types is awkward to iterate. `assertEnumsMatchSpec` in api-client keeps them honest.
- */
 
 export const USER_ROLES = ['PLAYER', 'COACH', 'ADMIN'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
