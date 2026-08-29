@@ -43,6 +43,25 @@ The single exception is **end-user product copy**, which follows the product's l
 
 Spring Boot 4.1 on Java 21, Gradle, Postgres with Flyway, Testcontainers for integration tests.
 
+**Ports and adapters, module on the outside, layers inside.** A new feature is a new package
+under `com.barbonperformance.courtproof` containing `controller/`, `dto/`, `application/`,
+`domain/`, `persistence/`, and `gateway/` when it talks to a third party. `docs/ARCHITECTURE.md`
+has the full tree and the reasoning; the short version:
+
+- `domain/` holds the entities and the **ports** — interfaces named for what the module needs
+  (`AppUsers`, `RefreshTokens`, `StreamGateway`), owned by the domain, not by the technology.
+  It depends on nothing around it.
+- `persistence/` and `gateway/` hold the adapters, and they are **package-private**. Callers get
+  the port, never the implementation.
+- `application/` orchestrates ports and owns `@Transactional`. It never touches an adapter.
+- `controller/` is HTTP in and DTO out. No persistence.
+- **Spring Data types never leave `persistence/`.** A `JpaRepository` is an implementation detail.
+- Entities keep their JPA annotations — deliberate; the port is what buys the decoupling, not a
+  hand-mapped domain model.
+
+`ArchitectureTest` enforces every one of those rules and fails the build. When it goes red, fix
+the placement rather than the rule.
+
 - Every table carries `org_id`, and every query is scoped by it. There is one organisation today;
   reads that ignore the column are bugs waiting for the second one.
 - Schema changes are Flyway migrations. Never edit a migration that has already been applied.
