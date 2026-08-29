@@ -93,65 +93,83 @@ barbon-tennis-performance/
 
 ## Backend structure
 
-Ports and adapters (hexagonal), with the **module on the outside and the layers inside it**.
-A module is a slice of the product; the packages inside it are the layers.
+Ports and adapters (hexagonal). Each **module** is a slice of the product, and inside it the
+three layers carry their canonical names: `domain/` and `application/` are the inside of the
+hexagon, `infrastructure/` is everything outside it, split by the kind of adapter.
 
 ```
 com.barbonperformance.courtproof
 ├── shared/
-│   ├── domain/         NotFoundException, ConflictException
-│   ├── controller/     ApiExceptionHandler, ProblemDetails
-│   └── config/         OpenApiConfig
+│   ├── domain/                          NotFoundException, ConflictException
+│   └── infrastructure/
+│       ├── web/                         ApiExceptionHandler, ProblemDetails
+│       └── config/                      OpenApiConfig
 ├── organization/
-│   ├── domain/         Organization · Organizations (port)
-│   └── persistence/    OrganizationJpaRepository, JpaOrganizations (adapter)
+│   ├── domain/                          Organization · Organizations (port)
+│   └── infrastructure/persistence/      OrganizationJpaRepository, JpaOrganizations
 ├── user/
-│   ├── domain/         AppUser, PlayerProfile, CoachProfile, UserRole, MembershipTier
-│   │                   AppUsers, PlayerProfiles, CoachProfiles (ports)
-│   └── persistence/    *JpaRepository + Jpa* adapters
+│   ├── domain/                          AppUser, PlayerProfile, CoachProfile, UserRole,
+│   │                                    MembershipTier · AppUsers, PlayerProfiles,
+│   │                                    CoachProfiles (ports)
+│   └── infrastructure/persistence/      *JpaRepository + Jpa* adapters
 ├── auth/
-│   ├── controller/     AuthController, AuthExceptionHandler
-│   ├── dto/            AuthDtos
-│   ├── application/    AuthService, RefreshTokenService
-│   ├── domain/         RefreshToken, AuthenticatedUser, InvalidRefreshTokenException
-│   │                   RefreshTokens (port)
-│   ├── persistence/    RefreshTokenJpaRepository, JpaRefreshTokens
-│   └── security/       JwtService, JwtAuthenticationFilter, SecurityConfig, SecurityProperties
+│   ├── SecurityProperties.java          module configuration, outside every layer
+│   ├── domain/                          RefreshToken, AuthenticatedUser,
+│   │                                    InvalidRefreshTokenException
+│   │                                    RefreshTokens, AccessTokens (ports)
+│   ├── application/                     AuthService, RefreshTokenService
+│   │   └── dto/                         AuthDtos
+│   └── infrastructure/
+│       ├── web/                         AuthController, AuthExceptionHandler
+│       ├── persistence/                 RefreshTokenJpaRepository, JpaRefreshTokens
+│       └── security/                    JwtAccessTokens, JwtAuthenticationFilter,
+│                                        SecurityConfig
 ├── coach/
-│   └── controller/ dto/ application/       reads user/domain through its ports
+│   ├── application/                     CoachService · dto/CoachDtos
+│   └── infrastructure/web/              CoachController
 └── player/
-    └── controller/ dto/ application/       reads user/domain through its ports
+    ├── application/                     PlayerHomeService · dto/PlayerHomeDtos
+    └── infrastructure/web/              PlayerController
 ```
 
-Every module from Phase 2 onward repeats the same skeleton, plus a `gateway/` package for the
-driven adapters that talk to a third party — `video/gateway/CloudflareStreamAdapter`,
-`video/gateway/R2ObjectStorage`. The port those implement lives in `video/domain/`, which is what
-lets the analysis use cases be tested against WireMock, or against a hand-written fake, without
-the HTTP client in the way.
+Every module from Phase 2 onward repeats the skeleton, adding `infrastructure/gateway/` for the
+driven adapters that talk to a third party — `video/infrastructure/gateway/CloudflareStreamAdapter`,
+`R2ObjectStorage`. The port they implement lives in `video/domain/`, which is what lets the
+analysis use cases run against WireMock, or against a hand-written fake, with no HTTP client in
+the way.
 
 ### The rules
 
 - **`domain/` depends on nothing around it.** It holds the entities and the **ports**: interfaces
-  named for what the module needs (`AppUsers`, `RefreshTokens`, later `StreamGateway`), owned by
-  the domain rather than by the technology behind them.
-- **`persistence/` and `gateway/` are adapters** and are package-private. Nothing outside the
-  package can reference an adapter, only the port it implements.
-- **`application/` orchestrates ports** and is where `@Transactional` lives. It never touches an
-  adapter or a controller.
-- **`controller/` is a driving adapter**: HTTP in, DTO out, no persistence.
-- **Spring Data exists only inside `persistence/`.** A `JpaRepository` is an implementation
-  detail; the rest of the codebase sees the port.
+  named for what the module needs (`AppUsers`, `AccessTokens`, later `StreamGateway`), owned by
+  the side that needs them rather than by the technology behind them. That ownership, not the
+  folder names, is what makes this hexagonal.
+- **`application/` orchestrates ports** and owns `@Transactional`. It never names a class under
+  `infrastructure/`. Its DTOs live in `application/dto/` because they are the contract of the use
+  case; putting them in the web adapter would invert the dependency.
+- **`infrastructure/web/` is the driving adapter**: HTTP in, DTO out, and it calls use cases.
+- **`infrastructure/persistence/`, `/security/` and later `/gateway/` are driven adapters.** They
+  implement a port and are called through it, so they never reference `application/`. They are
+  package-private: nothing outside the package can even name them.
+- **Spring Data exists only inside `infrastructure/persistence/`.** A `JpaRepository` is an
+  implementation detail; everything else sees the port.
 
 ### Entities keep their JPA annotations
 
-A deliberate trade-off. The persistence-free version of this — plain domain objects, separate
-`@Entity` classes, MapStruct in both directions — roughly doubles the classes per module and
-makes every `join fetch` a remapping exercise. What actually buys the decoupling here is the
-**port**, not the absence of `@Entity`, because the parts of Phase 2 that need to be swapped and
-faked are Cloudflare and R2, not Postgres.
+A deliberate trade-off. The persistence-free version — plain domain objects, separate `@Entity`
+classes, MapStruct in both directions — roughly doubles the classes per module and makes every
+`join fetch` a remapping exercise. What buys the decoupling here is the **port**, not the absence
+of `@Entity`, because the parts of Phase 2 that need to be swapped and faked are Cloudflare and
+R2, not Postgres.
+
+Two other leaks are accepted on the same grounds: `PasswordEncoder` and `BadCredentialsException`
+from Spring Security appear in `application/`. They are stable library abstractions, and wrapping
+them would be ceremony rather than insulation.
 
 `ArchitectureTest` (ArchUnit) enforces all of the above, including that the module slices stay
-free of cycles. It fails the build, so the structure cannot rot quietly.
+free of cycles, and fails the build. The rules are written against the `infrastructure/` boundary
+rather than against a list of adapter package names, so an adapter kind that does not exist yet —
+`gateway/` — is governed from the day it is created.
 
 ## Data model
 
