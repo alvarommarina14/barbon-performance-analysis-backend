@@ -1,15 +1,15 @@
 package com.barbonperformance.courtproof.auth.application;
 
-import com.barbonperformance.courtproof.auth.domain.InvalidRefreshTokenException;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.CoachSummary;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.CurrentUserResponse;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.LoginRequest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.LoginResponse;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.PlayerSummary;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.RegisterRequest;
-import com.barbonperformance.courtproof.auth.dto.AuthDtos.TokenPairResponse;
+import com.barbonperformance.courtproof.auth.SecurityProperties;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.CoachSummary;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.CurrentUserResponse;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.LoginRequest;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.LoginResponse;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.PlayerSummary;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.RegisterRequest;
+import com.barbonperformance.courtproof.auth.application.dto.AuthDtos.TokenPairResponse;
 import com.barbonperformance.courtproof.auth.domain.AccessTokens;
-import com.barbonperformance.courtproof.auth.security.SecurityProperties;
+import com.barbonperformance.courtproof.auth.domain.InvalidRefreshTokenException;
 import com.barbonperformance.courtproof.organization.domain.Organization;
 import com.barbonperformance.courtproof.organization.domain.Organizations;
 import com.barbonperformance.courtproof.shared.domain.ConflictException;
