@@ -1,9 +1,10 @@
-# Court Proof — Architecture
+# Barbon Performance Analysis — Architecture
 
 Barbon Performance runs tennis coaching built on biomechanical video analysis. The product is
 already validated as a no-code mockup (Softr + Notion), kept at
-`docs/court-proof-app-mockup-v3.html` in the `court-proof-frontend` repository, which
-defines the navigation, the annotated data model and the real product copy. This document
+`docs/barbon-performance-analysis-mockup-v3.html` in the
+`barbon-performance-analysis-frontend` repository, which defines the navigation, the annotated
+data model and the real product copy. This document
 describes the architecture that replaces it with a purpose-built product.
 
 The core loop is: **the player records themselves on court → uploads the video → the coach
@@ -85,12 +86,12 @@ Two repositories, cloned side by side. Every document has exactly one home: this
 ADRs live with the backend, the mockup lives with the clients that are built from it.
 
 ```
-court-proof-backend/
+barbon-performance-analysis-backend/
 ├── src/              # Spring Boot, Flyway migrations
 ├── infra/            # docker-compose, seed scripts
 └── docs/             # this document, and the ADRs
 
-court-proof-frontend/
+barbon-performance-analysis-frontend/
 ├── apps/mobile/
 ├── apps/coach/
 ├── packages/{api-client,core}/
@@ -104,7 +105,7 @@ three layers carry their canonical names: `domain/` and `application/` are the i
 hexagon, `infrastructure/` is everything outside it, split by the kind of adapter.
 
 ```
-com.barbonperformance.courtproof
+com.barbonperformance.analysis
 ├── shared/
 │   ├── domain/                          NotFoundException, ConflictException
 │   └── infrastructure/
@@ -317,5 +318,6 @@ This run must pass in full before Phase 2 is considered done.
 
 ### Manual
 
-Open `docs/court-proof-app-mockup-v3.html` from the `court-proof-frontend` repository alongside
-the app and compare screen by screen. The mockup is the specification for both UX and copy.
+Open `docs/barbon-performance-analysis-mockup-v3.html` from the
+`barbon-performance-analysis-frontend` repository alongside the app and compare screen by
+screen. The mockup is the specification for both UX and copy.
