@@ -1,9 +1,9 @@
 # Court Proof — working agreement
 
 Video analysis platform for Barbon Performance. The architecture, the data model and the phase
-plan live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the product mockup in
-[`docs/court-proof-app-mockup-v3.html`](docs/court-proof-app-mockup-v3.html) is the specification
-for both UX and copy. Read them before building a screen or an endpoint.
+plan live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The product mockup is the
+specification for both UX and copy; it lives in the `court-proof-frontend` repository at
+`docs/court-proof-app-mockup-v3.html`. Read them before building an endpoint.
 
 ## Comments and documentation
 

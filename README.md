@@ -7,8 +7,8 @@ with findings marked by timestamp.
 This repository holds the Spring Boot API. The two clients live in `court-proof-frontend`.
 
 The architecture, the data model and the phase plan live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
-The product mockup in [`docs/court-proof-app-mockup-v3.html`](docs/court-proof-app-mockup-v3.html)
-is the specification for both UX and copy.
+The product mockup is the specification for both UX and copy; it lives in the
+`court-proof-frontend` repository at `docs/court-proof-app-mockup-v3.html`.
 
 ## Layout
 
@@ -16,7 +16,7 @@ is the specification for both UX and copy.
 | -------- | ---------------------------------------------- |
 | `src/`   | Spring Boot API, Flyway migrations              |
 | `infra/` | docker-compose for Postgres, MinIO and Mailpit  |
-| `docs/`  | Architecture, ADRs, mockup                      |
+| `docs/`  | Architecture and ADRs                           |
 
 ## Running it
 
