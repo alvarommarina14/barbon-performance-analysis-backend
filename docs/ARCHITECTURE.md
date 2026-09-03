@@ -1,7 +1,8 @@
 # Court Proof — Architecture
 
 Barbon Performance runs tennis coaching built on biomechanical video analysis. The product is
-already validated as a no-code mockup (`court-proof-app-mockup-v3.html`, Softr + Notion), which
+already validated as a no-code mockup (Softr + Notion), kept at
+`docs/court-proof-app-mockup-v3.html` in the `court-proof-frontend` repository, which
 defines the navigation, the annotated data model and the real product copy. This document
 describes the architecture that replaces it with a purpose-built product.
 
@@ -80,15 +81,20 @@ no emulator, so development runs against a real development account using short 
 
 ## Repository layout
 
+Two repositories, cloned side by side. Every document has exactly one home: this one and the
+ADRs live with the backend, the mockup lives with the clients that are built from it.
+
 ```
-barbon-tennis-performance/
-├── backend/          # Spring Boot — the Gradle wrapper currently at the root moves here
-├── frontend/         # pnpm workspace
-│   ├── apps/mobile/
-│   ├── apps/coach/
-│   └── packages/{api-client,core}/
+court-proof-backend/
+├── src/              # Spring Boot, Flyway migrations
 ├── infra/            # docker-compose, seed scripts
-└── docs/             # ADRs, and the mockup as living reference
+└── docs/             # this document, and the ADRs
+
+court-proof-frontend/
+├── apps/mobile/
+├── apps/coach/
+├── packages/{api-client,core}/
+└── docs/             # the mockup, as living reference
 ```
 
 ## Backend structure
@@ -311,5 +317,5 @@ This run must pass in full before Phase 2 is considered done.
 
 ### Manual
 
-Open `court-proof-app-mockup-v3.html` alongside the app and compare screen by screen. The mockup
-is the specification for both UX and copy.
+Open `docs/court-proof-app-mockup-v3.html` from the `court-proof-frontend` repository alongside
+the app and compare screen by screen. The mockup is the specification for both UX and copy.

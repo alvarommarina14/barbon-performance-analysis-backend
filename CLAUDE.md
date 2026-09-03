@@ -1,18 +1,16 @@
 # Court Proof — working agreement
 
 Video analysis platform for Barbon Performance. The architecture, the data model and the phase
-plan live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the product mockup in
-[`docs/court-proof-app-mockup-v3.html`](docs/court-proof-app-mockup-v3.html) is the specification
-for both UX and copy. Read them before building a screen or an endpoint.
+plan live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The product mockup is the
+specification for both UX and copy; it lives in the `court-proof-frontend` repository at
+`docs/court-proof-app-mockup-v3.html`. Read them before building an endpoint.
 
 ## Comments and documentation
 
 **No JavaDoc.** Never write a `/** ... */` block anywhere in this repository — not on classes,
 records, enums, interfaces, methods, fields, constants or tests — and never write `@param`,
 `@return`, `@throws`, `@see` or `{@link}` tags. Do not reintroduce one into a file that has none,
-and do not "helpfully" document a method you are only passing through. TSDoc `/** */` blocks in
-the frontend are covered by the same rule. Generated files are exempt — nobody edits
-`packages/api-client/src/generated/`, `pnpm gen:api` rewrites it.
+and do not "helpfully" document a method you are only passing through.
 
 A `//` comment is allowed, but only when it records something the code genuinely cannot say: a
 decision with a non-obvious trade-off, a workaround for external behaviour, a constraint that
@@ -75,15 +73,14 @@ the placement rather than the rule.
 ## The API contract
 
 The backend's OpenAPI spec is the source of truth for both clients. After changing a DTO, run
-`pnpm gen:api` from `frontend/` with the backend running. If a client stops compiling afterwards,
-the contract changed and the client has to catch up — that is the point, not a problem to route
-around.
+`pnpm gen:api` in the frontend repository, with this backend running. If a client stops compiling
+afterwards, the contract changed and the client has to catch up — that is the point, not a
+problem to route around.
 
 ## Tests
 
 ```bash
-cd backend && ./gradlew test        # Testcontainers starts a real Postgres
-cd frontend && pnpm typecheck
+./gradlew test        # Testcontainers starts a real Postgres
 ```
 
 Docker does not run on this machine, so the suite also honours `COURT_PROOF_TEST_DB_URL` (plus
