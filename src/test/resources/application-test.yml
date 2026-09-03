@@ -7,7 +7,7 @@ logging:
     org.testcontainers: WARN
     com.github.dockerjava: WARN
 
-courtproof:
+analysis:
   video:
     # api-base-url is pointed at WireMock by AbstractIntegrationTest.
     account-id: test-account

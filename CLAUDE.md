@@ -1,9 +1,10 @@
-# Court Proof — working agreement
+# Barbon Performance Analysis — working agreement
 
 Video analysis platform for Barbon Performance. The architecture, the data model and the phase
 plan live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The product mockup is the
-specification for both UX and copy; it lives in the `court-proof-frontend` repository at
-`docs/court-proof-app-mockup-v3.html`. Read them before building an endpoint.
+specification for both UX and copy; it lives in the
+`barbon-performance-analysis-frontend` repository at
+`docs/barbon-performance-analysis-mockup-v3.html`. Read them before building an endpoint.
 
 ## Comments and documentation
 
@@ -42,7 +43,7 @@ The single exception is **end-user product copy**, which follows the product's l
 Spring Boot 4.1 on Java 21, Gradle, Postgres with Flyway, Testcontainers for integration tests.
 
 **Ports and adapters.** A new feature is a new module package under
-`com.barbonperformance.courtproof` holding `domain/`, `application/` and `infrastructure/`, the
+`com.barbonperformance.analysis` holding `domain/`, `application/` and `infrastructure/`, the
 last one split by adapter kind: `web/`, `persistence/`, `security/`, `gateway/`.
 `docs/ARCHITECTURE.md` has the full tree and the reasoning; the short version:
 
@@ -83,6 +84,6 @@ problem to route around.
 ./gradlew test        # Testcontainers starts a real Postgres
 ```
 
-Docker does not run on this machine, so the suite also honours `COURT_PROOF_TEST_DB_URL` (plus
+Docker does not run on this machine, so the suite also honours `ANALYSIS_TEST_DB_URL` (plus
 `_USER` and `_PASSWORD`) to run against an already-running Postgres. It must be an empty database
 the tests may truncate. See the README.

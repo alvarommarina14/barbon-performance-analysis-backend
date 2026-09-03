@@ -1,10 +1,10 @@
 spring:
   application:
-    name: court-proof-backend
+    name: barbon-performance-analysis-backend
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/courtproof}
-    username: ${DATABASE_USER:courtproof}
-    password: ${DATABASE_PASSWORD:courtproof}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/bpa}
+    username: ${DATABASE_USER:bpa}
+    password: ${DATABASE_PASSWORD:bpa}
   jpa:
     open-in-view: false
     hibernate:
@@ -44,9 +44,9 @@ springdoc:
 
 logging:
   level:
-    com.barbonperformance.courtproof: DEBUG
+    com.barbonperformance.analysis: DEBUG
 
-courtproof:
+analysis:
   security:
     # Development key only. Every deployment supplies its own through the environment.
     jwt-secret: ${JWT_SECRET:ZGV2ZWxvcG1lbnQtb25seS1zZWNyZXQtZG8tbm90LXVzZS1pbi1wcm9kdWN0aW9uLTI1Ng==}

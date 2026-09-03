@@ -6,8 +6,8 @@ docker compose -f infra/docker-compose.yml up -d
 
 | Service  | URL                     | Credentials             |
 | -------- | ----------------------- | ----------------------- |
-| Postgres | `localhost:5432`        | `courtproof`/`courtproof` |
-| MinIO    | http://localhost:9001   | `courtproof`/`courtproof` |
+| Postgres | `localhost:5432`        | `bpa`/`bpa` |
+| MinIO    | http://localhost:9001   | `bpa`/`bpa` |
 | Mailpit  | http://localhost:8025   | —                       |
 
 `seed/` is mounted into Postgres' entrypoint: any `.sql` dropped there runs the first time

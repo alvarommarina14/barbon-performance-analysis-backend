@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.barbonperformance'
 version = '0.1.0-SNAPSHOT'
-description = 'Court Proof backend'
+description = 'Barbon Performance Analysis backend'
 
 java {
     // Java 21 LTS. Pinned as a toolchain so every machine and CI runner compiles
