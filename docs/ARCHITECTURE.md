@@ -135,10 +135,35 @@ com.barbonperformance.analysis
 ├── coach/
 │   ├── application/                     CoachService · dto/CoachDtos
 │   └── infrastructure/web/              CoachController
-└── player/
-    ├── application/                     PlayerHomeService · dto/PlayerHomeDtos
-    └── infrastructure/web/              PlayerController
+├── player/
+│   ├── application/                     PlayerHomeService · dto/PlayerHomeDtos
+│   └── infrastructure/web/              PlayerController
+├── video/
+│   ├── VideoProperties.java             module configuration, outside every layer
+│   ├── domain/                          VideoAsset, VideoSubmission, StreamEvent, the enums ·
+│   │                                    VideoAssets, VideoSubmissions, StreamGateway,
+│   │                                    StreamWebhooks (ports)
+│   ├── application/                     VideoUploadService, PlaybackService,
+│   │   └── dto/                         StreamWebhookService · VideoDtos
+│   └── infrastructure/
+│       ├── web/                         VideoController, StreamWebhookController, exception advice
+│       ├── persistence/                 *JpaRepository + Jpa* adapters
+│       └── gateway/                     CloudflareStreamGateway, CloudflareStreamWebhooks
+└── analysis/
+    ├── domain/                          Analysis (aggregate, owns AnalysisFinding), AnalysisStatus ·
+    │                                    Analyses (port) · module exceptions
+    ├── application/                     AnalysisService (coach commands), AnalysisReadService,
+    │   └── dto/                         AnalysisPlaybackService · AnalysisDtos
+    └── infrastructure/
+        ├── web/                         AnalysisController, AnalysisExceptionHandler
+        └── persistence/                 AnalysisJpaRepository, JpaAnalyses
 ```
+
+`analysis` reuses `video/domain`'s ports (`StreamGateway`, `VideoAssets`, `VideoSubmissions`) and
+`VideoProperties` directly from its application layer — an `analysis → video` module edge, with no
+edge back, so `ArchitectureTest`'s no-cycles rule holds. The feedback video is a plain
+`video_asset` of `kind = COACH_FEEDBACK`; `analysis` owns its playback entitlement rather than
+teaching `video` about analyses (see [ADR 0003](adr/0003-playback-entitlement-without-a-module-cycle.md)).
 
 Every module from Phase 2 onward repeats the skeleton, adding `infrastructure/gateway/` for the
 driven adapters that talk to a third party — `video/infrastructure/gateway/CloudflareStreamAdapter`,
@@ -243,22 +268,32 @@ Cal.com embedded — the same approach as the mockup.
 This has the most moving parts and is where the product is won or lost. **Video bytes never pass
 through the backend.**
 
-1. `POST /api/v1/submissions/upload-intent` — the backend requests a Stream *direct creator
-   upload* with `requireSignedURLs: true`, `maxDurationSeconds`, `creator: playerId` and
-   `meta: { submissionId }`. It creates a `video_asset` in `PENDING_UPLOAD` and a
-   `video_submission` in `SUBMITTED`, and returns the one-time `uploadURL`.
-2. The mobile app uploads via `tus` straight to Cloudflare, with a progress bar, resuming if the
-   connection drops.
+1. `POST /api/v1/submissions/upload-intent` (with the file's `sizeBytes`) — the backend creates a
+   **resumable (tus) direct creator upload**: `POST /accounts/{id}/stream` with
+   `Tus-Resumable: 1.0.0`, `Upload-Length`, `Upload-Creator: playerId` and an `Upload-Metadata`
+   carrying `requiresignedurls`, `maxDurationSeconds` and `submissionId`. Cloudflare returns the
+   one-time URL in the `Location` header and the id in `stream-media-id`. The backend creates a
+   `video_asset` in `PENDING_UPLOAD` and a `video_submission` in `SUBMITTED`, and returns that URL
+   as `uploadUrl`.
+2. The mobile app uploads via `tus` straight to that URL (no credential — the URL is the
+   authentication), with a progress bar, resuming if the connection drops.
 3. Cloudflare transcodes, then calls `POST /api/v1/webhooks/cloudflare-stream`. **Verify the HMAC
    signature header and make the update idempotent** — Cloudflare retries. The asset moves to
-   `READY` with duration and thumbnail, and the coach gets a push notification.
-4. The coach opens the pending queue in Electron, plays the video through a signed URL, and
-   downloads the original to edit in their own tool.
-5. Back in the app, the coach creates the `analysis`, uploads the edited MP4 through the same
-   mechanism with `kind=COACH_FEEDBACK`, marks findings with the "mark here" button, assigns
-   drills from the library, and publishes.
-6. Publishing sends push and email. The player opens the analysis and sees the video with a list
-   of clickable findings.
+   `READY` with duration and thumbnail. Once it is `READY` the submission shows up in
+   `GET /api/v1/submissions/queue`.
+4. The coach opens the pending queue in Electron, plays the video through a signed URL, and gets
+   the original MP4 from `GET /api/v1/videos/{assetId}/download-url` (Cloudflare renders the
+   download lazily; the response says whether the URL is usable yet) to edit in their own tool.
+5. Back in the app, the coach creates the `analysis` (`POST /api/v1/analyses`, which moves the
+   submission to `IN_REVIEW`), uploads the edited MP4 through the same tus direct-upload + webhook
+   mechanism (`POST /api/v1/analyses/{id}/feedback-upload-intent` with `sizeBytes`,
+   `kind=COACH_FEEDBACK`, `Upload-Metadata` `analysisId`), replaces the whole finding
+   list with `PUT /api/v1/analyses/{id}/findings` (each `{ timestampSeconds, title, detail }`),
+   and publishes (`POST /api/v1/analyses/{id}/publish`, which requires the feedback video to be
+   `READY` and moves the submission to `ANALYZED`). Assigning drills is Phase 3.
+6. The player polls `GET /api/v1/analyses`, opens one, and plays the feedback video through
+   `GET /api/v1/analyses/{id}/playback` with a list of clickable findings. **Phase 2 sends no
+   push or email** — that is Phase 6; until then both sides poll.
 
 ### Privacy
 
@@ -266,10 +301,17 @@ through the backend.**
 short-lived playback tokens (around two hours) only after verifying that the requesting user is
 entitled to that asset. No `playback_id` is ever served unprotected.
 
+Entitlement is owned by the module that owns the asset's context: `video`'s
+`/api/v1/videos/{id}/playback` serves the player upload (player owns it, or the coach owns the
+player), and `analysis`'s `/api/v1/analyses/{id}/playback` serves the feedback video (player if
+the analysis is published and theirs, coach if it is theirs). Neither module reaches into the
+other — see [ADR 0003](adr/0003-playback-entitlement-without-a-module-cycle.md).
+
 ### Quotas
 
 `membership_tier` gates features — the mockup already shows this, where a base-tier client never
-sees the S&C tile — and also caps analyses per month. No billing in v1; the tier is set manually.
+sees the S&C tile. No billing in v1; the tier is set manually. An analyses-per-month cap is
+mentioned as a future lever but no number is specified, so **Phase 2 implements no cap**.
 
 ## Phases
 
@@ -287,8 +329,9 @@ client list.
 
 **Phase 2 — The video loop.** *The phase that defines the project — get it right before moving
 on.* Stream integration, upload intent, `tus` on both clients, idempotent webhook, signed
-playback. Coach analysis queue, finding editor with "mark here", publishing. Player view with
-clickable findings that seek the video.
+playback, original-video download. The `analysis` module: coach review queue, draft analysis,
+`kind=COACH_FEEDBACK` upload, bulk finding editor with "mark here", publish. Player view with
+clickable findings that seek the video. No push/email (Phase 6); no analyses cap.
 
 **Phase 3 — Drills.** Video library, assignment from an analysis, category filters, per-drill
 coach notes.
