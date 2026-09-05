@@ -35,20 +35,18 @@ class VideoFlowIT extends AbstractIntegrationTest {
     private static final String PASSWORD = "a-long-enough-password";
     private static final String STREAM_UID = "stream-uid-1";
     private static final String WEBHOOK_SECRET = "test-webhook-secret";
+    private static final long SIZE_BYTES = 12_345_678L;
 
     @Autowired
     private JdbcTemplate jdbc;
 
     @BeforeEach
     void stubCloudflare() {
-        CLOUDFLARE.stubFor(post(urlPathEqualTo("/accounts/test-account/stream/direct_upload"))
+        CLOUDFLARE.stubFor(post(urlPathEqualTo("/accounts/test-account/stream"))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("""
-                                {"success":true,"errors":[],"result":{
-                                  "uid":"%s",
-                                  "uploadURL":"https://upload.videodelivery.net/%s"}}
-                                """.formatted(STREAM_UID, STREAM_UID))));
+                        .withStatus(201)
+                        .withHeader("Location", "https://upload.videodelivery.net/tus/" + STREAM_UID)
+                        .withHeader("stream-media-id", STREAM_UID)));
 
         CLOUDFLARE.stubFor(post(urlPathMatching("/accounts/test-account/stream/.+/token"))
                 .willReturn(aResponse()
@@ -66,7 +64,7 @@ class VideoFlowIT extends AbstractIntegrationTest {
 
         assertThat(intent.submissionId()).isNotNull();
         assertThat(intent.videoAssetId()).isNotNull();
-        assertThat(intent.uploadUrl()).isEqualTo("https://upload.videodelivery.net/" + STREAM_UID);
+        assertThat(intent.uploadUrl()).isEqualTo("https://upload.videodelivery.net/tus/" + STREAM_UID);
         assertThat(intent.maxDurationSeconds()).isEqualTo(600);
 
         assertThat(assetStatus(intent.videoAssetId().toString())).isEqualTo("UPLOADING");
@@ -75,18 +73,20 @@ class VideoFlowIT extends AbstractIntegrationTest {
                 intent.submissionId().toString())).isEqualTo("SUBMITTED");
     }
 
-    // The submission id in the metadata is the only thing that ties a webhook delivery back to
-    // a player, and requireSignedURLs is what keeps the footage private.
+    // A resumable tus creation: the length is fixed up front, requiresignedurls keeps the footage
+    // private, and the submission id rides along in the metadata for dashboard traceability.
     @Test
-    void uploadIntentAsksCloudflareForAPrivateVideoTaggedWithTheSubmission() {
+    void uploadIntentAsksCloudflareForAPrivateResumableUpload() {
         LoginResponse player = register("player@example.com");
 
-        UploadIntentResponse intent = uploadIntent(player);
+        uploadIntent(player);
 
-        CLOUDFLARE.verify(postRequestedFor(urlPathEqualTo("/accounts/test-account/stream/direct_upload"))
+        CLOUDFLARE.verify(postRequestedFor(urlPathEqualTo("/accounts/test-account/stream"))
                 .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Bearer test-token"))
-                .withRequestBody(containing("\"requireSignedURLs\":true"))
-                .withRequestBody(containing(intent.submissionId().toString())));
+                .withHeader("Tus-Resumable", equalTo("1.0.0"))
+                .withHeader("Upload-Length", equalTo(Long.toString(SIZE_BYTES)))
+                .withHeader("Upload-Metadata", containing("requiresignedurls"))
+                .withHeader("Upload-Metadata", containing("submissionId")));
     }
 
     @Test
@@ -237,7 +237,8 @@ class VideoFlowIT extends AbstractIntegrationTest {
     private UploadIntentResponse uploadIntent(LoginResponse session) {
         return client.post().uri("/api/v1/submissions/upload-intent")
                 .header(HttpHeaders.AUTHORIZATION, bearer(session.accessToken()))
-                .body(new UploadIntentRequest(StrokeType.FOREHAND, "Elbow hurts on contact", null))
+                .body(new UploadIntentRequest(
+                        StrokeType.FOREHAND, "Elbow hurts on contact", null, SIZE_BYTES))
                 .exchange()
                 .expectStatus().isCreated()
                 .returnResult(UploadIntentResponse.class)
