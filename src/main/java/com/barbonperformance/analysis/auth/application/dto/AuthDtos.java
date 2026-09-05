@@ -20,6 +20,13 @@ public final class AuthDtos {
             String timezone) {
     }
 
+    public record RegisterCoachRequest(
+            @Email @NotBlank String email,
+            @NotBlank @Size(min = 10, max = 128) String password,
+            @NotBlank @Size(max = 120) String name,
+            String timezone) {
+    }
+
     public record LoginRequest(
             @Email @NotBlank String email,
             @NotBlank String password) {

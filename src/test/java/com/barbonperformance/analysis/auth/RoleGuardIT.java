@@ -44,6 +44,9 @@ class RoleGuardIT extends AbstractIntegrationTest {
 
     @Test
     void coachSeesOnlyTheirOwnClients() {
+        // Two coaches in one org: the fixtures write straight through the ports, bypassing the
+        // one-coach-per-org bootstrap guard in AuthService. This exercises client-list scoping,
+        // which is where the product is heading once a coach can invite others.
         CoachProfile coach = fixtures.createCoach("coach@example.com", PASSWORD, "Marcelo Barbon");
         CoachProfile otherCoach = fixtures.createCoach("other@example.com", PASSWORD, "Other Coach");
         fixtures.createPlayer("mine@example.com", PASSWORD, "My Client", coach);

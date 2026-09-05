@@ -7,5 +7,7 @@ public interface CoachProfiles {
 
     Optional<CoachProfile> findByUserId(UUID userId);
 
+    Optional<CoachProfile> findByOrganizationId(UUID organizationId);
+
     CoachProfile save(CoachProfile profile);
 }
