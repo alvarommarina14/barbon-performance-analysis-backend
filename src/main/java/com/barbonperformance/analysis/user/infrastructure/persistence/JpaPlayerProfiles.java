@@ -22,6 +22,11 @@ class JpaPlayerProfiles implements PlayerProfiles {
     }
 
     @Override
+    public Optional<PlayerProfile> findById(UUID id) {
+        return jpa.findDetailedById(id);
+    }
+
+    @Override
     public List<PlayerProfile> findAllByCoachId(UUID coachProfileId) {
         return jpa.findAllByCoachId(coachProfileId);
     }

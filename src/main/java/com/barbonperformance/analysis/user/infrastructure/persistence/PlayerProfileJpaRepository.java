@@ -12,6 +12,16 @@ interface PlayerProfileJpaRepository extends JpaRepository<PlayerProfile, UUID> 
     @Query("select p from PlayerProfile p join fetch p.user where p.user.id = :userId")
     Optional<PlayerProfile> findByUserId(UUID userId);
 
+    // Cross-module lookups (analysis) need the player's coach to check ownership.
+    @Query("""
+            select p from PlayerProfile p
+            join fetch p.user
+            left join fetch p.coach c
+            left join fetch c.user
+            where p.id = :id
+            """)
+    Optional<PlayerProfile> findDetailedById(UUID id);
+
     // The coach's client list. Fetches the user eagerly — every row renders a name.
     @Query("""
             select p from PlayerProfile p
