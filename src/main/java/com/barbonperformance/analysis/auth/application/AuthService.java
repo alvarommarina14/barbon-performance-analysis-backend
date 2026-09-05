@@ -6,6 +6,7 @@ import com.barbonperformance.analysis.auth.application.dto.AuthDtos.CurrentUserR
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginRequest;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginResponse;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.PlayerSummary;
+import com.barbonperformance.analysis.auth.application.dto.AuthDtos.RegisterCoachRequest;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.RegisterRequest;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.TokenPairResponse;
 import com.barbonperformance.analysis.auth.domain.AccessTokens;
@@ -55,27 +56,32 @@ public class AuthService {
 
     @Transactional
     public LoginResponse register(RegisterRequest request) {
-        String email = AppUser.normalizeEmail(request.email());
-        String slug = properties.organizationSlug();
+        Organization organization = organizationForNewAccount(request.email());
 
-        if (users.emailIsTaken(slug, email)) {
-            throw new ConflictException("That email is already registered");
+        AppUser user = users.save(newUser(organization, request.email(), request.password(),
+                UserRole.PLAYER, request.name(), request.timezone()));
+
+        PlayerProfile profile = new PlayerProfile(organization, user);
+        coachProfiles.findByOrganizationId(organization.getId()).ifPresent(profile::setCoach);
+        playerProfiles.save(profile);
+
+        return issueSession(user);
+    }
+
+    @Transactional
+    public LoginResponse registerCoach(RegisterCoachRequest request) {
+        Organization organization = organizationForNewAccount(request.email());
+
+        // Phase 1: the organisation has exactly one coach, and this open endpoint bootstraps it.
+        // Later coaches arrive through an invite flow, and this guard is what gets removed then.
+        // See docs/adr/0002-coach-onboarding.md.
+        if (coachProfiles.findByOrganizationId(organization.getId()).isPresent()) {
+            throw new ConflictException("This organisation already has a coach");
         }
 
-        Organization organization = organizations.findBySlug(slug)
-                .orElseThrow(() -> new IllegalStateException("Organisation " + slug + " is missing"));
-
-        AppUser user = users.save(new AppUser(
-                organization,
-                email,
-                passwordEncoder.encode(request.password()),
-                UserRole.PLAYER,
-                request.name().trim(),
-                request.timezone() == null || request.timezone().isBlank()
-                        ? organizationDefaultTimezone()
-                        : request.timezone()));
-
-        playerProfiles.save(new PlayerProfile(organization, user));
+        AppUser user = users.save(newUser(organization, request.email(), request.password(),
+                UserRole.COACH, request.name(), request.timezone()));
+        coachProfiles.save(new CoachProfile(organization, user));
 
         return issueSession(user);
     }
@@ -115,6 +121,26 @@ public class AuthService {
         AppUser user = users.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User " + userId + " not found"));
         return describe(user);
+    }
+
+    private Organization organizationForNewAccount(String email) {
+        String slug = properties.organizationSlug();
+        if (users.emailIsTaken(slug, AppUser.normalizeEmail(email))) {
+            throw new ConflictException("That email is already registered");
+        }
+        return organizations.findBySlug(slug)
+                .orElseThrow(() -> new IllegalStateException("Organisation " + slug + " is missing"));
+    }
+
+    private AppUser newUser(Organization organization, String email, String rawPassword,
+            UserRole role, String name, String timezone) {
+        return new AppUser(
+                organization,
+                email,
+                passwordEncoder.encode(rawPassword),
+                role,
+                name.trim(),
+                timezone == null || timezone.isBlank() ? organizationDefaultTimezone() : timezone);
     }
 
     private LoginResponse issueSession(AppUser user) {

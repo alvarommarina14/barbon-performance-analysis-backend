@@ -23,6 +23,7 @@ Two distinct clients: **player on mobile**, **coach on desktop**.
 | v1 scope | The full mockup | Built in six phases, each one shippable. |
 | Coach app | Electron | React + Vite, packaged, with local filesystem access for the edited MP4s. |
 | Video infrastructure | Cloudflare R2 + Stream | No egress charges, HLS transcoding included, signed URLs for privacy. |
+| Coach onboarding | Self-serve from the desktop app, one per org for now, guarded in the application layer | No booking/bio at signup; a player's coach is resolved by the backend. See [ADR 0002](adr/0002-coach-onboarding.md). |
 
 ### Note on the feedback decision
 
@@ -186,12 +187,19 @@ painful migration.
 
 ### Identity
 
-- `organization` — the business
+- `organization` — the coaching business. One today; it is expected to hold several coaches over
+  time, and every table is `org_id`-scoped for that.
 - `app_user` — email, password_hash, role (`PLAYER` | `COACH` | `ADMIN`), name, avatar, timezone
 - `coach_profile` — user_id, booking_url, bio
 - `player_profile` — user_id, coach_id, `membership_tier` (`BASE` | `PRO`), current_week,
   cycle_started_at, program_pdf_key, next_call_at, injury_notes
 - `refresh_token` — rotating, revocable
+
+The coach self-registers from the desktop app (`POST /api/v1/auth/register-coach`). It is open
+but rejects a second coach in the org — a Phase-1 bootstrap guard in the application layer that
+an invite flow replaces later. A player's coach is resolved by the backend at registration (the
+org's coach, or NULL until one exists); the client never sends a coach id. See
+[ADR 0002](adr/0002-coach-onboarding.md).
 
 ### Video and analysis
 
@@ -272,7 +280,9 @@ Each phase ends with something usable across all three surfaces, rather than one
 Compose. A pnpm workspace with both apps scaffolded. A working `gen:api` pipeline.
 
 **Phase 1 — Auth and profiles.** Registration and login, JWT with rotating refresh tokens, roles
-and role guards. Login on both clients. Player home showing their name and current week; coach
+and role guards. Player registration on mobile; coach self-registration on the desktop app, one
+per org (a bootstrap guard the later invite flow removes). A player is assigned the org's coach
+at registration. Login on both clients. Player home showing their name and current week; coach
 client list.
 
 **Phase 2 — The video loop.** *The phase that defines the project — get it right before moving

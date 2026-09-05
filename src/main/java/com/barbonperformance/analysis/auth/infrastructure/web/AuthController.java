@@ -5,6 +5,7 @@ import com.barbonperformance.analysis.auth.application.dto.AuthDtos.CurrentUserR
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginRequest;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginResponse;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.RefreshRequest;
+import com.barbonperformance.analysis.auth.application.dto.AuthDtos.RegisterCoachRequest;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.RegisterRequest;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.TokenPairResponse;
 import com.barbonperformance.analysis.auth.domain.AuthenticatedUser;
@@ -35,6 +36,13 @@ public class AuthController {
     @Operation(summary = "Register a player and start a session")
     ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
+    }
+
+    @PostMapping("/register-coach")
+    @SecurityRequirements
+    @Operation(summary = "Register the organisation's coach and start a session")
+    ResponseEntity<LoginResponse> registerCoach(@Valid @RequestBody RegisterCoachRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerCoach(request));
     }
 
     @PostMapping("/login")

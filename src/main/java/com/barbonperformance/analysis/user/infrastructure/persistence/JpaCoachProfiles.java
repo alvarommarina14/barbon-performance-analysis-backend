@@ -21,6 +21,11 @@ class JpaCoachProfiles implements CoachProfiles {
     }
 
     @Override
+    public Optional<CoachProfile> findByOrganizationId(UUID organizationId) {
+        return jpa.findFirstByOrganizationId(organizationId);
+    }
+
+    @Override
     public CoachProfile save(CoachProfile profile) {
         return jpa.save(profile);
     }
