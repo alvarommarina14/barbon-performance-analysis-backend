@@ -158,7 +158,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void publishRemovesTheSubmissionFromTheCoachQueue() {
+    void publishKeepsTheSubmissionOutOfTheCoachQueue() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
         UploadIntentResponse submission = readySubmission(player);
@@ -166,11 +166,31 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
 
-        assertThat(queueIds(coach)).contains(submission.submissionId());
+        // The draft already pulled it from the queue; publishing keeps it out.
+        assertThat(queueIds(coach)).doesNotContain(submission.submissionId());
 
         publish(coach, analysis.id());
 
         assertThat(queueIds(coach)).doesNotContain(submission.submissionId());
+    }
+
+    @Test
+    void aSubmissionUnderReviewLeavesTheCoachQueueUntilTheDraftIsDiscarded() {
+        LoginResponse coach = registerCoach("coach@example.com");
+        LoginResponse player = registerPlayer("player@example.com");
+        UploadIntentResponse submission = readySubmission(player);
+
+        assertThat(queueIds(coach)).contains(submission.submissionId());
+
+        AnalysisDetail analysis = createAnalysis(coach, submission.submissionId());
+        assertThat(queueIds(coach)).doesNotContain(submission.submissionId());
+
+        client.delete().uri("/api/v1/analyses/{id}", analysis.id())
+                .header(HttpHeaders.AUTHORIZATION, bearer(coach.accessToken()))
+                .exchange()
+                .expectStatus().isNoContent();
+
+        assertThat(queueIds(coach)).contains(submission.submissionId());
     }
 
     @Test
