@@ -3,6 +3,7 @@ package com.barbonperformance.analysis.video.infrastructure.web;
 import com.barbonperformance.analysis.auth.domain.AuthenticatedUser;
 import com.barbonperformance.analysis.video.application.PlaybackService;
 import com.barbonperformance.analysis.video.application.VideoUploadService;
+import com.barbonperformance.analysis.video.application.dto.VideoDtos.DownloadUrlResponse;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.PlaybackResponse;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.SubmissionSummary;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentRequest;
@@ -49,6 +50,20 @@ public class VideoController {
     @Operation(summary = "The signed-in player's own submissions")
     List<SubmissionSummary> mySubmissions(@AuthenticationPrincipal AuthenticatedUser principal) {
         return uploads.mySubmissions(principal.id());
+    }
+
+    @GetMapping("/submissions/queue")
+    @PreAuthorize("hasRole('COACH')")
+    @Operation(summary = "Submissions from the coach's clients that still need an analysis")
+    List<SubmissionSummary> coachQueue(@AuthenticationPrincipal AuthenticatedUser principal) {
+        return uploads.coachQueue(principal.id());
+    }
+
+    @GetMapping("/videos/{videoAssetId}/download-url")
+    @Operation(summary = "A download URL for the original video the caller may access")
+    DownloadUrlResponse downloadUrl(@AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID videoAssetId) {
+        return playback.downloadUrl(principal.id(), videoAssetId);
     }
 
     @GetMapping("/videos/{videoAssetId}/playback")

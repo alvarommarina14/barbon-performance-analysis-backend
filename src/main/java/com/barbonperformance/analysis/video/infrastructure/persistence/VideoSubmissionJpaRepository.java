@@ -14,6 +14,7 @@ interface VideoSubmissionJpaRepository extends JpaRepository<VideoSubmission, UU
             join fetch s.videoAsset
             join fetch s.player p
             join fetch p.user
+            left join fetch p.coach
             where s.id = :id
             """)
     Optional<VideoSubmission> findDetailedById(UUID id);

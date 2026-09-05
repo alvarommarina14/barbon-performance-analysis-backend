@@ -74,6 +74,11 @@ public class VideoSubmission {
         this.status = SubmissionStatus.IN_REVIEW;
     }
 
+    // The coach abandoned a draft analysis: the video is back in the queue for the next attempt.
+    public void returnToQueue() {
+        this.status = SubmissionStatus.SUBMITTED;
+    }
+
     public void markAnalyzed() {
         this.status = SubmissionStatus.ANALYZED;
     }

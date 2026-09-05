@@ -1,6 +1,7 @@
 package com.barbonperformance.analysis.video.application;
 
 import com.barbonperformance.analysis.shared.domain.NotFoundException;
+import com.barbonperformance.analysis.user.domain.CoachProfiles;
 import com.barbonperformance.analysis.user.domain.PlayerProfile;
 import com.barbonperformance.analysis.user.domain.PlayerProfiles;
 import com.barbonperformance.analysis.video.VideoProperties;
@@ -23,14 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class VideoUploadService {
 
     private final PlayerProfiles playerProfiles;
+    private final CoachProfiles coachProfiles;
     private final VideoAssets videoAssets;
     private final VideoSubmissions submissions;
     private final StreamGateway stream;
     private final VideoProperties properties;
 
-    public VideoUploadService(PlayerProfiles playerProfiles, VideoAssets videoAssets,
-            VideoSubmissions submissions, StreamGateway stream, VideoProperties properties) {
+    public VideoUploadService(PlayerProfiles playerProfiles, CoachProfiles coachProfiles,
+            VideoAssets videoAssets, VideoSubmissions submissions, StreamGateway stream,
+            VideoProperties properties) {
         this.playerProfiles = playerProfiles;
+        this.coachProfiles = coachProfiles;
         this.videoAssets = videoAssets;
         this.submissions = submissions;
         this.stream = stream;
@@ -59,6 +63,7 @@ public class VideoUploadService {
                 new StreamGateway.DirectUploadRequest(
                         player.getId().toString(),
                         properties.maxDurationSeconds(),
+                        request.sizeBytes(),
                         Map.of("submissionId", submission.getId().toString())));
 
         asset.attachToStream(upload.streamUid());
@@ -75,6 +80,16 @@ public class VideoUploadService {
         PlayerProfile player = playerProfiles.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("No player profile for this account"));
         return submissions.findAllByPlayerId(player.getId()).stream()
+                .map(VideoUploadService::describe)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubmissionSummary> coachQueue(UUID coachUserId) {
+        UUID coachProfileId = coachProfiles.findByUserId(coachUserId)
+                .orElseThrow(() -> new NotFoundException("No coach profile for this account"))
+                .getId();
+        return submissions.findQueueForCoach(coachProfileId).stream()
                 .map(VideoUploadService::describe)
                 .toList();
     }
