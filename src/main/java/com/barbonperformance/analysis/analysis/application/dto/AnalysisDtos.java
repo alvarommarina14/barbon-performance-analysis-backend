@@ -72,6 +72,8 @@ public final class AnalysisDtos {
             StrokeType strokeType,
             @NotNull String coachName,
             @NotNull String playerName,
+            // Null when the coach filmed the player themselves rather than from a submission.
+            UUID submissionId,
             boolean feedbackReady,
             Instant publishedAt,
             int findingCount,

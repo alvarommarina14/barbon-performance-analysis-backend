@@ -46,6 +46,7 @@ final class AnalysisMapper {
                 submission == null ? null : submission.getStrokeType(),
                 analysis.getCoach().getUser().getName(),
                 analysis.getPlayer().getUser().getName(),
+                submission == null ? null : submission.getId(),
                 analysis.feedbackReady(),
                 analysis.getPublishedAt(),
                 analysis.getFindings().size(),
