@@ -12,7 +12,6 @@ import com.barbonperformance.analysis.user.domain.UserRole;
 import com.barbonperformance.analysis.video.VideoProperties;
 import com.barbonperformance.analysis.video.domain.StreamGateway;
 import com.barbonperformance.analysis.video.domain.VideoAsset;
-import java.time.Instant;
 import java.util.UUID;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -54,13 +53,14 @@ public class AnalysisPlaybackService {
             throw new NotFoundException("That feedback video is not ready yet");
         }
 
-        String token = stream.signPlayback(asset.getStreamUid(), properties.playbackTokenTtl());
+        StreamGateway.Playback playback =
+                stream.signPlayback(asset.getStreamUid(), properties.playbackTokenTtl());
         return new PlaybackView(
                 asset.getId(),
-                "https://videodelivery.net/" + token + "/manifest/video.m3u8",
-                "https://videodelivery.net/" + token + "/manifest/video.mpd",
-                token,
-                Instant.now().plus(properties.playbackTokenTtl()));
+                playback.hlsUrl(),
+                playback.dashUrl(),
+                playback.token(),
+                playback.expiresAt());
     }
 
     private boolean isEntitled(UUID userId, Analysis analysis) {

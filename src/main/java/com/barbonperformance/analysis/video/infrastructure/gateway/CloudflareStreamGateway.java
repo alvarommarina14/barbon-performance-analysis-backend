@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 @Component
+@ConditionalOnProperty(prefix = "analysis.video", name = "provider", havingValue = "cloudflare",
+        matchIfMissing = true)
 class CloudflareStreamGateway implements StreamGateway {
 
     private static final String TUS_VERSION = "1.0.0";
@@ -29,6 +32,9 @@ class CloudflareStreamGateway implements StreamGateway {
     private static final ParameterizedTypeReference<CloudflareResponse<DownloadsResult>> DOWNLOADS =
             new ParameterizedTypeReference<>() {
             };
+
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(CloudflareStreamGateway.class);
 
     private final RestClient http;
     private final VideoProperties properties;
@@ -41,6 +47,8 @@ class CloudflareStreamGateway implements StreamGateway {
                 .baseUrl(properties.apiBaseUrl())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.apiToken())
                 .build();
+        log.info("Video provider: CLOUDFLARE — Stream API at {}, account {}",
+                properties.apiBaseUrl(), properties.accountId());
     }
 
     // A resumable (tus) direct-creator upload: the client uploads courtside over mobile data and
@@ -86,7 +94,7 @@ class CloudflareStreamGateway implements StreamGateway {
     }
 
     @Override
-    public String signPlayback(String streamUid, Duration ttl) {
+    public Playback signPlayback(String streamUid, Duration ttl) {
         // Letting Cloudflare mint the token keeps the RSA signing key off this machine
         // entirely. The cost is one round trip per playback request.
         TokenResult result = call(
@@ -97,7 +105,20 @@ class CloudflareStreamGateway implements StreamGateway {
                         .body(TOKEN),
                 "playback token");
 
-        return result.token();
+        String base = properties.deliveryBaseUrl() + "/" + result.token() + "/manifest/video";
+        return new Playback(base + ".m3u8", base + ".mpd", result.token(), Instant.now().plus(ttl));
+    }
+
+    @Override
+    public void discardUpload(String streamUid) {
+        try {
+            http.delete()
+                    .uri("/accounts/{account}/stream/{uid}", properties.accountId(), streamUid)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (RestClientException e) {
+            log.warn("Could not discard Stream video {}: {}", streamUid, e.getMessage());
+        }
     }
 
     @Override

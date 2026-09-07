@@ -13,7 +13,6 @@ import com.barbonperformance.analysis.video.domain.VideoAsset;
 import com.barbonperformance.analysis.video.domain.VideoAssets;
 import com.barbonperformance.analysis.video.domain.VideoSubmission;
 import com.barbonperformance.analysis.video.domain.VideoSubmissions;
-import java.time.Instant;
 import java.util.UUID;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -58,13 +57,14 @@ public class PlaybackService {
             throw new AccessDeniedException("Not entitled to this video");
         }
 
-        String token = stream.signPlayback(asset.getStreamUid(), properties.playbackTokenTtl());
+        StreamGateway.Playback playback =
+                stream.signPlayback(asset.getStreamUid(), properties.playbackTokenTtl());
         return new PlaybackResponse(
                 asset.getId(),
-                "https://videodelivery.net/" + token + "/manifest/video.m3u8",
-                "https://videodelivery.net/" + token + "/manifest/video.mpd",
-                token,
-                Instant.now().plus(properties.playbackTokenTtl()));
+                playback.hlsUrl(),
+                playback.dashUrl(),
+                playback.token(),
+                playback.expiresAt());
     }
 
     // The coach edits the feedback video outside the app, so they need the original MP4. Same
