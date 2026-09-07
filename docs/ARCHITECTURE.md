@@ -78,8 +78,10 @@ the player to that point. This is what separates the product from sending an MP4
 
 ### Local infrastructure — `infra/`
 
-`docker-compose.yml` with Postgres, MinIO (standing in for R2) and Mailpit. Cloudflare Stream has
-no emulator, so development runs against a real development account using short test videos.
+`docker-compose.yml` with Postgres, MinIO (standing in for R2), Mailpit, and `tusd`. Cloudflare
+Stream has no emulator; development uses the **local video provider** instead
+(`analysis.video.provider=local`) — `tusd` + MinIO in place of Stream. Production uses
+Cloudflare. See [ADR 0004](adr/0004-local-video-provider.md) and the README.
 
 ## Repository layout
 
@@ -271,29 +273,50 @@ through the backend.**
 1. `POST /api/v1/submissions/upload-intent` (with the file's `sizeBytes`) — the backend creates a
    **resumable (tus) direct creator upload**: `POST /accounts/{id}/stream` with
    `Tus-Resumable: 1.0.0`, `Upload-Length`, `Upload-Creator: playerId` and an `Upload-Metadata`
-   carrying `requiresignedurls`, `maxDurationSeconds` and `submissionId`. Cloudflare returns the
-   one-time URL in the `Location` header and the id in `stream-media-id`. The backend creates a
-   `video_asset` in `PENDING_UPLOAD` and a `video_submission` in `SUBMITTED`, and returns that URL
-   as `uploadUrl`.
+   carrying `requiresignedurls`, `maxDurationSeconds` and `videoAssetId`. Cloudflare returns the
+   one-time URL in the `Location` header and the id in `stream-media-id`. The backend creates
+   **only a `video_asset`** (in `PENDING_UPLOAD`, stamped with the player) and returns that URL as
+   `uploadUrl`. No `video_submission` yet — see [ADR 0005](adr/0005-upload-before-submission.md).
 2. The mobile app uploads via `tus` straight to that URL (no credential — the URL is the
    authentication), with a progress bar, resuming if the connection drops.
 3. Cloudflare transcodes, then calls `POST /api/v1/webhooks/cloudflare-stream`. **Verify the HMAC
    signature header and make the update idempotent** — Cloudflare retries. The asset moves to
-   `READY` with duration and thumbnail. Once it is `READY` the submission shows up in
-   `GET /api/v1/submissions/queue`.
-4. The coach opens the pending queue in Electron, plays the video through a signed URL, and gets
+   `READY` with duration and thumbnail.
+4. `POST /api/v1/submissions` (`{ videoAssetId, strokeType, playerNote?, recordedAt? }`) — the
+   client sends this once its upload has succeeded. The backend checks the asset is the player's
+   and `READY` (retryable `409 video-not-ready` while the webhook is still in flight) and creates
+   the `video_submission` in `SUBMITTED`. It now shows in `GET /api/v1/submissions/queue`. An
+   asset that never gets a submission is swept after `analysis.video.orphaned-upload-grace`.
+6. The coach opens the pending queue in Electron, plays the video through a signed URL, and gets
    the original MP4 from `GET /api/v1/videos/{assetId}/download-url` (Cloudflare renders the
    download lazily; the response says whether the URL is usable yet) to edit in their own tool.
-5. Back in the app, the coach creates the `analysis` (`POST /api/v1/analyses`, which moves the
+7. Back in the app, the coach creates the `analysis` (`POST /api/v1/analyses`, which moves the
    submission to `IN_REVIEW`), uploads the edited MP4 through the same tus direct-upload + webhook
    mechanism (`POST /api/v1/analyses/{id}/feedback-upload-intent` with `sizeBytes`,
    `kind=COACH_FEEDBACK`, `Upload-Metadata` `analysisId`), replaces the whole finding
    list with `PUT /api/v1/analyses/{id}/findings` (each `{ timestampSeconds, title, detail }`),
    and publishes (`POST /api/v1/analyses/{id}/publish`, which requires the feedback video to be
    `READY` and moves the submission to `ANALYZED`). Assigning drills is Phase 3.
-6. The player polls `GET /api/v1/analyses`, opens one, and plays the feedback video through
+8. The player polls `GET /api/v1/analyses`, opens one, and plays the feedback video through
    `GET /api/v1/analyses/{id}/playback` with a list of clickable findings. **Phase 2 sends no
    push or email** — that is Phase 6; until then both sides poll.
+
+### The local provider
+
+`analysis.video.provider` picks the adapter behind `StreamGateway` / `StreamWebhooks`:
+`cloudflare` (production, unchanged) or `local`. In `local` mode the steps above are
+identical from the client's point of view, but:
+
+- the tus creation `POST` goes to **`tusd`**, which stores the finished upload in the **MinIO**
+  bucket. `tusd` runs `-behind-proxy` so the upload URL it advertises is the one the phone can
+  reach (`analysis.video.local.public-base-url`).
+- step 3 is `tusd`'s `post-finish` hook to `POST /api/v1/webhooks/tusd`, authenticated by a
+  shared secret in the query string. There is no transcode, so **duration and thumbnail are
+  null**.
+- playback and download (steps 4, 6) are **pre-signed MinIO GET URLs** for the stored MP4 —
+  no HLS, no separate token.
+
+Details and trade-offs: [ADR 0004](adr/0004-local-video-provider.md).
 
 ### Privacy
 

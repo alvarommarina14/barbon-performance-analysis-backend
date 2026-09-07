@@ -1,9 +1,13 @@
 # Local development infrastructure for Barbon Performance Analysis.
 #
-# Cloudflare Stream has no emulator, so video development runs against a real Cloudflare
-# development account with short test clips. Everything else runs here.
+# With ANALYSIS_VIDEO_PROVIDER=local the backend uses the tusd + MinIO services below instead
+# of Cloudflare Stream: tusd owns the resumable upload and drops the finished file into MinIO,
+# and the backend serves playback as a pre-signed MinIO URL. Production still uses Cloudflare.
 #
 #   docker compose -f infra/docker-compose.yml up -d
+#
+# For an end-to-end run with a real phone, copy infra/.env.example to infra/.env and set the
+# LAN address there so the upload and playback URLs the backend hands out are reachable.
 
 name: barbon-performance-analysis
 
@@ -25,8 +29,8 @@ services:
       timeout: 5s
       retries: 10
 
-  # Stands in for Cloudflare R2, which is S3-compatible. PDFs, images and audio only —
-  # video goes straight to Cloudflare Stream and never touches object storage here.
+  # Stands in for Cloudflare R2, which is S3-compatible. Holds PDFs, images and audio, and —
+  # when the local video provider is active — the uploaded videos that tusd writes here.
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
@@ -56,6 +60,33 @@ services:
       mc mb --ignore-existing local/barbon-performance-analysis &&
       mc anonymous set none local/barbon-performance-analysis
       "
+
+  # Resumable (tus) upload endpoint for the local video provider. Stores finished uploads in
+  # the MinIO bucket and calls the backend's post-finish hook so the asset is marked READY.
+  # -behind-proxy makes tusd honour the X-Forwarded-* headers the backend sends, so the upload
+  # URL it advertises points at ANALYSIS_VIDEO_PUBLIC_URL (the LAN address), not the container.
+  tusd:
+    image: tusproject/tusd:v2.6.0
+    command:
+      - -behind-proxy
+      # host.docker.internal is the machine running the backend. If the container gets
+      # "connection refused" here, the backend is not on :8080 or is not on the local profile;
+      # override the whole URL with TUSD_HOOK_URL (e.g. the machine's LAN address).
+      - -hooks-http=${TUSD_HOOK_URL:-http://host.docker.internal:8080/api/v1/webhooks/tusd}?token=${TUSD_HOOK_SECRET:-local-hook-secret}
+      - -hooks-enabled-events=post-finish
+      - -s3-bucket=barbon-performance-analysis
+      - -s3-endpoint=http://minio:9000
+    environment:
+      AWS_ACCESS_KEY_ID: bpa
+      AWS_SECRET_ACCESS_KEY: bpa-development
+      AWS_REGION: us-east-1
+    ports:
+      - '1080:8080'
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
 
   # Catches transactional email (analysis published, password reset) without sending it.
   mailpit:
