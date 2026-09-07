@@ -21,6 +21,7 @@ import com.barbonperformance.analysis.analysis.application.dto.AnalysisDtos.Upda
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginResponse;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.RegisterCoachRequest;
 import com.barbonperformance.analysis.auth.application.dto.AuthDtos.RegisterRequest;
+import com.barbonperformance.analysis.video.application.dto.VideoDtos.CreateSubmissionRequest;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.SubmissionSummary;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentRequest;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentResponse;
@@ -54,7 +55,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     @BeforeEach
     void stubCloudflare() {
         CLOUDFLARE.stubFor(post(urlPathEqualTo("/accounts/test-account/stream"))
-                .withHeader("Upload-Metadata", containing("submissionId"))
+                .withHeader("Upload-Metadata", containing("videoAssetId"))
                 .willReturn(tusCreated(PLAYER_UID)));
         CLOUDFLARE.stubFor(post(urlPathEqualTo("/accounts/test-account/stream"))
                 .withHeader("Upload-Metadata", containing("analysisId"))
@@ -72,20 +73,20 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void creatingFromASubmissionMovesItToInReview() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        UploadIntentResponse submission = readySubmission(player);
+        SubmissionSummary submission = readySubmission(player);
 
-        AnalysisDetail analysis = createAnalysis(coach, submission.submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, submission.id());
 
         assertThat(analysis.status().name()).isEqualTo("DRAFT");
         assertThat(analysis.strokeType()).isEqualTo(StrokeType.FOREHAND);
-        assertThat(submissionStatus(submission.submissionId())).isEqualTo("IN_REVIEW");
+        assertThat(submissionStatus(submission.id())).isEqualTo("IN_REVIEW");
     }
 
     @Test
     void feedbackUploadIntentAsksCloudflareForAPrivateVideoTaggedWithTheAnalysis() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
 
         FeedbackUploadIntentResponse intent = feedbackUploadIntent(coach, analysis.id());
 
@@ -105,7 +106,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void findingsAreBulkReplaced() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
 
         replaceFindings(coach, analysis.id(), List.of(
                 new FindingInput(42, "Contact point", "behind the hip"),
@@ -128,7 +129,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void publishIsRejectedUntilTheFeedbackVideoIsReady() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
         feedbackUploadIntent(coach, analysis.id());
 
         client.post().uri("/api/v1/analyses/{id}/publish", analysis.id())
@@ -145,8 +146,8 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void publishSucceedsOnceTheFeedbackWebhookArrivesAndClosesTheSubmission() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        UploadIntentResponse submission = readySubmission(player);
-        AnalysisDetail analysis = createAnalysis(coach, submission.submissionId());
+        SubmissionSummary submission = readySubmission(player);
+        AnalysisDetail analysis = createAnalysis(coach, submission.id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
 
@@ -154,43 +155,43 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
 
         assertThat(published.status().name()).isEqualTo("PUBLISHED");
         assertThat(published.publishedAt()).isNotNull();
-        assertThat(submissionStatus(submission.submissionId())).isEqualTo("ANALYZED");
+        assertThat(submissionStatus(submission.id())).isEqualTo("ANALYZED");
     }
 
     @Test
     void publishKeepsTheSubmissionOutOfTheCoachQueue() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        UploadIntentResponse submission = readySubmission(player);
-        AnalysisDetail analysis = createAnalysis(coach, submission.submissionId());
+        SubmissionSummary submission = readySubmission(player);
+        AnalysisDetail analysis = createAnalysis(coach, submission.id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
 
         // The draft already pulled it from the queue; publishing keeps it out.
-        assertThat(queueIds(coach)).doesNotContain(submission.submissionId());
+        assertThat(queueIds(coach)).doesNotContain(submission.id());
 
         publish(coach, analysis.id());
 
-        assertThat(queueIds(coach)).doesNotContain(submission.submissionId());
+        assertThat(queueIds(coach)).doesNotContain(submission.id());
     }
 
     @Test
     void aSubmissionUnderReviewLeavesTheCoachQueueUntilTheDraftIsDiscarded() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        UploadIntentResponse submission = readySubmission(player);
+        SubmissionSummary submission = readySubmission(player);
 
-        assertThat(queueIds(coach)).contains(submission.submissionId());
+        assertThat(queueIds(coach)).contains(submission.id());
 
-        AnalysisDetail analysis = createAnalysis(coach, submission.submissionId());
-        assertThat(queueIds(coach)).doesNotContain(submission.submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, submission.id());
+        assertThat(queueIds(coach)).doesNotContain(submission.id());
 
         client.delete().uri("/api/v1/analyses/{id}", analysis.id())
                 .header(HttpHeaders.AUTHORIZATION, bearer(coach.accessToken()))
                 .exchange()
                 .expectStatus().isNoContent();
 
-        assertThat(queueIds(coach)).contains(submission.submissionId());
+        assertThat(queueIds(coach)).contains(submission.id());
     }
 
     @Test
@@ -198,17 +199,18 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
 
-        UploadIntentResponse ready = readySubmission(player);
+        SubmissionSummary ready = readySubmission(player);
 
-        assertThat(queueIds(coach)).containsExactly(ready.submissionId());
+        assertThat(queueIds(coach)).containsExactly(ready.id());
     }
 
     @Test
-    void anUnreadySubmissionIsNotInTheCoachQueue() {
+    void anUploadThatIsNotYetASubmissionIsNotInTheCoachQueue() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
 
         uploadIntent(player);
+        sendReadyWebhook(PLAYER_UID).expectStatus().isNoContent();
 
         assertThat(queueIds(coach)).isEmpty();
     }
@@ -219,8 +221,8 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
         LoginResponse player = registerPlayer("player@example.com");
         LoginResponse other = registerPlayer("other@example.com");
 
-        UploadIntentResponse submission = readySubmission(player);
-        AnalysisDetail analysis = createAnalysis(coach, submission.submissionId());
+        SubmissionSummary submission = readySubmission(player);
+        AnalysisDetail analysis = createAnalysis(coach, submission.id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
         publish(coach, analysis.id());
@@ -236,7 +238,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void aPlayerGetsASignedPlaybackTokenForAPublishedAnalysis() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
         publish(coach, analysis.id());
@@ -258,7 +260,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void aPlayerCannotGetPlaybackForADraftAnalysis() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
 
@@ -272,7 +274,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void theCoachCanPreviewTheFeedbackVideoOnADraft() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
 
@@ -286,7 +288,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void editingAPublishedAnalysisIsRejected() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
         publish(coach, analysis.id());
@@ -304,7 +306,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void creatingWithBothOrNeitherTargetIsRejected() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        UUID submissionId = readySubmission(player).submissionId();
+        UUID submissionId = readySubmission(player).id();
 
         client.post().uri("/api/v1/analyses")
                 .header(HttpHeaders.AUTHORIZATION, bearer(coach.accessToken()))
@@ -347,17 +349,17 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void deletingADraftReturnsTheSubmissionToTheQueue() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        UploadIntentResponse submission = readySubmission(player);
-        AnalysisDetail analysis = createAnalysis(coach, submission.submissionId());
-        assertThat(submissionStatus(submission.submissionId())).isEqualTo("IN_REVIEW");
+        SubmissionSummary submission = readySubmission(player);
+        AnalysisDetail analysis = createAnalysis(coach, submission.id());
+        assertThat(submissionStatus(submission.id())).isEqualTo("IN_REVIEW");
 
         client.delete().uri("/api/v1/analyses/{id}", analysis.id())
                 .header(HttpHeaders.AUTHORIZATION, bearer(coach.accessToken()))
                 .exchange()
                 .expectStatus().isNoContent();
 
-        assertThat(submissionStatus(submission.submissionId())).isEqualTo("SUBMITTED");
-        assertThat(queueIds(coach)).contains(submission.submissionId());
+        assertThat(submissionStatus(submission.id())).isEqualTo("SUBMITTED");
+        assertThat(queueIds(coach)).contains(submission.id());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM analysis", Integer.class)).isZero();
     }
 
@@ -383,7 +385,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void publishingTwiceIsRejected() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).submissionId());
+        AnalysisDetail analysis = createAnalysis(coach, readySubmission(player).id());
         feedbackUploadIntent(coach, analysis.id());
         sendReadyWebhook(FEEDBACK_UID).expectStatus().isNoContent();
         publish(coach, analysis.id());
@@ -408,7 +410,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     void theCoachCanDownloadTheOriginalVideo() {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
-        UploadIntentResponse submission = readySubmission(player);
+        SubmissionSummary submission = readySubmission(player);
 
         client.get().uri("/api/v1/videos/{id}/download-url", submission.videoAssetId())
                 .header(HttpHeaders.AUTHORIZATION, bearer(coach.accessToken()))
@@ -426,7 +428,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
         LoginResponse coach = registerCoach("coach@example.com");
         LoginResponse player = registerPlayer("player@example.com");
         LoginResponse stranger = registerPlayer("stranger@example.com");
-        UploadIntentResponse submission = readySubmission(player);
+        SubmissionSummary submission = readySubmission(player);
 
         client.get().uri("/api/v1/videos/{id}/download-url", submission.videoAssetId())
                 .header(HttpHeaders.AUTHORIZATION, bearer(stranger.accessToken()))
@@ -461,18 +463,24 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
     private UploadIntentResponse uploadIntent(LoginResponse player) {
         return client.post().uri("/api/v1/submissions/upload-intent")
                 .header(HttpHeaders.AUTHORIZATION, bearer(player.accessToken()))
-                .body(new UploadIntentRequest(
-                        StrokeType.FOREHAND, "Elbow hurts on contact", null, SIZE_BYTES))
+                .body(new UploadIntentRequest(SIZE_BYTES))
                 .exchange()
                 .expectStatus().isCreated()
                 .returnResult(UploadIntentResponse.class)
                 .getResponseBody();
     }
 
-    private UploadIntentResponse readySubmission(LoginResponse player) {
+    private SubmissionSummary readySubmission(LoginResponse player) {
         UploadIntentResponse intent = uploadIntent(player);
         sendReadyWebhook(PLAYER_UID).expectStatus().isNoContent();
-        return intent;
+        return client.post().uri("/api/v1/submissions")
+                .header(HttpHeaders.AUTHORIZATION, bearer(player.accessToken()))
+                .body(new CreateSubmissionRequest(
+                        intent.videoAssetId(), StrokeType.FOREHAND, "Elbow hurts on contact", null))
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(SubmissionSummary.class)
+                .getResponseBody();
     }
 
     private AnalysisDetail createAnalysis(LoginResponse coach, UUID submissionId) {

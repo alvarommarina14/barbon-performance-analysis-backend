@@ -14,18 +14,22 @@ public final class VideoDtos {
     private VideoDtos() {
     }
 
-    public record UploadIntentRequest(
-            @NotNull StrokeType strokeType,
-            @Size(max = 2000) String playerNote,
-            Instant recordedAt,
-            @Positive long sizeBytes) {
+    public record UploadIntentRequest(@Positive long sizeBytes) {
     }
 
     public record UploadIntentResponse(
-            @NotNull UUID submissionId,
             @NotNull UUID videoAssetId,
             @NotNull String uploadUrl,
             int maxDurationSeconds) {
+    }
+
+    // Sent once the upload has landed: the submission is created only now, so it always has a
+    // playable video behind it.
+    public record CreateSubmissionRequest(
+            @NotNull UUID videoAssetId,
+            @NotNull StrokeType strokeType,
+            @Size(max = 2000) String playerNote,
+            Instant recordedAt) {
     }
 
     public record SubmissionSummary(

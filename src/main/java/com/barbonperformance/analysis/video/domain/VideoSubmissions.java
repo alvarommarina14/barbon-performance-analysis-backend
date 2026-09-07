@@ -15,4 +15,6 @@ public interface VideoSubmissions {
     List<VideoSubmission> findQueueForCoach(UUID coachProfileId);
 
     VideoSubmission save(VideoSubmission submission);
+
+    void delete(VideoSubmission submission);
 }
