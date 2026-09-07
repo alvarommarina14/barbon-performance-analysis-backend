@@ -29,6 +29,35 @@ docker compose -f infra/docker-compose.yml up -d
 ./gradlew bootRun     # http://localhost:8080, docs at /swagger-ui.html
 ```
 
+## Running the video loop locally
+
+Cloudflare Stream is not free, so development uses a **local video provider** — `tusd` +
+MinIO, both in `infra/docker-compose.yml` — selected by `analysis.video.provider=local`.
+Production keeps using Cloudflare. Trade-offs are in
+[`docs/adr/0004-local-video-provider.md`](docs/adr/0004-local-video-provider.md).
+
+```bash
+cp infra/.env.example infra/.env
+docker compose --env-file infra/.env -f infra/docker-compose.yml up -d
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+The `local` profile sets `analysis.video.provider=local`. On startup the log prints which
+provider is active — look for `Video provider: LOCAL`. In IntelliJ, set the run
+configuration's active profile to `local` (env vars are not picked up otherwise).
+
+The backend must listen on **:8080** — that is where tusd (in the container) sends its
+post-finish hook. If tusd logs `connection refused` for the hook, either the backend is not
+on :8080 / not on the `local` profile, or set `TUSD_HOOK_URL` in `infra/.env` to the
+machine's LAN address.
+
+**End-to-end with a phone (Expo Go) on the same Wi-Fi** works with no extra configuration:
+the phone reaches the backend at `http://<lan-ip>:8080`, and while the configured
+`analysis.video.local.*` hosts are `localhost` the backend hands back upload and playback
+URLs built from that same `<lan-ip>` (keeping the tusd/MinIO ports). Set
+`ANALYSIS_VIDEO_PUBLIC_URL` / `ANALYSIS_VIDEO_S3_PUBLIC_ENDPOINT` only to pin a specific
+address.
+
 ## The API contract
 
 The OpenAPI spec served at `/v3/api-docs` is the source of truth for both clients. After changing

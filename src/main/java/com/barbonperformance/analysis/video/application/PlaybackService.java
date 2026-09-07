@@ -6,13 +6,13 @@ import com.barbonperformance.analysis.user.domain.CoachProfiles;
 import com.barbonperformance.analysis.user.domain.PlayerProfiles;
 import com.barbonperformance.analysis.user.domain.UserRole;
 import com.barbonperformance.analysis.video.VideoProperties;
+import com.barbonperformance.analysis.video.application.dto.VideoDtos.DownloadUrlResponse;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.PlaybackResponse;
 import com.barbonperformance.analysis.video.domain.StreamGateway;
 import com.barbonperformance.analysis.video.domain.VideoAsset;
 import com.barbonperformance.analysis.video.domain.VideoAssets;
 import com.barbonperformance.analysis.video.domain.VideoSubmission;
 import com.barbonperformance.analysis.video.domain.VideoSubmissions;
-import java.time.Instant;
 import java.util.UUID;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -57,13 +57,33 @@ public class PlaybackService {
             throw new AccessDeniedException("Not entitled to this video");
         }
 
-        String token = stream.signPlayback(asset.getStreamUid(), properties.playbackTokenTtl());
+        StreamGateway.Playback playback =
+                stream.signPlayback(asset.getStreamUid(), properties.playbackTokenTtl());
         return new PlaybackResponse(
                 asset.getId(),
-                "https://videodelivery.net/" + token + "/manifest/video.m3u8",
-                "https://videodelivery.net/" + token + "/manifest/video.mpd",
-                token,
-                Instant.now().plus(properties.playbackTokenTtl()));
+                playback.hlsUrl(),
+                playback.dashUrl(),
+                playback.token(),
+                playback.expiresAt());
+    }
+
+    // The coach edits the feedback video outside the app, so they need the original MP4. Same
+    // entitlement as playback; Cloudflare renders the download lazily, so the response says
+    // whether the url is usable yet and the client polls otherwise.
+    @Transactional(readOnly = true)
+    public DownloadUrlResponse downloadUrl(UUID userId, UUID videoAssetId) {
+        VideoAsset asset = videoAssets.findById(videoAssetId)
+                .orElseThrow(() -> new AccessDeniedException("Not entitled to this video"));
+
+        if (!asset.isReady()) {
+            throw new NotFoundException("That video is not ready yet");
+        }
+        if (!isEntitled(userId, asset)) {
+            throw new AccessDeniedException("Not entitled to this video");
+        }
+
+        StreamGateway.DownloadResult download = stream.enableDownload(asset.getStreamUid());
+        return new DownloadUrlResponse(download.url(), download.ready());
     }
 
     private boolean isEntitled(UUID userId, VideoAsset asset) {

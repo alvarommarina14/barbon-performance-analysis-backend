@@ -2,6 +2,7 @@ package com.barbonperformance.analysis.video.domain;
 
 import com.barbonperformance.analysis.organization.domain.Organization;
 import com.barbonperformance.analysis.user.domain.PlayerProfile;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,7 +33,9 @@ public class VideoSubmission {
     @JoinColumn(name = "player_id", nullable = false)
     private PlayerProfile player;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    // The asset row exists only to back this submission, so removing the submission removes it.
+    // Player uploads only: a COACH_FEEDBACK asset is owned by an analysis, never a submission.
+    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "video_asset_id", nullable = false, unique = true)
     private VideoAsset videoAsset;
 
@@ -70,8 +73,18 @@ public class VideoSubmission {
         this.recordedAt = recordedAt;
     }
 
+    // The player may still pull a submission back while no coach has started on it.
+    public boolean isCancellable() {
+        return status == SubmissionStatus.SUBMITTED;
+    }
+
     public void takeIntoReview() {
         this.status = SubmissionStatus.IN_REVIEW;
+    }
+
+    // The coach abandoned a draft analysis: the video is back in the queue for the next attempt.
+    public void returnToQueue() {
+        this.status = SubmissionStatus.SUBMITTED;
     }
 
     public void markAnalyzed() {

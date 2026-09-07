@@ -1,0 +1,16 @@
+# Development profile for the local video provider (tusd + MinIO instead of Cloudflare Stream).
+#
+#   ./gradlew bootRun --args='--spring.profiles.active=local'
+#   IntelliJ: set the active profile to "local" in the run configuration.
+#
+# For an end-to-end run with a phone, still export the LAN address so the upload and playback
+# URLs the backend returns are reachable from the phone (see the README):
+#   ANALYSIS_VIDEO_PUBLIC_URL, ANALYSIS_VIDEO_S3_PUBLIC_ENDPOINT
+
+analysis:
+  video:
+    provider: local
+
+logging:
+  level:
+    com.barbonperformance.analysis.video.infrastructure.gateway: DEBUG

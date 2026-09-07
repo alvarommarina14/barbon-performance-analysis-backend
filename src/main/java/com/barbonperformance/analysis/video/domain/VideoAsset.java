@@ -1,6 +1,7 @@
 package com.barbonperformance.analysis.video.domain;
 
 import com.barbonperformance.analysis.organization.domain.Organization;
+import com.barbonperformance.analysis.user.domain.PlayerProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,6 +26,12 @@ public class VideoAsset {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "org_id", nullable = false)
     private Organization organization;
+
+    // Set for PLAYER_UPLOAD only: whoever asked for the upload URL. A COACH_FEEDBACK asset is
+    // owned by its analysis instead. Stops one player's upload being claimed by another.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uploaded_by_player_id")
+    private PlayerProfile uploadedByPlayer;
 
     @Column(name = "stream_uid")
     private String streamUid;
@@ -62,6 +69,15 @@ public class VideoAsset {
     public VideoAsset(Organization organization, VideoAssetKind kind) {
         this.organization = organization;
         this.kind = kind;
+    }
+
+    public VideoAsset(Organization organization, VideoAssetKind kind, PlayerProfile uploadedByPlayer) {
+        this(organization, kind);
+        this.uploadedByPlayer = uploadedByPlayer;
+    }
+
+    public boolean wasUploadedBy(UUID playerProfileId) {
+        return uploadedByPlayer != null && uploadedByPlayer.getId().equals(playerProfileId);
     }
 
     public void attachToStream(String streamUid) {
@@ -113,6 +129,10 @@ public class VideoAsset {
 
     public Organization getOrganization() {
         return organization;
+    }
+
+    public PlayerProfile getUploadedByPlayer() {
+        return uploadedByPlayer;
     }
 
     public String getStreamUid() {

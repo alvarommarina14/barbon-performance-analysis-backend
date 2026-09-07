@@ -4,6 +4,7 @@ import com.barbonperformance.analysis.video.domain.StrokeType;
 import com.barbonperformance.analysis.video.domain.SubmissionStatus;
 import com.barbonperformance.analysis.video.domain.VideoAssetStatus;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
@@ -13,17 +14,22 @@ public final class VideoDtos {
     private VideoDtos() {
     }
 
-    public record UploadIntentRequest(
-            @NotNull StrokeType strokeType,
-            @Size(max = 2000) String playerNote,
-            Instant recordedAt) {
+    public record UploadIntentRequest(@Positive long sizeBytes) {
     }
 
     public record UploadIntentResponse(
-            @NotNull UUID submissionId,
             @NotNull UUID videoAssetId,
             @NotNull String uploadUrl,
             int maxDurationSeconds) {
+    }
+
+    // Sent once the upload has landed: the submission is created only now, so it always has a
+    // playable video behind it.
+    public record CreateSubmissionRequest(
+            @NotNull UUID videoAssetId,
+            @NotNull StrokeType strokeType,
+            @Size(max = 2000) String playerNote,
+            Instant recordedAt) {
     }
 
     public record SubmissionSummary(
@@ -47,5 +53,10 @@ public final class VideoDtos {
             @NotNull String dashUrl,
             @NotNull String token,
             @NotNull Instant expiresAt) {
+    }
+
+    public record DownloadUrlResponse(
+            @NotNull String url,
+            boolean ready) {
     }
 }

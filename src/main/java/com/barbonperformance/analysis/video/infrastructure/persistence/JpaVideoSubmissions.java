@@ -40,4 +40,9 @@ class JpaVideoSubmissions implements VideoSubmissions {
     public VideoSubmission save(VideoSubmission submission) {
         return jpa.save(submission);
     }
+
+    @Override
+    public void delete(VideoSubmission submission) {
+        jpa.delete(submission);
+    }
 }

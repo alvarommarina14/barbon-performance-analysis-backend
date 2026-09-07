@@ -55,13 +55,32 @@ analysis:
     refresh-token-ttl: 30d
     organization-slug: barbon-performance
   video:
+    # cloudflare (production) | local (tusd + MinIO, for development without a Stream account)
+    provider: ${ANALYSIS_VIDEO_PROVIDER:cloudflare}
     api-base-url: ${CLOUDFLARE_API_BASE_URL:https://api.cloudflare.com/client/v4}
     account-id: ${CLOUDFLARE_ACCOUNT_ID:development-account}
     api-token: ${CLOUDFLARE_API_TOKEN:development-token}
     # Set in the Cloudflare Stream webhook settings; the callback is rejected without it.
     webhook-secret: ${CLOUDFLARE_WEBHOOK_SECRET:development-webhook-secret}
+    # The playback host. Cloudflare's newer accounts use customer-<code>.cloudflarestream.com;
+    # the local provider overrides this with a pre-signed object URL instead.
+    delivery-base-url: ${CLOUDFLARE_DELIVERY_BASE_URL:https://videodelivery.net}
     # Long enough for the player to finish watching, short enough that a leaked URL dies.
     playback-token-ttl: 2h
     # How far a webhook's signed timestamp may drift before the delivery is refused.
     webhook-tolerance: 5m
+    # A submission whose upload never finishes is swept away this long after it was created.
+    # Generous: a large clip over slow mobile data is a legitimately slow upload, not an orphan.
+    orphaned-upload-grace: 45m
     max-duration-seconds: 600
+    local:
+      # Backend -> tusd (server to server); client -> tusd must be reachable from the phone,
+      # so public-base-url is the dev machine's LAN address in a real end-to-end run.
+      tusd-internal-base-url: ${TUSD_INTERNAL_URL:http://localhost:1080}
+      public-base-url: ${ANALYSIS_VIDEO_PUBLIC_URL:http://localhost:1080}
+      s3-endpoint: ${ANALYSIS_VIDEO_S3_ENDPOINT:http://localhost:9000}
+      s3-public-endpoint: ${ANALYSIS_VIDEO_S3_PUBLIC_ENDPOINT:http://localhost:9000}
+      s3-bucket: ${ANALYSIS_VIDEO_S3_BUCKET:barbon-performance-analysis}
+      s3-access-key: ${MINIO_ACCESS_KEY:bpa}
+      s3-secret-key: ${MINIO_SECRET_KEY:bpa-development}
+      hook-secret: ${TUSD_HOOK_SECRET:local-hook-secret}

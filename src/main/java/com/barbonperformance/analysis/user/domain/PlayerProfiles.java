@@ -8,6 +8,8 @@ public interface PlayerProfiles {
 
     Optional<PlayerProfile> findByUserId(UUID userId);
 
+    Optional<PlayerProfile> findById(UUID id);
+
     List<PlayerProfile> findAllByCoachId(UUID coachProfileId);
 
     PlayerProfile save(PlayerProfile profile);

@@ -16,9 +16,12 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "analysis.video", name = "provider", havingValue = "cloudflare",
+        matchIfMissing = true)
 class CloudflareStreamWebhooks implements StreamWebhooks {
 
     private static final Logger log = LoggerFactory.getLogger(CloudflareStreamWebhooks.class);

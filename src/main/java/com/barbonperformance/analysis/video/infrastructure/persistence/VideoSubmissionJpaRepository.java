@@ -14,6 +14,7 @@ interface VideoSubmissionJpaRepository extends JpaRepository<VideoSubmission, UU
             join fetch s.videoAsset
             join fetch s.player p
             join fetch p.user
+            left join fetch p.coach
             where s.id = :id
             """)
     Optional<VideoSubmission> findDetailedById(UUID id);
@@ -39,15 +40,17 @@ interface VideoSubmissionJpaRepository extends JpaRepository<VideoSubmission, UU
             """)
     List<VideoSubmission> findAllByPlayerId(UUID playerProfileId);
 
-    // The coach's pending queue: their own clients only, oldest first so nobody is starved,
-    // and only what is actually watchable.
+    // The coach's pending queue: their own clients only, oldest first so nobody is starved, and
+    // only what is actually watchable. Just SUBMITTED — once a draft analysis exists the
+    // submission is IN_REVIEW and drops off the queue until the draft is discarded
+    // (returnToQueue() puts it back), and ANALYZED (published) is terminal.
     @Query("""
             select s from VideoSubmission s
             join fetch s.videoAsset a
             join fetch s.player p
             join fetch p.user
             where p.coach.id = :coachProfileId
-              and s.status <> com.barbonperformance.analysis.video.domain.SubmissionStatus.ANALYZED
+              and s.status = com.barbonperformance.analysis.video.domain.SubmissionStatus.SUBMITTED
               and a.status = com.barbonperformance.analysis.video.domain.VideoAssetStatus.READY
             order by s.createdAt asc
             """)

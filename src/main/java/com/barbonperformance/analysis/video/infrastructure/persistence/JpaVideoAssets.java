@@ -2,6 +2,8 @@ package com.barbonperformance.analysis.video.infrastructure.persistence;
 
 import com.barbonperformance.analysis.video.domain.VideoAsset;
 import com.barbonperformance.analysis.video.domain.VideoAssets;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
@@ -26,7 +28,17 @@ class JpaVideoAssets implements VideoAssets {
     }
 
     @Override
+    public List<VideoAsset> findOrphanedUploads(Instant createdBefore) {
+        return jpa.findOrphanedUploads(createdBefore);
+    }
+
+    @Override
     public VideoAsset save(VideoAsset asset) {
         return jpa.save(asset);
+    }
+
+    @Override
+    public void delete(VideoAsset asset) {
+        jpa.delete(asset);
     }
 }

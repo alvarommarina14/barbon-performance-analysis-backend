@@ -15,4 +15,7 @@ analysis:
     webhook-secret: test-webhook-secret
     playback-token-ttl: 2h
     webhook-tolerance: 5m
+    orphaned-upload-grace: 45m
     max-duration-seconds: 600
+    # The sweep is exercised directly in tests, not on a timer.
+    sweep-enabled: false
