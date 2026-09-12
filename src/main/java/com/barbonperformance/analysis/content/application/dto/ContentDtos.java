@@ -31,6 +31,14 @@ public final class ContentDtos {
     public record ConfirmVideoRequest(@NotNull UUID videoAssetId) {
     }
 
+    public record RecordingTipsPlaybackView(
+            @NotNull UUID videoAssetId,
+            @NotNull String hlsUrl,
+            @NotNull String dashUrl,
+            @NotNull String token,
+            @NotNull Instant expiresAt) {
+    }
+
     public record PdfUploadIntentRequest(
             @Positive long sizeBytes,
             @NotBlank String contentType) {

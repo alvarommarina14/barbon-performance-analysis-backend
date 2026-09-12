@@ -6,6 +6,7 @@ import com.barbonperformance.analysis.content.application.dto.ContentDtos.Confir
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmVideoRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentResponse;
+import com.barbonperformance.analysis.content.application.dto.ContentDtos.RecordingTipsPlaybackView;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.RecordingTipsView;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.VideoUploadIntentRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.VideoUploadIntentResponse;
@@ -33,6 +34,12 @@ public class ContentController {
     @Operation(summary = "The recording-tips video and PDF, if they have been uploaded")
     RecordingTipsView get(@AuthenticationPrincipal AuthenticatedUser principal) {
         return tips.get(principal.id());
+    }
+
+    @GetMapping("/playback")
+    @Operation(summary = "A short-lived signed playback token for the recording-tips video")
+    RecordingTipsPlaybackView playback(@AuthenticationPrincipal AuthenticatedUser principal) {
+        return tips.playback(principal.id());
     }
 
     @PostMapping("/video-upload-intent")

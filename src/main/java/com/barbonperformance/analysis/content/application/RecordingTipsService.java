@@ -5,6 +5,7 @@ import com.barbonperformance.analysis.content.application.dto.ContentDtos.Confir
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmVideoRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentResponse;
+import com.barbonperformance.analysis.content.application.dto.ContentDtos.RecordingTipsPlaybackView;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.RecordingTipsView;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.VideoUploadIntentRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.VideoUploadIntentResponse;
@@ -57,11 +58,35 @@ public class RecordingTipsService {
     // Nothing uploaded yet is a valid state (a brand new org), not a 404.
     @Transactional(readOnly = true)
     public RecordingTipsView get(UUID userId) {
-        UUID orgId = users.findById(userId)
+        return store.findByOrgId(organizationId(userId)).map(this::describe)
+                .orElseGet(() -> new RecordingTipsView(null, null, null, null));
+    }
+
+    // Its own entitlement, same as drills: org-wide instructional content has no submission to
+    // check ownership against, so GET /api/v1/videos/{id}/playback (submission-based) can never
+    // authorize it.
+    @Transactional(readOnly = true)
+    public RecordingTipsPlaybackView playback(UUID userId) {
+        RecordingTips tips = store.findByOrgId(organizationId(userId))
+                .filter(t -> t.getVideoAsset() != null)
+                .orElseThrow(() -> new NotFoundException("No recording-tips video has been uploaded yet"));
+
+        VideoAsset asset = tips.getVideoAsset();
+        if (!asset.isReady()) {
+            throw new VideoNotReadyException("the video is still uploading");
+        }
+
+        StreamGateway.Playback playback =
+                stream.signPlayback(asset.getStreamUid(), videoProperties.playbackTokenTtl());
+        return new RecordingTipsPlaybackView(
+                asset.getId(), playback.hlsUrl(), playback.dashUrl(), playback.token(),
+                playback.expiresAt());
+    }
+
+    private UUID organizationId(UUID userId) {
+        return users.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User " + userId + " not found"))
                 .getOrganization().getId();
-        return store.findByOrgId(orgId).map(this::describe)
-                .orElseGet(() -> new RecordingTipsView(null, null, null, null));
     }
 
     @Transactional
