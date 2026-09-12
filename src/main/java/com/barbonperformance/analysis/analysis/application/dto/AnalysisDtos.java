@@ -1,7 +1,6 @@
 package com.barbonperformance.analysis.analysis.application.dto;
 
 import com.barbonperformance.analysis.analysis.domain.AnalysisStatus;
-import com.barbonperformance.analysis.video.domain.StrokeType;
 import com.barbonperformance.analysis.video.domain.VideoAssetStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -69,7 +68,6 @@ public final class AnalysisDtos {
             @NotNull UUID id,
             @NotNull String title,
             @NotNull AnalysisStatus status,
-            StrokeType strokeType,
             @NotNull String coachName,
             @NotNull String playerName,
             // Null when the coach filmed the player themselves rather than from a submission.
@@ -90,7 +88,6 @@ public final class AnalysisDtos {
             @NotNull UUID coachProfileId,
             @NotNull String coachName,
             UUID submissionId,
-            StrokeType strokeType,
             String playerNote,
             UUID feedbackVideoAssetId,
             VideoAssetStatus feedbackVideoStatus,

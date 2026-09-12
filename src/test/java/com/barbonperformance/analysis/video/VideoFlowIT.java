@@ -18,7 +18,6 @@ import com.barbonperformance.analysis.video.application.dto.VideoDtos.PlaybackRe
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.SubmissionSummary;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentRequest;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentResponse;
-import com.barbonperformance.analysis.video.domain.StrokeType;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HexFormat;
@@ -226,7 +225,7 @@ class VideoFlowIT extends AbstractIntegrationTest {
         client.post().uri("/api/v1/submissions")
                 .header(HttpHeaders.AUTHORIZATION, bearer(player.accessToken()))
                 .body(new CreateSubmissionRequest(
-                        intent.videoAssetId(), StrokeType.FOREHAND, null, null))
+                        intent.videoAssetId(), null, null))
                 .exchange()
                 .expectStatus().isEqualTo(409)
                 .expectBody(String.class)
@@ -244,7 +243,7 @@ class VideoFlowIT extends AbstractIntegrationTest {
         client.post().uri("/api/v1/submissions")
                 .header(HttpHeaders.AUTHORIZATION, bearer(stranger.accessToken()))
                 .body(new CreateSubmissionRequest(
-                        intent.videoAssetId(), StrokeType.FOREHAND, null, null))
+                        intent.videoAssetId(), null, null))
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -362,7 +361,7 @@ class VideoFlowIT extends AbstractIntegrationTest {
         return client.post().uri("/api/v1/submissions")
                 .header(HttpHeaders.AUTHORIZATION, bearer(session.accessToken()))
                 .body(new CreateSubmissionRequest(
-                        assetId, StrokeType.FOREHAND, "Elbow hurts on contact", null))
+                        assetId, "Elbow hurts on contact", null))
                 .exchange();
     }
 

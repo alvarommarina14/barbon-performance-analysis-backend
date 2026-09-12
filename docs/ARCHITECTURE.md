@@ -233,8 +233,9 @@ org's coach, or NULL until one exists); the client never sends a coach id. See
 - `video_asset` — stream_uid, playback_id, `kind` (`PLAYER_UPLOAD` | `COACH_FEEDBACK` |
   `LIBRARY_DRILL` | `PROTOCOL`), `status` (`PENDING_UPLOAD` → `UPLOADING` → `PROCESSING` →
   `READY` | `ERRORED`), duration, thumbnail_url, size_bytes
-- `video_submission` — player_id, video_asset_id, `stroke_type`, player_note, recorded_at,
-  `status` (`SUBMITTED` | `IN_REVIEW` | `ANALYZED`)
+- `video_submission` — player_id, video_asset_id, player_note, recorded_at, `status`
+  (`SUBMITTED` | `IN_REVIEW` | `ANALYZED`). No stroke on the row — analysis always covers every
+  stroke in the clip.
 - `analysis` — **nullable submission_id** (the coach sometimes films the player themselves),
   player_id, coach_id, title, summary, feedback_video_asset_id, `status` (`DRAFT` | `PUBLISHED`)
 - `analysis_finding` — analysis_id, **timestamp_seconds**, title, detail, sort_order — the
@@ -282,7 +283,7 @@ through the backend.**
 3. Cloudflare transcodes, then calls `POST /api/v1/webhooks/cloudflare-stream`. **Verify the HMAC
    signature header and make the update idempotent** — Cloudflare retries. The asset moves to
    `READY` with duration and thumbnail.
-4. `POST /api/v1/submissions` (`{ videoAssetId, strokeType, playerNote?, recordedAt? }`) — the
+4. `POST /api/v1/submissions` (`{ videoAssetId, playerNote?, recordedAt? }`) — the
    client sends this once its upload has succeeded. The backend checks the asset is the player's
    and `READY` (retryable `409 video-not-ready` while the webhook is still in flight) and creates
    the `video_submission` in `SUBMITTED`. It now shows in `GET /api/v1/submissions/queue`. An

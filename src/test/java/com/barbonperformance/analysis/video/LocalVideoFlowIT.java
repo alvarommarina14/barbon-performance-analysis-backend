@@ -13,7 +13,6 @@ import com.barbonperformance.analysis.video.application.dto.VideoDtos.PlaybackRe
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.SubmissionSummary;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentRequest;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentResponse;
-import com.barbonperformance.analysis.video.domain.StrokeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +145,7 @@ class LocalVideoFlowIT extends AbstractIntegrationTest {
         return client.post().uri("/api/v1/submissions")
                 .header(HttpHeaders.AUTHORIZATION, bearer(session.accessToken()))
                 .body(new CreateSubmissionRequest(
-                        intent.videoAssetId(), StrokeType.FOREHAND, "Elbow hurts", null))
+                        intent.videoAssetId(), "Elbow hurts", null))
                 .exchange()
                 .expectStatus().isCreated()
                 .returnResult(SubmissionSummary.class)
