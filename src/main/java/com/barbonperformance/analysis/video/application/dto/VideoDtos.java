@@ -1,6 +1,5 @@
 package com.barbonperformance.analysis.video.application.dto;
 
-import com.barbonperformance.analysis.video.domain.StrokeType;
 import com.barbonperformance.analysis.video.domain.SubmissionStatus;
 import com.barbonperformance.analysis.video.domain.VideoAssetStatus;
 import jakarta.validation.constraints.NotNull;
@@ -27,7 +26,6 @@ public final class VideoDtos {
     // playable video behind it.
     public record CreateSubmissionRequest(
             @NotNull UUID videoAssetId,
-            @NotNull StrokeType strokeType,
             @Size(max = 2000) String playerNote,
             Instant recordedAt) {
     }
@@ -36,7 +34,6 @@ public final class VideoDtos {
             @NotNull UUID id,
             @NotNull UUID playerProfileId,
             @NotNull String playerName,
-            @NotNull StrokeType strokeType,
             String playerNote,
             Instant recordedAt,
             @NotNull SubmissionStatus status,

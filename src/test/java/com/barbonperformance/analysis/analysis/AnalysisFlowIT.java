@@ -25,7 +25,6 @@ import com.barbonperformance.analysis.video.application.dto.VideoDtos.CreateSubm
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.SubmissionSummary;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentRequest;
 import com.barbonperformance.analysis.video.application.dto.VideoDtos.UploadIntentResponse;
-import com.barbonperformance.analysis.video.domain.StrokeType;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HexFormat;
@@ -78,7 +77,6 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
         AnalysisDetail analysis = createAnalysis(coach, submission.id());
 
         assertThat(analysis.status().name()).isEqualTo("DRAFT");
-        assertThat(analysis.strokeType()).isEqualTo(StrokeType.FOREHAND);
         assertThat(submissionStatus(submission.id())).isEqualTo("IN_REVIEW");
     }
 
@@ -377,7 +375,6 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
                 .getResponseBody();
 
         assertThat(analysis.submissionId()).isNull();
-        assertThat(analysis.strokeType()).isNull();
         assertThat(analysis.playerNote()).isNull();
     }
 
@@ -476,7 +473,7 @@ class AnalysisFlowIT extends AbstractIntegrationTest {
         return client.post().uri("/api/v1/submissions")
                 .header(HttpHeaders.AUTHORIZATION, bearer(player.accessToken()))
                 .body(new CreateSubmissionRequest(
-                        intent.videoAssetId(), StrokeType.FOREHAND, "Elbow hurts on contact", null))
+                        intent.videoAssetId(), "Elbow hurts on contact", null))
                 .exchange()
                 .expectStatus().isCreated()
                 .returnResult(SubmissionSummary.class)

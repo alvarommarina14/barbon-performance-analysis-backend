@@ -231,10 +231,11 @@ org's coach, or NULL until one exists); the client never sends a coach id. See
 ### Video and analysis
 
 - `video_asset` — stream_uid, playback_id, `kind` (`PLAYER_UPLOAD` | `COACH_FEEDBACK` |
-  `LIBRARY_DRILL` | `PROTOCOL`), `status` (`PENDING_UPLOAD` → `UPLOADING` → `PROCESSING` →
-  `READY` | `ERRORED`), duration, thumbnail_url, size_bytes
-- `video_submission` — player_id, video_asset_id, `stroke_type`, player_note, recorded_at,
-  `status` (`SUBMITTED` | `IN_REVIEW` | `ANALYZED`)
+  `LIBRARY_DRILL` | `PROTOCOL` | `RECORDING_TIPS`), `status` (`PENDING_UPLOAD` → `UPLOADING` →
+  `PROCESSING` → `READY` | `ERRORED`), duration, thumbnail_url, size_bytes
+- `video_submission` — player_id, video_asset_id, player_note, recorded_at, `status`
+  (`SUBMITTED` | `IN_REVIEW` | `ANALYZED`). No stroke on the row — analysis always covers every
+  stroke in the clip.
 - `analysis` — **nullable submission_id** (the coach sometimes films the player themselves),
   player_id, coach_id, title, summary, feedback_video_asset_id, `status` (`DRAFT` | `PUBLISHED`)
 - `analysis_finding` — analysis_id, **timestamp_seconds**, title, detail, sort_order — the
@@ -242,10 +243,28 @@ org's coach, or NULL until one exists); the client never sends a coach id. See
 
 ### Drills
 
-- `video_library_item` — global per organisation: title, cue, category, video_asset_id
+- `video_library_item` — global per organisation (shared across every coach's clients): title,
+  cue, `category` (`FOREHAND` | `BACKHAND` | `SERVE` | `MOVEMENT` | `FITNESS`), video_asset_id
+  (`kind=LIBRARY_DRILL`, uploaded through the same pipeline as any other video)
 - `drill_assignment` — player_id, library_item_id, **nullable analysis_id**, coach_note,
   sort_order. The join table from the mockup; `analysis_id` closes the loop, letting the app say
-  "these drills come from your analysis".
+  "these drills come from your analysis". Every write path today sets it; the column stays
+  nullable for a future drill assigned outside of any analysis.
+
+The coach manages the library and assigns drills from `apps/coach`:
+
+- `GET /api/v1/drills/library` — the organisation's whole library.
+- `POST /api/v1/drills/library/upload-intent` then `POST /api/v1/drills/library` once the asset is
+  `READY` (retryable `409 video-not-ready` while it isn't) — same upload-before-create shape as
+  submissions ([ADR 0005](adr/0005-upload-before-submission.md)).
+- `PUT /api/v1/drills/library/{itemId}` / `DELETE /api/v1/drills/library/{itemId}` (rejected with
+  `409` while the drill is still assigned somewhere).
+- `GET /api/v1/drills/library/{itemId}/playback` — org-wide visibility, no per-player entitlement:
+  the library is shared, not owned by whoever assigned it.
+- `GET /api/v1/drills/assignments?category=&analysisId=&playerProfileId=` — a player's own
+  drills, one analysis' drills, or (coach only) one client's drills.
+- `PUT /api/v1/drills/analyses/{analysisId}/assignments` — replaces the whole drill list on one
+  analysis; the request array's order becomes `sort_order`.
 
 ### Strength and conditioning
 
@@ -265,6 +284,24 @@ org's coach, or NULL until one exists); the client never sends a coach id. See
 **Booking** is not built. `coach_profile.booking_url` plus `player_profile.next_call_at`, with
 Cal.com embedded — the same approach as the mockup.
 
+### Recording tips
+
+The instructional "how to record" video and PDF, one per organisation, both coach-uploadable so
+they can be replaced without a deploy:
+
+- `recording_tips` — org_id (unique), video_asset_id (`kind=RECORDING_TIPS`, same video pipeline
+  as a drill), pdf_object_key, pdf_content_type, updated_by_user_id, updated_at
+- `GET /api/v1/content/recording-tips` — `{ videoAssetId?, videoStatus?, pdfUrl?, updatedAt? }`,
+  nulls when nothing has been uploaded yet rather than a 404. The video plays through the
+  ordinary `GET /api/v1/videos/{videoAssetId}/playback`; the PDF's `pdfUrl` is already a
+  short-lived signed download link.
+- `POST /api/v1/content/recording-tips/video-upload-intent` + `POST .../video` (confirm), and
+  `POST .../pdf-upload-intent` + `POST .../pdf` (confirm) — coach only. The PDF is a plain object
+  (MinIO locally, Cloudflare R2 in production) behind a presigned PUT, at a deterministic key per
+  org (`content/{orgId}/recording-tips/guide.pdf`) so a re-upload just overwrites it — see the
+  `content` module's `ObjectStorage` port, the first user of the `R2ObjectStorage`-shaped gateway
+  this doc anticipated for PDFs, images and audio.
+
 ## The video flow
 
 This has the most moving parts and is where the product is won or lost. **Video bytes never pass
@@ -282,7 +319,7 @@ through the backend.**
 3. Cloudflare transcodes, then calls `POST /api/v1/webhooks/cloudflare-stream`. **Verify the HMAC
    signature header and make the update idempotent** — Cloudflare retries. The asset moves to
    `READY` with duration and thumbnail.
-4. `POST /api/v1/submissions` (`{ videoAssetId, strokeType, playerNote?, recordedAt? }`) — the
+4. `POST /api/v1/submissions` (`{ videoAssetId, playerNote?, recordedAt? }`) — the
    client sends this once its upload has succeeded. The backend checks the asset is the player's
    and `READY` (retryable `409 video-not-ready` while the webhook is still in flight) and creates
    the `video_submission` in `SUBMITTED`. It now shows in `GET /api/v1/submissions/queue`. An
@@ -296,7 +333,8 @@ through the backend.**
    `kind=COACH_FEEDBACK`, `Upload-Metadata` `analysisId`), replaces the whole finding
    list with `PUT /api/v1/analyses/{id}/findings` (each `{ timestampSeconds, title, detail }`),
    and publishes (`POST /api/v1/analyses/{id}/publish`, which requires the feedback video to be
-   `READY` and moves the submission to `ANALYZED`). Assigning drills is Phase 3.
+   `READY` and moves the submission to `ANALYZED`). The coach can also assign drills to the
+   analysis at this point (`PUT /api/v1/drills/analyses/{id}/assignments`) — see Drills, above.
 8. The player polls `GET /api/v1/analyses`, opens one, and plays the feedback video through
    `GET /api/v1/analyses/{id}/playback` with a list of clickable findings. **Phase 2 sends no
    push or email** — that is Phase 6; until then both sides poll.

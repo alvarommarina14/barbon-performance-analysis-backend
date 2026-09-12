@@ -39,10 +39,6 @@ public class VideoSubmission {
     @JoinColumn(name = "video_asset_id", nullable = false, unique = true)
     private VideoAsset videoAsset;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "stroke_type", nullable = false)
-    private StrokeType strokeType;
-
     @Column(name = "player_note")
     private String playerNote;
 
@@ -64,11 +60,10 @@ public class VideoSubmission {
     }
 
     public VideoSubmission(Organization organization, PlayerProfile player, VideoAsset videoAsset,
-            StrokeType strokeType, String playerNote, Instant recordedAt) {
+            String playerNote, Instant recordedAt) {
         this.organization = organization;
         this.player = player;
         this.videoAsset = videoAsset;
-        this.strokeType = strokeType;
         this.playerNote = playerNote;
         this.recordedAt = recordedAt;
     }
@@ -105,10 +100,6 @@ public class VideoSubmission {
 
     public VideoAsset getVideoAsset() {
         return videoAsset;
-    }
-
-    public StrokeType getStrokeType() {
-        return strokeType;
     }
 
     public String getPlayerNote() {

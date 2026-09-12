@@ -4,5 +4,6 @@ public enum VideoAssetKind {
     PLAYER_UPLOAD,
     COACH_FEEDBACK,
     LIBRARY_DRILL,
-    PROTOCOL
+    PROTOCOL,
+    RECORDING_TIPS
 }

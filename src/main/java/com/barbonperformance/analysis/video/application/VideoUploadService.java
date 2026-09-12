@@ -95,7 +95,7 @@ public class VideoUploadService {
 
         VideoSubmission submission = submissions.save(new VideoSubmission(
                 player.getOrganization(), player, asset,
-                request.strokeType(), request.playerNote(), request.recordedAt()));
+                request.playerNote(), request.recordedAt()));
         return describe(submission);
     }
 
@@ -159,7 +159,6 @@ public class VideoUploadService {
                 submission.getId(),
                 submission.getPlayer().getId(),
                 submission.getPlayer().getUser().getName(),
-                submission.getStrokeType(),
                 submission.getPlayerNote(),
                 submission.getRecordedAt(),
                 submission.getStatus(),
