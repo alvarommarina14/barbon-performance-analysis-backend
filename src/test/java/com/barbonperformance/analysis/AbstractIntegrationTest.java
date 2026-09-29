@@ -81,7 +81,7 @@ public abstract class AbstractIntegrationTest {
         // organization is left alone: it is seeded by the baseline migration.
         jdbcTemplate.execute("TRUNCATE TABLE app_user CASCADE");
         // These hang off organization, not app_user, so the cascade above misses them.
-        jdbcTemplate.execute("TRUNCATE TABLE video_asset, red_flag CASCADE");
+        jdbcTemplate.execute("TRUNCATE TABLE video_asset, red_flag, daily_routine CASCADE");
         CLOUDFLARE.resetAll();
 
         this.client = RestTestClient.bindToServer()

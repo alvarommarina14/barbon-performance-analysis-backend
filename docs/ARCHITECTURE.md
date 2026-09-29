@@ -353,7 +353,14 @@ already defined.
   (a coach naming no player gets the org-wide list only). `PUT /api/v1/strength/red-flags` and
   `PUT /api/v1/strength/players/{playerProfileId}/red-flags` replace each list whole (coach only) —
   safe here because nothing references a red flag.
-- `protocol` — title, type (`WARMUP` | `RECOVERY`), pdf_object_key, video_asset_id
+- `daily_routine` — one row per org: warmup_video_asset_id, recovery_video_asset_id (both
+  `video_asset` kind `PROTOCOL`) and one PDF with its file details. Built in place of the planned
+  multi-row `protocol` table, since the product has exactly these three pieces. `GET
+  /api/v1/content/daily-routine`, `GET .../playback?part=WARMUP|RECOVERY` (its own entitlement,
+  like recording tips), and coach-only `POST .../video-upload-intent { part, sizeBytes, fileName }`,
+  `POST .../video { part, videoAssetId }`, `POST .../pdf-upload-intent`, `POST .../pdf`. Every PDF
+  confirm (daily routine, recording tips, RPE guide, program PDF) rejects an object key other than
+  the one its upload intent handed out, with `409`.
 - `notification` and `push_token` (user_id, expo_token, platform)
 
 **Booking** is not built. `coach_profile.booking_url` plus `player_profile.next_call_at`, with
