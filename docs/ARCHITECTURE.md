@@ -348,7 +348,11 @@ already defined.
   reached, so notes written ahead never leak; the coach sees all twelve. `PUT
   /api/v1/strength/players/{playerProfileId}/weekly-notes/{planWeek} { body }` writes one week (coach
   only); an empty body deletes it. Each note carries `weekStartsOn`, derived from the plan start.
-- `red_flag` — **nullable player_id**, so a row is either global or player-specific
+- `red_flag` — **nullable player_id**, so a row is either global or player-specific; title, body,
+  sort_order. `GET /api/v1/strength/red-flags?playerProfileId=` returns `{ forEveryone, forPlayer }`
+  (a coach naming no player gets the org-wide list only). `PUT /api/v1/strength/red-flags` and
+  `PUT /api/v1/strength/players/{playerProfileId}/red-flags` replace each list whole (coach only) —
+  safe here because nothing references a red flag.
 - `protocol` — title, type (`WARMUP` | `RECOVERY`), pdf_object_key, video_asset_id
 - `notification` and `push_token` (user_id, expo_token, platform)
 
