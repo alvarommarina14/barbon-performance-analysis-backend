@@ -62,7 +62,7 @@ public final class AuthDtos {
     public record PlayerSummary(
             @NotNull UUID profileId,
             @NotNull MembershipTier membershipTier,
-            int currentWeek,
+            Integer planWeek,
             boolean hasCoach) {
     }
 

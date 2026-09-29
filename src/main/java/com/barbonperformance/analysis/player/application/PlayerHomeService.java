@@ -9,6 +9,7 @@ import com.barbonperformance.analysis.shared.domain.NotFoundException;
 import com.barbonperformance.analysis.strength.domain.CyclePhase;
 import com.barbonperformance.analysis.strength.domain.CyclePhases;
 import com.barbonperformance.analysis.user.domain.CoachProfile;
+import com.barbonperformance.analysis.user.domain.PlanCalendar;
 import com.barbonperformance.analysis.user.domain.PlayerProfile;
 import com.barbonperformance.analysis.user.domain.PlayerProfiles;
 import java.util.UUID;
@@ -37,10 +38,12 @@ public class PlayerHomeService {
                 .orElseThrow(() -> new NotFoundException("No player profile for this account"));
 
         CoachProfile coach = profile.getCoach();
-        PhaseCard currentPhase = cyclePhases
-                .findByPlayerIdAndWeekNumber(profile.getId(), profile.getCurrentWeek())
-                .map(PlayerHomeService::describe)
-                .orElse(null);
+        Integer planWeek = PlanCalendar.planWeek(profile).orElse(null);
+        Integer cycleWeek = planWeek == null ? null : PlanCalendar.cycleWeek(planWeek);
+        PhaseCard currentPhase = cycleWeek == null ? null
+                : cyclePhases.findByPlayerIdAndWeekNumber(profile.getId(), cycleWeek)
+                        .map(PlayerHomeService::describe)
+                        .orElse(null);
         String programPdfUrl = profile.getProgramPdfKey() == null ? null
                 : objectStorage.presignDownload(profile.getProgramPdfKey(), contentProperties.presignTtl());
 
@@ -49,9 +52,10 @@ public class PlayerHomeService {
                 profile.getUser().getName(),
                 profile.getUser().getAvatarUrl(),
                 profile.getMembershipTier(),
-                profile.getCurrentWeek(),
-                PlayerProfile.CYCLE_WEEKS,
-                profile.getCycleStartedAt(),
+                planWeek,
+                PlanCalendar.PLAN_WEEKS,
+                cycleWeek,
+                profile.getPlanStartedAt(),
                 profile.getNextCallAt(),
                 coach == null ? null : new CoachCard(
                         coach.getId(),

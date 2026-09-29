@@ -218,8 +218,8 @@ painful migration.
   time, and every table is `org_id`-scoped for that.
 - `app_user` — email, password_hash, role (`PLAYER` | `COACH` | `ADMIN`), name, avatar, timezone
 - `coach_profile` — user_id, booking_url, bio
-- `player_profile` — user_id, coach_id, `membership_tier` (`BASE` | `PRO`), current_week,
-  cycle_started_at, program_pdf_key, next_call_at, injury_notes
+- `player_profile` — user_id, coach_id, `membership_tier` (`BASE` | `PRO`), plan_started_at,
+  program_pdf_key, next_call_at, injury_notes
 - `refresh_token` — rotating, revocable
 
 The coach self-registers from the desktop app (`POST /api/v1/auth/register-coach`). It is open
@@ -312,9 +312,16 @@ training days from `apps/coach`:
 - The exercise video plays through the existing `GET /api/v1/drills/library/{itemId}/playback` —
   no new playback endpoint.
 
-`player_profile.current_week` picks out which of the player's own `cycle_phase` rows is "now";
-`GET /api/v1/players/me/home` returns it as `currentPhase` (nullable — null until that week's row
-is loaded). Shown to every membership tier today; BASE/PRO gating on this card is deliberately not
+**The twelve-week plan.** A plan runs twelve weeks: the four-week cycle three times over.
+`player_profile.plan_started_at` is the only stored fact; the plan week (1-12) is derived from it
+and today's date in the player's timezone (`user.domain.PlanCalendar`), and the cycle week (1-4)
+from the plan week. There is no stored "current week" to fall out of date. `PUT
+/api/v1/strength/players/{playerProfileId}/plan { startDate }` (coach only; null clears it) and `GET
+/api/v1/strength/plan?playerProfileId=` return `{ startDate, planWeek, planWeeks, cycleWeek,
+unlockedWeeks }`; `planWeek` is null before the start and after week 12, and `unlockedWeeks` is how
+many weeks the player has reached (0-12). The cycle week picks out which of the player's own
+`cycle_phase` rows is "now"; `GET /api/v1/players/me/home` returns it as `currentPhase` (nullable —
+null outside the plan or until that week's row is loaded). Shown to every membership tier today; BASE/PRO gating on this card is deliberately not
 built yet.
 
 **Program PDF.** `player_profile.program_pdf_key` (existing since Phase 1, unused until now) is a

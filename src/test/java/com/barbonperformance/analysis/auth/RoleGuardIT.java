@@ -28,7 +28,7 @@ class RoleGuardIT extends AbstractIntegrationTest {
                 .value(body -> {
                     assertThat(body).contains("Rosario Fiol");
                     assertThat(body).contains("Marcelo Barbon");
-                    assertThat(body).contains("\"cycleWeeks\":4");
+                    assertThat(body).contains("\"planWeeks\":12");
                 });
     }
 

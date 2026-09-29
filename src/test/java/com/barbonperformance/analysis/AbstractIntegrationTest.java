@@ -1,5 +1,7 @@
 package com.barbonperformance.analysis;
 
+import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginRequest;
+import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginResponse;
 import com.barbonperformance.analysis.support.TestFixtures;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterAll;
@@ -89,5 +91,15 @@ public abstract class AbstractIntegrationTest {
 
     protected String bearer(String accessToken) {
         return "Bearer " + accessToken;
+    }
+
+    protected String bearerFor(String email, String password) {
+        LoginResponse session = client.post().uri("/api/v1/auth/login")
+                .body(new LoginRequest(email, password))
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(LoginResponse.class)
+                .getResponseBody();
+        return bearer(session.accessToken());
     }
 }

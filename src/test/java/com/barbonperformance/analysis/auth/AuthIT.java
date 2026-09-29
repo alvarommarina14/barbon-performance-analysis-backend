@@ -27,7 +27,7 @@ class AuthIT extends AbstractIntegrationTest {
         assertThat(response.user().role()).isEqualTo(UserRole.PLAYER);
         assertThat(response.user().name()).isEqualTo("Rosario Fiol");
         assertThat(response.user().player()).isNotNull();
-        assertThat(response.user().player().currentWeek()).isEqualTo(1);
+        assertThat(response.user().player().planWeek()).isNull();
         assertThat(response.user().player().hasCoach()).isFalse();
         assertThat(response.user().coach()).isNull();
     }

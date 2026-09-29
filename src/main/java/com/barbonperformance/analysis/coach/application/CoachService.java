@@ -3,6 +3,7 @@ package com.barbonperformance.analysis.coach.application;
 import com.barbonperformance.analysis.coach.application.dto.CoachDtos.ClientSummary;
 import com.barbonperformance.analysis.shared.domain.NotFoundException;
 import com.barbonperformance.analysis.user.domain.CoachProfiles;
+import com.barbonperformance.analysis.user.domain.PlanCalendar;
 import com.barbonperformance.analysis.user.domain.PlayerProfiles;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +35,9 @@ public class CoachService {
                         profile.getUser().getEmail(),
                         profile.getUser().getAvatarUrl(),
                         profile.getMembershipTier(),
-                        profile.getCurrentWeek(),
+                        PlanCalendar.planWeek(profile).orElse(null),
+                        PlanCalendar.PLAN_WEEKS,
+                        profile.getPlanStartedAt(),
                         profile.getNextCallAt()))
                 .toList();
     }

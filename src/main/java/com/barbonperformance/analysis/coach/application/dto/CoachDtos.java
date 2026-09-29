@@ -3,6 +3,7 @@ package com.barbonperformance.analysis.coach.application.dto;
 import com.barbonperformance.analysis.user.domain.MembershipTier;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public final class CoachDtos {
@@ -17,7 +18,9 @@ public final class CoachDtos {
             @NotNull String email,
             String avatarUrl,
             @NotNull MembershipTier membershipTier,
-            int currentWeek,
+            Integer planWeek,
+            int planWeeks,
+            LocalDate planStartedAt,
             Instant nextCallAt) {
     }
 }
