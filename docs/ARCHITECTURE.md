@@ -371,8 +371,13 @@ already defined.
   the one its upload intent handed out, with `409`.
 - `notification` and `push_token` (user_id, expo_token, platform)
 
-**Booking** is not built. `coach_profile.booking_url` plus `player_profile.next_call_at`, with
-Cal.com embedded — the same approach as the mockup.
+**Booking** is a link, the way a recruiter sends one: the coach pastes the URL of their booking
+page (a Google Calendar appointment schedule, Calendly…) and the player's app opens it. `GET` and
+`PUT /api/v1/coach/booking-link { bookingUrl }` (coach only; https only, blank clears it) write
+`coach_profile.booking_url`, which `GET /api/v1/players/me/home` already returns in `coach`. The app
+does not read the coach's calendar, so it cannot know when the next call is: syncing with Google
+Calendar, a one-call-every-14-days rule and a "Your next call" date (`player_profile.next_call_at`,
+still unwritten) are deferred until that rule is defined.
 
 ### Recording tips
 
