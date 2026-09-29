@@ -5,6 +5,7 @@ import com.barbonperformance.analysis.content.domain.ObjectStorage;
 import com.barbonperformance.analysis.player.application.dto.ProgramPdfDtos.ConfirmProgramPdfRequest;
 import com.barbonperformance.analysis.player.application.dto.ProgramPdfDtos.ProgramPdfUploadIntentRequest;
 import com.barbonperformance.analysis.player.application.dto.ProgramPdfDtos.ProgramPdfUploadIntentResponse;
+import com.barbonperformance.analysis.shared.domain.ConflictException;
 import com.barbonperformance.analysis.shared.domain.NotFoundException;
 import com.barbonperformance.analysis.user.domain.CoachProfile;
 import com.barbonperformance.analysis.user.domain.CoachProfiles;
@@ -46,6 +47,11 @@ public class ProgramPdfService {
     @Transactional
     public void confirm(UUID coachUserId, UUID playerProfileId, ConfirmProgramPdfRequest request) {
         PlayerProfile player = loadOwnedPlayer(coachUserId, playerProfileId);
+        // Only the key this player's upload intent handed out may be confirmed; any other key would
+        // point the player at an object that was never theirs.
+        if (!KEY_TEMPLATE.formatted(player.getOrganization().getId(), player.getId()).equals(request.objectKey())) {
+            throw new ConflictException("the uploaded object does not belong to this player");
+        }
         player.setProgramPdfKey(request.objectKey());
         playerProfiles.save(player);
     }

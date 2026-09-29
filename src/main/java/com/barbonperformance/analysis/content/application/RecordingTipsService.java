@@ -143,6 +143,7 @@ public class RecordingTipsService {
     @Transactional
     public RecordingTipsView confirmPdf(UUID coachUserId, ConfirmPdfUploadRequest request) {
         CoachProfile coach = coach(coachUserId);
+        UploadedObjects.requireKey(request.objectKey(), PDF_KEY_TEMPLATE.formatted(coach.getOrganization().getId()));
         RecordingTips tips = tipsFor(coach.getOrganization());
         tips.attachPdf(request.objectKey(), request.contentType(), request.fileName(),
                 request.sizeBytes(), coach.getUser());

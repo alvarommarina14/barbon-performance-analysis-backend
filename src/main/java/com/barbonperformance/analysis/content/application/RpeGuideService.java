@@ -60,6 +60,7 @@ public class RpeGuideService {
     @Transactional
     public RpeGuideView confirmPdf(UUID coachUserId, ConfirmPdfUploadRequest request) {
         CoachProfile coach = coach(coachUserId);
+        UploadedObjects.requireKey(request.objectKey(), PDF_KEY_TEMPLATE.formatted(coach.getOrganization().getId()));
         RpeGuide guide = guideFor(coach.getOrganization());
         guide.attachPdf(request.objectKey(), request.contentType(), request.fileName(),
                 request.sizeBytes(), coach.getUser());
