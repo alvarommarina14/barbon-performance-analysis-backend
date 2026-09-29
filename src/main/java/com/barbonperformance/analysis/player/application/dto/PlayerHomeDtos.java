@@ -20,7 +20,9 @@ public final class PlayerHomeDtos {
             int cycleWeeks,
             LocalDate cycleStartedAt,
             Instant nextCallAt,
-            CoachCard coach) {
+            CoachCard coach,
+            PhaseCard currentPhase,
+            String programPdfUrl) {
     }
 
     public record CoachCard(
@@ -28,5 +30,13 @@ public final class PlayerHomeDtos {
             @NotNull String name,
             String avatarUrl,
             String bookingUrl) {
+    }
+
+    public record PhaseCard(
+            int weekNumber,
+            @NotNull String phaseName,
+            @NotNull String goal,
+            String setsReps,
+            String rpeRange) {
     }
 }
