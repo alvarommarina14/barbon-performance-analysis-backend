@@ -342,7 +342,12 @@ already defined.
 
 - `session_log` — player_id, date, session_type, what_you_did, rpe, pain_score, notes. The player
   creates rows and can then only read them.
-- `coach_note` — player_id, body, published_at
+- `weekly_note` — player_id, plan_week (1-12, unique per player), body. Built in place of the
+  planned `coach_note`: the coach's message is tied to a week of the plan. `GET
+  /api/v1/strength/weekly-notes?playerProfileId=` returns a player only the weeks they have
+  reached, so notes written ahead never leak; the coach sees all twelve. `PUT
+  /api/v1/strength/players/{playerProfileId}/weekly-notes/{planWeek} { body }` writes one week (coach
+  only); an empty body deletes it. Each note carries `weekStartsOn`, derived from the plan start.
 - `red_flag` — **nullable player_id**, so a row is either global or player-specific
 - `protocol` — title, type (`WARMUP` | `RECOVERY`), pdf_object_key, video_asset_id
 - `notification` and `push_token` (user_id, expo_token, platform)
