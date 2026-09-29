@@ -36,6 +36,15 @@ public class RecordingTips {
     @Column(name = "pdf_content_type")
     private String pdfContentType;
 
+    @Column(name = "pdf_file_name")
+    private String pdfFileName;
+
+    @Column(name = "pdf_size_bytes")
+    private Long pdfSizeBytes;
+
+    @Column(name = "pdf_uploaded_at")
+    private Instant pdfUploadedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by_user_id")
     private AppUser updatedByUser;
@@ -56,9 +65,13 @@ public class RecordingTips {
         this.updatedByUser = updatedBy;
     }
 
-    public void attachPdf(String objectKey, String contentType, AppUser updatedBy) {
+    public void attachPdf(String objectKey, String contentType, String fileName, long sizeBytes,
+            AppUser updatedBy) {
         this.pdfObjectKey = objectKey;
         this.pdfContentType = contentType;
+        this.pdfFileName = fileName;
+        this.pdfSizeBytes = sizeBytes;
+        this.pdfUploadedAt = Instant.now();
         this.updatedByUser = updatedBy;
     }
 
@@ -80,6 +93,18 @@ public class RecordingTips {
 
     public String getPdfContentType() {
         return pdfContentType;
+    }
+
+    public String getPdfFileName() {
+        return pdfFileName;
+    }
+
+    public Long getPdfSizeBytes() {
+        return pdfSizeBytes;
+    }
+
+    public Instant getPdfUploadedAt() {
+        return pdfUploadedAt;
     }
 
     public Instant getUpdatedAt() {
