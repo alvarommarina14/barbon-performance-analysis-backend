@@ -268,9 +268,68 @@ The coach manages the library and assigns drills from `apps/coach`:
 
 ### Strength and conditioning
 
-- `cycle_phase` — global, four rows: week_number, phase_name, goal, sets_reps, rpe_range
-- `training_day` — player_id, day_label, title, focus, duration, `kind` (`REHAB` | `STRENGTH`)
-- `day_exercise` — training_day_id, library_item_id, sets_reps_wk1..wk4, cue_override, sort_order
+- `cycle_phase` — **per-player**, not shared: `org_id`, `player_id` (nullable), `template_name`
+  (nullable), `week_number`, `phase_name`, `goal`, `sets_reps`, `rpe_range`. Exactly one of
+  `player_id`/`template_name` is set per row — a row belongs either to a player's own cycle or to
+  a reusable, named org-level template, never both. A template is nothing more than four
+  `cycle_phase` rows with no player, grouped and addressed by `(org_id, template_name)` instead of
+  a surrogate id; applying one to a player is a one-time copy into that player's own rows, not a
+  live link — editing either side afterward never affects the other.
+- `training_day` — org_id, player_id, day_label, title, focus, duration_minutes, `kind`
+  (`REHAB` | `STRENGTH`), sort_order
+- `day_exercise` — org_id, training_day_id, library_item_id (reuses `video_library_item` from
+  Drills, category `FITNESS`; no second video pipeline), sets_reps_wk1..wk4, cue_override,
+  sort_order
+
+The `strength` module owns all three. The coach manages templates, a client's cycle and a client's
+training days from `apps/coach`:
+
+- `GET /api/v1/strength/cycle-phases?playerProfileId=` — a player's own four weeks, or (coach
+  only) one client's.
+- `PUT /api/v1/strength/players/{playerProfileId}/cycle-phases` — coach only; replaces that
+  player's four weeks directly; the request must contain exactly weeks 1-4, once each (`409`
+  otherwise); upserts by `(player_id, week_number)`.
+- `POST /api/v1/strength/players/{playerProfileId}/cycle-phases/apply-template` — coach only, body
+  `{ templateName }`; copies the named template's weeks into that player's own rows (`404` if the
+  name doesn't exist in the coach's org).
+- `GET /api/v1/strength/cycle-phase-templates` — coach only; every template in the org, weeks
+  nested inline.
+- `PUT /api/v1/strength/cycle-phase-templates/{name}` — coach only; creates the template if the
+  name is new or replaces it if it already exists (upsert by name); the request must contain
+  exactly weeks 1-4, once each (`409` otherwise). There is no separate create/rename step — a
+  template is always written whole.
+- `DELETE /api/v1/strength/cycle-phase-templates/{name}` — coach only; `404` if the name doesn't
+  exist. Deleting a template never touches any player's already-copied rows.
+- `GET /api/v1/strength/training-days?playerProfileId=` — a player's own days, or (coach only) one
+  client's days.
+- `PUT /api/v1/strength/players/{playerProfileId}/training-days` — replaces the whole day list for
+  that player; the request array's order becomes `sort_order`.
+- `GET /api/v1/strength/training-days/{trainingDayId}/exercises` — a day's exercise list.
+- `PUT /api/v1/strength/training-days/{trainingDayId}/exercises` — replaces the whole exercise
+  list on one day; each `libraryItemId` is resolved against the same-org `video_library_item`
+  table, without forcing category `FITNESS` server-side (that filter lives in the coach's picker
+  UI only, same convention as Drills).
+- The exercise video plays through the existing `GET /api/v1/drills/library/{itemId}/playback` —
+  no new playback endpoint.
+
+`player_profile.current_week` picks out which of the player's own `cycle_phase` rows is "now";
+`GET /api/v1/players/me/home` returns it as `currentPhase` (nullable — null until that week's row
+is loaded). Shown to every membership tier today; BASE/PRO gating on this card is deliberately not
+built yet.
+
+**Program PDF.** `player_profile.program_pdf_key` (existing since Phase 1, unused until now) is a
+plain object behind a presigned PUT, at a deterministic key per player
+(`content/{orgId}/players/{playerId}/program.pdf`), fixed content-type `application/pdf`. `POST
+/api/v1/players/{playerProfileId}/program-pdf/upload-intent` + `POST .../confirm` (coach only);
+`GET /api/v1/players/me/home` returns the current signed download link as `programPdfUrl`.
+
+**RPE guide.** One PDF per organisation, undocumented in the original mockup but built as a
+sibling of Recording tips minus the video half: `rpe_guide` (org_id unique, pdf_object_key,
+pdf_content_type, updated_by_user_id, updated_at). `GET /api/v1/content/rpe-guide` — `{ pdfUrl?,
+updatedAt? }`, null when nothing has been uploaded yet. `POST
+/api/v1/content/rpe-guide/pdf-upload-intent` + `POST .../pdf` (confirm) — coach only, reusing the
+same `content.domain.ObjectStorage` port and the generic upload-intent/confirm DTOs Recording tips
+already defined.
 
 ### Tracking and communication
 
