@@ -302,11 +302,13 @@ training days from `apps/coach`:
   exist. Deleting a template never touches any player's already-copied rows.
 - `GET /api/v1/strength/training-days?playerProfileId=` — a player's own days, or (coach only) one
   client's days.
-- `PUT /api/v1/strength/players/{playerProfileId}/training-days` — replaces the whole day list for
-  that player; the request array's order becomes `sort_order`.
+- `PUT /api/v1/strength/players/{playerProfileId}/training-days` — sets the whole day list for
+  that player; the request array's order becomes `sort_order`. An item carrying an `id` updates that
+  day in place, one without is new, and days left out are deleted. Updating in place matters: a
+  delete-and-recreate would cascade away the day's exercises and the player's logs.
 - `GET /api/v1/strength/training-days/{trainingDayId}/exercises` — a day's exercise list.
-- `PUT /api/v1/strength/training-days/{trainingDayId}/exercises` — replaces the whole exercise
-  list on one day; each `libraryItemId` is resolved against the same-org `video_library_item`
+- `PUT /api/v1/strength/training-days/{trainingDayId}/exercises` — sets the whole exercise
+  list on one day, with the same `id` rules as the day list; each `libraryItemId` is resolved against the same-org `video_library_item`
   table, without forcing category `FITNESS` server-side (that filter lives in the coach's picker
   UI only, same convention as Drills).
 - The exercise video plays through the existing `GET /api/v1/drills/library/{itemId}/playback` —
@@ -342,6 +344,12 @@ already defined.
 
 - `session_log` — player_id, date, session_type, what_you_did, rpe, pain_score, notes. The player
   creates rows and can then only read them.
+- `exercise_log` — player_id, day_exercise_id, plan_week, unit (`LB` | `KG`), logged_at; unique per
+  player, exercise and week, with its sets in `exercise_log_set` (set_number, reps, weight; a null
+  weight is bodyweight). `PUT /api/v1/strength/day-exercises/{id}/logs/{planWeek} { unit, sets }`
+  is player only, for their own exercises and only weeks they have reached (`409` otherwise); no
+  sets deletes the log (`204`). `GET /api/v1/strength/training-days/{id}/logs?planWeek=` serves the
+  player and their coach.
 - `weekly_note` — player_id, plan_week (1-12, unique per player), body. Built in place of the
   planned `coach_note`: the coach's message is tied to a week of the plan. `GET
   /api/v1/strength/weekly-notes?playerProfileId=` returns a player only the weeks they have
