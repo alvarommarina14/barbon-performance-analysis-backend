@@ -75,6 +75,17 @@ public class DayExercise {
         this.sortOrder = sortOrder;
     }
 
+    public void revise(LibraryItem libraryItem, String setsRepsWk1, String setsRepsWk2, String setsRepsWk3,
+            String setsRepsWk4, String cueOverride, int sortOrder) {
+        this.libraryItem = libraryItem;
+        this.setsRepsWk1 = setsRepsWk1;
+        this.setsRepsWk2 = setsRepsWk2;
+        this.setsRepsWk3 = setsRepsWk3;
+        this.setsRepsWk4 = setsRepsWk4;
+        this.cueOverride = cueOverride;
+        this.sortOrder = sortOrder;
+    }
+
     public UUID getId() {
         return id;
     }

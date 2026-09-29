@@ -10,7 +10,7 @@ public interface TrainingDays {
 
     Optional<TrainingDay> findById(UUID trainingDayId);
 
-    void deleteAllByPlayerId(UUID playerProfileId);
+    void deleteAll(List<TrainingDay> trainingDays);
 
     List<TrainingDay> saveAll(List<TrainingDay> trainingDays);
 }

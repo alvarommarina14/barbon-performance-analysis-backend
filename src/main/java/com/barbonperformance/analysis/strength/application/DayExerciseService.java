@@ -17,7 +17,10 @@ import com.barbonperformance.analysis.user.domain.UserRole;
 import com.barbonperformance.analysis.video.domain.VideoAsset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,11 +56,12 @@ public class DayExerciseService {
         CoachProfile coach = coach(coachUserId);
         TrainingDay day = trainingDays.findById(trainingDayId)
                 .orElseThrow(() -> new NotFoundException("Training day " + trainingDayId + " not found"));
-        if (!day.getOrganization().getId().equals(coach.getOrganization().getId())) {
+        if (day.getPlayer().getCoach() == null || !day.getPlayer().getCoach().getId().equals(coach.getId())) {
             throw new NotFoundException("Training day " + trainingDayId + " not found");
         }
 
-        dayExercises.deleteAllByTrainingDayId(day.getId());
+        Map<UUID, DayExercise> existing = dayExercises.findAllByTrainingDayId(day.getId()).stream()
+                .collect(Collectors.toMap(DayExercise::getId, Function.identity()));
 
         List<DayExercise> toSave = new ArrayList<>();
         int order = 0;
@@ -66,10 +70,21 @@ public class DayExerciseService {
                     .filter(i -> i.getOrganization().getId().equals(coach.getOrganization().getId()))
                     .orElseThrow(() -> new NotFoundException(
                             "Exercise " + input.libraryItemId() + " not found"));
-            toSave.add(new DayExercise(coach.getOrganization(), day, item,
-                    input.setsRepsWk1(), input.setsRepsWk2(), input.setsRepsWk3(), input.setsRepsWk4(),
-                    input.cueOverride(), order++));
+            if (input.id() == null) {
+                toSave.add(new DayExercise(coach.getOrganization(), day, item,
+                        input.setsRepsWk1(), input.setsRepsWk2(), input.setsRepsWk3(), input.setsRepsWk4(),
+                        input.cueOverride(), order++));
+                continue;
+            }
+            DayExercise exercise = existing.remove(input.id());
+            if (exercise == null) {
+                throw new NotFoundException("Day exercise " + input.id() + " not found");
+            }
+            exercise.revise(item, input.setsRepsWk1(), input.setsRepsWk2(), input.setsRepsWk3(),
+                    input.setsRepsWk4(), input.cueOverride(), order++);
+            toSave.add(exercise);
         }
+        dayExercises.deleteAll(List.copyOf(existing.values()));
 
         return dayExercises.saveAll(toSave).stream()
                 .map(DayExerciseService::describe)

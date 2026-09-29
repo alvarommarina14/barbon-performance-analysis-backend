@@ -27,8 +27,8 @@ class JpaTrainingDays implements TrainingDays {
     }
 
     @Override
-    public void deleteAllByPlayerId(UUID playerProfileId) {
-        jpa.deleteAllByPlayerId(playerProfileId);
+    public void deleteAll(List<TrainingDay> trainingDays) {
+        jpa.deleteAll(trainingDays);
     }
 
     @Override

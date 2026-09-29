@@ -8,6 +8,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 interface TrainingDayJpaRepository extends JpaRepository<TrainingDay, UUID> {
 
     List<TrainingDay> findAllByPlayerIdOrderBySortOrder(UUID playerProfileId);
-
-    void deleteAllByPlayerId(UUID playerProfileId);
 }

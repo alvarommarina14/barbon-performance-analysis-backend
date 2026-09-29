@@ -3,6 +3,7 @@ package com.barbonperformance.analysis.strength.infrastructure.persistence;
 import com.barbonperformance.analysis.strength.domain.DayExercise;
 import com.barbonperformance.analysis.strength.domain.DayExercises;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
@@ -21,13 +22,18 @@ class JpaDayExercises implements DayExercises {
     }
 
     @Override
+    public Optional<DayExercise> findById(UUID dayExerciseId) {
+        return jpa.findById(dayExerciseId);
+    }
+
+    @Override
     public int countByTrainingDayId(UUID trainingDayId) {
         return jpa.countByTrainingDayId(trainingDayId);
     }
 
     @Override
-    public void deleteAllByTrainingDayId(UUID trainingDayId) {
-        jpa.deleteAllByTrainingDayId(trainingDayId);
+    public void deleteAll(List<DayExercise> exercises) {
+        jpa.deleteAll(exercises);
     }
 
     @Override

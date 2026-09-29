@@ -72,6 +72,16 @@ public class TrainingDay {
         this.sortOrder = sortOrder;
     }
 
+    public void revise(String dayLabel, String title, String focus, Integer durationMinutes,
+            TrainingDayKind kind, int sortOrder) {
+        this.dayLabel = dayLabel;
+        this.title = title;
+        this.focus = focus;
+        this.durationMinutes = durationMinutes;
+        this.kind = kind;
+        this.sortOrder = sortOrder;
+    }
+
     public UUID getId() {
         return id;
     }

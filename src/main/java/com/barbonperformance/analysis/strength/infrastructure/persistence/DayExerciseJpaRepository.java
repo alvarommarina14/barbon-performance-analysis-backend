@@ -10,6 +10,4 @@ interface DayExerciseJpaRepository extends JpaRepository<DayExercise, UUID> {
     List<DayExercise> findAllByTrainingDayIdOrderBySortOrder(UUID trainingDayId);
 
     int countByTrainingDayId(UUID trainingDayId);
-
-    void deleteAllByTrainingDayId(UUID trainingDayId);
 }

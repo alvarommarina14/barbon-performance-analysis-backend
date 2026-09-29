@@ -15,7 +15,10 @@ import com.barbonperformance.analysis.user.domain.PlayerProfiles;
 import com.barbonperformance.analysis.user.domain.UserRole;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,19 +53,28 @@ public class TrainingDayService {
     public List<TrainingDayView> replaceForPlayer(UUID coachUserId, UUID playerProfileId,
             ReplaceTrainingDaysRequest request) {
         PlayerProfile player = loadOwnedPlayer(coachUserId, playerProfileId);
-
-        trainingDays.deleteAllByPlayerId(player.getId());
+        Map<UUID, TrainingDay> existing = trainingDays.findAllByPlayerId(player.getId()).stream()
+                .collect(Collectors.toMap(TrainingDay::getId, Function.identity()));
 
         List<TrainingDay> toSave = new ArrayList<>();
         int order = 0;
         for (TrainingDayInput input : request.days()) {
-            toSave.add(new TrainingDay(player.getOrganization(), player, input.dayLabel(),
-                    input.title(), input.focus(), input.durationMinutes(), input.kind(), order++));
+            if (input.id() == null) {
+                toSave.add(new TrainingDay(player.getOrganization(), player, input.dayLabel(),
+                        input.title(), input.focus(), input.durationMinutes(), input.kind(), order++));
+                continue;
+            }
+            TrainingDay day = existing.remove(input.id());
+            if (day == null) {
+                throw new NotFoundException("Training day " + input.id() + " not found");
+            }
+            day.revise(input.dayLabel(), input.title(), input.focus(), input.durationMinutes(), input.kind(),
+                    order++);
+            toSave.add(day);
         }
+        trainingDays.deleteAll(List.copyOf(existing.values()));
 
-        return trainingDays.saveAll(toSave).stream()
-                .map(day -> describe(day, 0))
-                .toList();
+        return describeAll(trainingDays.saveAll(toSave));
     }
 
     private List<TrainingDayView> forPlayer(UUID userId, UUID playerProfileId) {
