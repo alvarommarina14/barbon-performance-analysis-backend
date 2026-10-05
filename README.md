@@ -29,6 +29,9 @@ docker compose -f infra/docker-compose.yml up -d
 ./gradlew bootRun     # http://localhost:8080, docs at /swagger-ui.html
 ```
 
+Production runs on Railway with Cloudflare Stream and R2; the steps are in
+[`docs/deploy.md`](docs/deploy.md).
+
 ## Running the video loop locally
 
 Cloudflare Stream is not free, so development uses a **local video provider** — `tusd` +
