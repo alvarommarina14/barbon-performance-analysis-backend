@@ -48,9 +48,9 @@ public final class StrengthDtos {
 
     // id names an existing day to update in place; without one the day is new. Updating in place
     // keeps the day's exercises and the player's logs, which a delete-and-recreate would cascade away.
+    // There is no label: a day is named "Day N" after its position in the list.
     public record TrainingDayInput(
             UUID id,
-            @NotBlank @Size(max = 50) String dayLabel,
             @NotBlank @Size(max = 200) String title,
             @Size(max = 500) String focus,
             Integer durationMinutes,

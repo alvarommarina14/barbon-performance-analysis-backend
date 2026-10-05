@@ -1,6 +1,7 @@
 package com.barbonperformance.analysis.strength;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import com.barbonperformance.analysis.AbstractIntegrationTest;
 import com.barbonperformance.analysis.strength.application.dto.ExerciseLogDtos.ExerciseLogView;
@@ -52,7 +53,7 @@ class ExerciseLogIT extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus().isOk();
 
-        day = saveDays(new TrainingDayInput(null, "Day A", "Lower body", null, 45, TrainingDayKind.STRENGTH)).get(0);
+        day = saveDays(new TrainingDayInput(null, "Lower body", null, 45, TrainingDayKind.STRENGTH)).get(0);
         exercise = saveExercises(day.id(), new DayExerciseInput(null, libraryItemId, "3x8", "3x8", "4x6", "2x8", null))
                 .get(0);
     }
@@ -91,8 +92,8 @@ class ExerciseLogIT extends AbstractIntegrationTest {
         log(1, new LogExerciseRequest(WeightUnit.LB, List.of(new LoggedSetInput(10, new BigDecimal("135")))))
                 .expectStatus().isOk();
 
-        saveDays(new TrainingDayInput(day.id(), "Day A", "Lower body — heavier", null, 50, TrainingDayKind.STRENGTH),
-                new TrainingDayInput(null, "Day B", "Upper body", null, 40, TrainingDayKind.STRENGTH));
+        saveDays(new TrainingDayInput(day.id(), "Lower body — heavier", null, 50, TrainingDayKind.STRENGTH),
+                new TrainingDayInput(null, "Upper body", null, 40, TrainingDayKind.STRENGTH));
         saveExercises(day.id(), new DayExerciseInput(exercise.id(), libraryItemId, "4x6", "4x6", "5x5", "2x8", "Brace"));
 
         List<ExerciseLogView> seenByPlayer = client.get()
@@ -105,6 +106,18 @@ class ExerciseLogIT extends AbstractIntegrationTest {
                 .getResponseBody();
 
         assertThat(seenByPlayer).extracting(ExerciseLogView::dayExerciseId).containsExactly(exercise.id());
+    }
+
+    @Test
+    void daysAreNumberedByTheirPositionAndRenumberedWhenReordered() {
+        List<TrainingDayView> saved = saveDays(
+                new TrainingDayInput(null, "Upper body", null, 40, TrainingDayKind.STRENGTH),
+                new TrainingDayInput(day.id(), "Lower body", null, 45, TrainingDayKind.STRENGTH));
+
+        assertThat(saved).extracting(TrainingDayView::dayLabel, TrainingDayView::title)
+                .containsExactly(
+                        tuple("Day 1", "Upper body"),
+                        tuple("Day 2", "Lower body"));
     }
 
     @Test

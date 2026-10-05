@@ -60,26 +60,29 @@ public class TrainingDay {
         // for JPA
     }
 
-    public TrainingDay(Organization organization, PlayerProfile player, String dayLabel, String title,
-            String focus, Integer durationMinutes, TrainingDayKind kind, int sortOrder) {
+    public TrainingDay(Organization organization, PlayerProfile player, String title, String focus,
+            Integer durationMinutes, TrainingDayKind kind, int sortOrder) {
         this.organization = organization;
         this.player = player;
-        this.dayLabel = dayLabel;
         this.title = title;
         this.focus = focus;
         this.durationMinutes = durationMinutes;
         this.kind = kind;
-        this.sortOrder = sortOrder;
+        place(sortOrder);
     }
 
-    public void revise(String dayLabel, String title, String focus, Integer durationMinutes,
-            TrainingDayKind kind, int sortOrder) {
-        this.dayLabel = dayLabel;
+    public void revise(String title, String focus, Integer durationMinutes, TrainingDayKind kind,
+            int sortOrder) {
         this.title = title;
         this.focus = focus;
         this.durationMinutes = durationMinutes;
         this.kind = kind;
+        place(sortOrder);
+    }
+
+    private void place(int sortOrder) {
         this.sortOrder = sortOrder;
+        this.dayLabel = "Day " + (sortOrder + 1);
     }
 
     public UUID getId() {

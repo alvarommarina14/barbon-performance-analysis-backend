@@ -60,16 +60,15 @@ public class TrainingDayService {
         int order = 0;
         for (TrainingDayInput input : request.days()) {
             if (input.id() == null) {
-                toSave.add(new TrainingDay(player.getOrganization(), player, input.dayLabel(),
-                        input.title(), input.focus(), input.durationMinutes(), input.kind(), order++));
+                toSave.add(new TrainingDay(player.getOrganization(), player, input.title(), input.focus(),
+                        input.durationMinutes(), input.kind(), order++));
                 continue;
             }
             TrainingDay day = existing.remove(input.id());
             if (day == null) {
                 throw new NotFoundException("Training day " + input.id() + " not found");
             }
-            day.revise(input.dayLabel(), input.title(), input.focus(), input.durationMinutes(), input.kind(),
-                    order++);
+            day.revise(input.title(), input.focus(), input.durationMinutes(), input.kind(), order++);
             toSave.add(day);
         }
         trainingDays.deleteAll(List.copyOf(existing.values()));

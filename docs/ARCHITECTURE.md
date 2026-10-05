@@ -276,7 +276,9 @@ The coach manages the library and assigns drills from `apps/coach`:
   a surrogate id; applying one to a player is a one-time copy into that player's own rows, not a
   live link — editing either side afterward never affects the other.
 - `training_day` — org_id, player_id, day_label, title, focus, duration_minutes, `kind`
-  (`REHAB` | `STRENGTH`), sort_order
+  (`REHAB` | `STRENGTH`), sort_order. day_label is not typed by the coach: it is always
+  "Day {sort_order + 1}", so adding, removing or reordering days renumbers them (V17 renumbered
+  the days that already had free-text labels).
 - `day_exercise` — org_id, training_day_id, library_item_id (reuses `video_library_item` from
   Drills, category `FITNESS`; no second video pipeline), sets_reps_wk1..wk4, cue_override,
   sort_order
