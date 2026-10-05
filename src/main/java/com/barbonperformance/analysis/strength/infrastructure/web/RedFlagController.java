@@ -3,7 +3,6 @@ package com.barbonperformance.analysis.strength.infrastructure.web;
 import com.barbonperformance.analysis.auth.domain.AuthenticatedUser;
 import com.barbonperformance.analysis.strength.application.RedFlagService;
 import com.barbonperformance.analysis.strength.application.dto.RedFlagDtos.RedFlagView;
-import com.barbonperformance.analysis.strength.application.dto.RedFlagDtos.RedFlagsView;
 import com.barbonperformance.analysis.strength.application.dto.RedFlagDtos.ReplaceRedFlagsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -30,25 +29,32 @@ public class RedFlagController {
     }
 
     @GetMapping("/red-flags")
-    @Operation(summary = "Red flags for everyone, plus the named player's own")
-    RedFlagsView redFlags(@AuthenticationPrincipal AuthenticatedUser principal,
+    @Operation(summary = "One player's red flags")
+    List<RedFlagView> forPlayer(@AuthenticationPrincipal AuthenticatedUser principal,
             @RequestParam(required = false) UUID playerProfileId) {
-        return redFlags.listForCaller(principal.id(), playerProfileId);
-    }
-
-    @PutMapping("/red-flags")
-    @PreAuthorize("hasRole('COACH')")
-    @Operation(summary = "Replace the red flags every client sees")
-    List<RedFlagView> replaceForEveryone(@AuthenticationPrincipal AuthenticatedUser principal,
-            @Valid @RequestBody ReplaceRedFlagsRequest request) {
-        return redFlags.replaceForEveryone(principal.id(), request);
+        return redFlags.forPlayer(principal.id(), playerProfileId);
     }
 
     @PutMapping("/players/{playerProfileId}/red-flags")
     @PreAuthorize("hasRole('COACH')")
-    @Operation(summary = "Replace one client's own red flags")
+    @Operation(summary = "Replace one client's red flags")
     List<RedFlagView> replaceForPlayer(@AuthenticationPrincipal AuthenticatedUser principal,
             @PathVariable UUID playerProfileId, @Valid @RequestBody ReplaceRedFlagsRequest request) {
         return redFlags.replaceForPlayer(principal.id(), playerProfileId, request);
+    }
+
+    @GetMapping("/red-flag-library")
+    @PreAuthorize("hasRole('COACH')")
+    @Operation(summary = "The red flags a coach picks from for any client")
+    List<RedFlagView> library(@AuthenticationPrincipal AuthenticatedUser principal) {
+        return redFlags.library(principal.id());
+    }
+
+    @PutMapping("/red-flag-library")
+    @PreAuthorize("hasRole('COACH')")
+    @Operation(summary = "Replace the red flag library")
+    List<RedFlagView> replaceLibrary(@AuthenticationPrincipal AuthenticatedUser principal,
+            @Valid @RequestBody ReplaceRedFlagsRequest request) {
+        return redFlags.replaceLibrary(principal.id(), request);
     }
 }

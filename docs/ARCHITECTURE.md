@@ -356,11 +356,15 @@ already defined.
   reached, so notes written ahead never leak; the coach sees all twelve. `PUT
   /api/v1/strength/players/{playerProfileId}/weekly-notes/{planWeek} { body }` writes one week (coach
   only); an empty body deletes it. Each note carries `weekStartsOn`, derived from the plan start.
-- `red_flag` — **nullable player_id**, so a row is either global or player-specific; title, body,
-  sort_order. `GET /api/v1/strength/red-flags?playerProfileId=` returns `{ forEveryone, forPlayer }`
-  (a coach naming no player gets the org-wide list only). `PUT /api/v1/strength/red-flags` and
-  `PUT /api/v1/strength/players/{playerProfileId}/red-flags` replace each list whole (coach only) —
-  safe here because nothing references a red flag.
+- `red_flag` — **nullable player_id**: a row without one is an entry in the org's red flag
+  library, a row with one belongs to that player; title, body, sort_order. The library works like
+  cycle phase templates: the coach picks entries for each client and the pick is a one-time copy
+  into the player's rows, which the coach can then edit or extend with ones specific to that
+  player's condition. A player only ever sees their own rows, never the library. (V14's comment
+  still describes the first design, where library rows applied to every client.) `GET
+  /api/v1/strength/red-flags?playerProfileId=` returns the player's list; coach-only `GET`/`PUT
+  /api/v1/strength/red-flag-library` and `PUT /api/v1/strength/players/{playerProfileId}/red-flags`
+  replace each list whole — safe here because nothing references a red flag.
 - `daily_routine` — one row per org: warmup_video_asset_id, recovery_video_asset_id (both
   `video_asset` kind `PROTOCOL`) and one PDF with its file details. Built in place of the planned
   multi-row `protocol` table, since the product has exactly these three pieces. `GET

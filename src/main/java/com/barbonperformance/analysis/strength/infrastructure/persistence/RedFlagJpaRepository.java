@@ -15,7 +15,7 @@ interface RedFlagJpaRepository extends JpaRepository<RedFlag, UUID> {
 
     @Modifying
     @Query("delete from RedFlag f where f.organization.id = :orgId and f.player is null")
-    void deleteAllForEveryone(UUID orgId);
+    void deleteLibrary(UUID orgId);
 
     @Modifying
     @Query("delete from RedFlag f where f.player.id = :playerProfileId")

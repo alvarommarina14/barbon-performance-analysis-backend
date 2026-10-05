@@ -5,11 +5,11 @@ import java.util.UUID;
 
 public interface RedFlags {
 
-    List<RedFlag> findAllForEveryone(UUID orgId);
+    List<RedFlag> findLibrary(UUID orgId);
 
     List<RedFlag> findAllByPlayerId(UUID playerProfileId);
 
-    void deleteAllForEveryone(UUID orgId);
+    void deleteLibrary(UUID orgId);
 
     void deleteAllByPlayerId(UUID playerProfileId);
 

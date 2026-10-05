@@ -22,7 +22,4 @@ public final class RedFlagDtos {
 
     public record RedFlagView(@NotNull UUID id, @NotNull String title, String body) {
     }
-
-    public record RedFlagsView(@NotNull List<RedFlagView> forEveryone, @NotNull List<RedFlagView> forPlayer) {
-    }
 }

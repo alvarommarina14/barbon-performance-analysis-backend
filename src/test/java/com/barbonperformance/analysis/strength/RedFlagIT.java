@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.barbonperformance.analysis.AbstractIntegrationTest;
 import com.barbonperformance.analysis.strength.application.dto.RedFlagDtos.RedFlagInput;
 import com.barbonperformance.analysis.strength.application.dto.RedFlagDtos.RedFlagView;
-import com.barbonperformance.analysis.strength.application.dto.RedFlagDtos.RedFlagsView;
 import com.barbonperformance.analysis.strength.application.dto.RedFlagDtos.ReplaceRedFlagsRequest;
 import com.barbonperformance.analysis.user.domain.CoachProfile;
 import com.barbonperformance.analysis.user.domain.PlayerProfile;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 class RedFlagIT extends AbstractIntegrationTest {
 
     private static final String PASSWORD = "a-long-enough-password";
+    private static final String LIBRARY = "/api/v1/strength/red-flag-library";
 
     private PlayerProfile player;
     private PlayerProfile otherPlayer;
@@ -31,50 +31,58 @@ class RedFlagIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void aPlayerSeesTheSharedFlagsAndOnlyTheirOwn() {
-        replace("/api/v1/strength/red-flags", List.of(
+    void aPlayerSeesOnlyTheFlagsTheirCoachGaveThemAndNeverTheLibrary() {
+        replace(LIBRARY, List.of(
                 new RedFlagInput("Sharp or electric pain", "Stop the exercise and message your coach."),
                 new RedFlagInput("Joint pain that lingers over 48 hours", null)));
-        replace("/api/v1/strength/players/" + player.getId() + "/red-flags", List.of(
+        replace(playerFlags(player), List.of(
+                new RedFlagInput("Sharp or electric pain", "Stop the exercise and message your coach."),
                 new RedFlagInput("Elbow pain above 3/10", "Skip the pressing work that day.")));
-        replace("/api/v1/strength/players/" + otherPlayer.getId() + "/red-flags", List.of(
-                new RedFlagInput("Someone else's knee", null)));
+        replace(playerFlags(otherPlayer), List.of(new RedFlagInput("Someone else's knee", null)));
 
-        RedFlagsView seen = client.get().uri("/api/v1/strength/red-flags")
-                .header(HttpHeaders.AUTHORIZATION, bearerFor("player@example.com", PASSWORD))
-                .exchange()
-                .expectStatus().isOk()
-                .returnResult(RedFlagsView.class)
-                .getResponseBody();
-
-        assertThat(seen.forEveryone()).extracting(RedFlagView::title)
-                .containsExactly("Sharp or electric pain", "Joint pain that lingers over 48 hours");
-        assertThat(seen.forPlayer()).extracting(RedFlagView::title).containsExactly("Elbow pain above 3/10");
+        assertThat(read("/api/v1/strength/red-flags", bearerFor("player@example.com", PASSWORD)))
+                .extracting(RedFlagView::title)
+                .containsExactly("Sharp or electric pain", "Elbow pain above 3/10");
     }
 
     @Test
-    void replacingTheListDropsTheFlagsThatWereLeftOut() {
-        replace("/api/v1/strength/red-flags", List.of(new RedFlagInput("Old", null), new RedFlagInput("Kept", null)));
-        replace("/api/v1/strength/red-flags", List.of(new RedFlagInput("Kept", null)));
+    void aClientWithNoFlagsPickedSeesNone() {
+        replace(LIBRARY, List.of(new RedFlagInput("Sharp or electric pain", null)));
 
-        RedFlagsView seenByCoach = client.get().uri("/api/v1/strength/red-flags")
-                .header(HttpHeaders.AUTHORIZATION, coachAuth)
-                .exchange()
-                .expectStatus().isOk()
-                .returnResult(RedFlagsView.class)
-                .getResponseBody();
-
-        assertThat(seenByCoach.forEveryone()).extracting(RedFlagView::title).containsExactly("Kept");
-        assertThat(seenByCoach.forPlayer()).isEmpty();
+        assertThat(read("/api/v1/strength/red-flags", bearerFor("player@example.com", PASSWORD))).isEmpty();
     }
 
     @Test
-    void aPlayerCannotWriteRedFlags() {
-        client.put().uri("/api/v1/strength/red-flags")
-                .header(HttpHeaders.AUTHORIZATION, bearerFor("player@example.com", PASSWORD))
+    void editingTheLibraryLeavesTheCopiesClientsAlreadyHave() {
+        replace(LIBRARY, List.of(new RedFlagInput("Sharp pain", null)));
+        replace(playerFlags(player), List.of(new RedFlagInput("Sharp pain", null)));
+
+        replace(LIBRARY, List.of(new RedFlagInput("Sharp or electric pain", null)));
+
+        assertThat(read(LIBRARY, coachAuth)).extracting(RedFlagView::title)
+                .containsExactly("Sharp or electric pain");
+        assertThat(read("/api/v1/strength/red-flags?playerProfileId=" + player.getId(), coachAuth))
+                .extracting(RedFlagView::title)
+                .containsExactly("Sharp pain");
+    }
+
+    @Test
+    void aPlayerCannotReadTheLibraryOrWriteRedFlags() {
+        String playerAuth = bearerFor("player@example.com", PASSWORD);
+
+        client.get().uri(LIBRARY)
+                .header(HttpHeaders.AUTHORIZATION, playerAuth)
+                .exchange()
+                .expectStatus().isForbidden();
+        client.put().uri(playerFlags(player))
+                .header(HttpHeaders.AUTHORIZATION, playerAuth)
                 .body(new ReplaceRedFlagsRequest(List.of(new RedFlagInput("Nope", null))))
                 .exchange()
                 .expectStatus().isForbidden();
+    }
+
+    private static String playerFlags(PlayerProfile target) {
+        return "/api/v1/strength/players/" + target.getId() + "/red-flags";
     }
 
     private void replace(String uri, List<RedFlagInput> flags) {
@@ -83,5 +91,14 @@ class RedFlagIT extends AbstractIntegrationTest {
                 .body(new ReplaceRedFlagsRequest(flags))
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    private List<RedFlagView> read(String uri, String auth) {
+        return List.of(client.get().uri(uri)
+                .header(HttpHeaders.AUTHORIZATION, auth)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(RedFlagView[].class)
+                .getResponseBody());
     }
 }

@@ -50,7 +50,7 @@ public class RedFlag {
         this.sortOrder = sortOrder;
     }
 
-    public static RedFlag forEveryone(Organization organization, String title, String body, int sortOrder) {
+    public static RedFlag inLibrary(Organization organization, String title, String body, int sortOrder) {
         return new RedFlag(organization, null, title, body, sortOrder);
     }
 

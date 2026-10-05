@@ -16,7 +16,7 @@ class JpaRedFlags implements RedFlags {
     }
 
     @Override
-    public List<RedFlag> findAllForEveryone(UUID orgId) {
+    public List<RedFlag> findLibrary(UUID orgId) {
         return jpa.findAllByOrganizationIdAndPlayerIsNullOrderBySortOrder(orgId);
     }
 
@@ -26,8 +26,8 @@ class JpaRedFlags implements RedFlags {
     }
 
     @Override
-    public void deleteAllForEveryone(UUID orgId) {
-        jpa.deleteAllForEveryone(orgId);
+    public void deleteLibrary(UUID orgId) {
+        jpa.deleteLibrary(orgId);
     }
 
     @Override
