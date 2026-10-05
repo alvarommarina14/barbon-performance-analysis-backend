@@ -15,11 +15,18 @@ public final class ContentDtos {
     public record RecordingTipsView(
             UUID videoAssetId,
             VideoAssetStatus videoStatus,
+            String videoFileName,
+            Long videoSizeBytes,
+            Integer videoDurationSeconds,
+            Instant videoUploadedAt,
             String pdfUrl,
+            String pdfFileName,
+            Long pdfSizeBytes,
+            Instant pdfUploadedAt,
             Instant updatedAt) {
     }
 
-    public record VideoUploadIntentRequest(@Positive long sizeBytes) {
+    public record VideoUploadIntentRequest(@Positive long sizeBytes, @NotBlank String fileName) {
     }
 
     public record VideoUploadIntentResponse(
@@ -49,8 +56,20 @@ public final class ContentDtos {
             @NotNull String objectKey) {
     }
 
-    public record ConfirmPdfRequest(
+    // Shared by every "confirm a plain PDF upload" endpoint (recording tips, RPE guide): each
+    // keeps its own object key template, but the confirmation payload is always the same shape.
+    public record ConfirmPdfUploadRequest(
             @NotBlank String objectKey,
-            @NotBlank String contentType) {
+            @NotBlank String contentType,
+            @NotBlank String fileName,
+            @Positive long sizeBytes) {
+    }
+
+    public record RpeGuideView(
+            String pdfUrl,
+            String pdfFileName,
+            Long pdfSizeBytes,
+            Instant pdfUploadedAt,
+            Instant updatedAt) {
     }
 }

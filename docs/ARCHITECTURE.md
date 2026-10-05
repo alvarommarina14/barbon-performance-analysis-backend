@@ -218,8 +218,8 @@ painful migration.
   time, and every table is `org_id`-scoped for that.
 - `app_user` — email, password_hash, role (`PLAYER` | `COACH` | `ADMIN`), name, avatar, timezone
 - `coach_profile` — user_id, booking_url, bio
-- `player_profile` — user_id, coach_id, `membership_tier` (`BASE` | `PRO`), current_week,
-  cycle_started_at, program_pdf_key, next_call_at, injury_notes
+- `player_profile` — user_id, coach_id, `membership_tier` (`BASE` | `PRO`), plan_started_at,
+  program_pdf_key, next_call_at, injury_notes
 - `refresh_token` — rotating, revocable
 
 The coach self-registers from the desktop app (`POST /api/v1/auth/register-coach`). It is open
@@ -268,21 +268,122 @@ The coach manages the library and assigns drills from `apps/coach`:
 
 ### Strength and conditioning
 
-- `cycle_phase` — global, four rows: week_number, phase_name, goal, sets_reps, rpe_range
-- `training_day` — player_id, day_label, title, focus, duration, `kind` (`REHAB` | `STRENGTH`)
-- `day_exercise` — training_day_id, library_item_id, sets_reps_wk1..wk4, cue_override, sort_order
+- `cycle_phase` — **per-player**, not shared: `org_id`, `player_id` (nullable), `template_name`
+  (nullable), `week_number`, `phase_name`, `goal`, `sets_reps`, `rpe_range`. Exactly one of
+  `player_id`/`template_name` is set per row — a row belongs either to a player's own cycle or to
+  a reusable, named org-level template, never both. A template is nothing more than four
+  `cycle_phase` rows with no player, grouped and addressed by `(org_id, template_name)` instead of
+  a surrogate id; applying one to a player is a one-time copy into that player's own rows, not a
+  live link — editing either side afterward never affects the other.
+- `training_day` — org_id, player_id, day_label, title, focus, duration_minutes, `kind`
+  (`REHAB` | `STRENGTH`), sort_order. day_label is not typed by the coach: it is always
+  "Day {sort_order + 1}", so adding, removing or reordering days renumbers them (V17 renumbered
+  the days that already had free-text labels).
+- `day_exercise` — org_id, training_day_id, library_item_id (reuses `video_library_item` from
+  Drills, category `FITNESS`; no second video pipeline), sets_reps_wk1..wk4, cue_override,
+  sort_order
+
+The `strength` module owns all three. The coach manages templates, a client's cycle and a client's
+training days from `apps/coach`:
+
+- `GET /api/v1/strength/cycle-phases?playerProfileId=` — a player's own four weeks, or (coach
+  only) one client's.
+- `PUT /api/v1/strength/players/{playerProfileId}/cycle-phases` — coach only; replaces that
+  player's four weeks directly; the request must contain exactly weeks 1-4, once each (`409`
+  otherwise); upserts by `(player_id, week_number)`.
+- `POST /api/v1/strength/players/{playerProfileId}/cycle-phases/apply-template` — coach only, body
+  `{ templateName }`; copies the named template's weeks into that player's own rows (`404` if the
+  name doesn't exist in the coach's org).
+- `GET /api/v1/strength/cycle-phase-templates` — coach only; every template in the org, weeks
+  nested inline.
+- `PUT /api/v1/strength/cycle-phase-templates/{name}` — coach only; creates the template if the
+  name is new or replaces it if it already exists (upsert by name); the request must contain
+  exactly weeks 1-4, once each (`409` otherwise). There is no separate create/rename step — a
+  template is always written whole.
+- `DELETE /api/v1/strength/cycle-phase-templates/{name}` — coach only; `404` if the name doesn't
+  exist. Deleting a template never touches any player's already-copied rows.
+- `GET /api/v1/strength/training-days?playerProfileId=` — a player's own days, or (coach only) one
+  client's days.
+- `PUT /api/v1/strength/players/{playerProfileId}/training-days` — sets the whole day list for
+  that player; the request array's order becomes `sort_order`. An item carrying an `id` updates that
+  day in place, one without is new, and days left out are deleted. Updating in place matters: a
+  delete-and-recreate would cascade away the day's exercises and the player's logs.
+- `GET /api/v1/strength/training-days/{trainingDayId}/exercises` — a day's exercise list.
+- `PUT /api/v1/strength/training-days/{trainingDayId}/exercises` — sets the whole exercise
+  list on one day, with the same `id` rules as the day list; each `libraryItemId` is resolved against the same-org `video_library_item`
+  table, without forcing category `FITNESS` server-side (that filter lives in the coach's picker
+  UI only, same convention as Drills).
+- The exercise video plays through the existing `GET /api/v1/drills/library/{itemId}/playback` —
+  no new playback endpoint.
+
+**The twelve-week plan.** A plan runs twelve weeks: the four-week cycle three times over.
+`player_profile.plan_started_at` is the only stored fact; the plan week (1-12) is derived from it
+and today's date in the player's timezone (`user.domain.PlanCalendar`), and the cycle week (1-4)
+from the plan week. There is no stored "current week" to fall out of date. `PUT
+/api/v1/strength/players/{playerProfileId}/plan { startDate }` (coach only; null clears it) and `GET
+/api/v1/strength/plan?playerProfileId=` return `{ startDate, planWeek, planWeeks, cycleWeek,
+unlockedWeeks }`; `planWeek` is null before the start and after week 12, and `unlockedWeeks` is how
+many weeks the player has reached (0-12). The cycle week picks out which of the player's own
+`cycle_phase` rows is "now"; `GET /api/v1/players/me/home` returns it as `currentPhase` (nullable —
+null outside the plan or until that week's row is loaded). Shown to every membership tier today; BASE/PRO gating on this card is deliberately not
+built yet.
+
+**Program PDF.** `player_profile.program_pdf_key` (existing since Phase 1, unused until now) is a
+plain object behind a presigned PUT, at a deterministic key per player
+(`content/{orgId}/players/{playerId}/program.pdf`), fixed content-type `application/pdf`. `POST
+/api/v1/players/{playerProfileId}/program-pdf/upload-intent` + `POST .../confirm` (coach only);
+`GET /api/v1/players/me/home` returns the current signed download link as `programPdfUrl`.
+
+**RPE guide.** One PDF per organisation, undocumented in the original mockup but built as a
+sibling of Recording tips minus the video half: `rpe_guide` (org_id unique, pdf_object_key,
+pdf_content_type, updated_by_user_id, updated_at). `GET /api/v1/content/rpe-guide` — `{ pdfUrl?,
+updatedAt? }`, null when nothing has been uploaded yet. `POST
+/api/v1/content/rpe-guide/pdf-upload-intent` + `POST .../pdf` (confirm) — coach only, reusing the
+same `content.domain.ObjectStorage` port and the generic upload-intent/confirm DTOs Recording tips
+already defined.
 
 ### Tracking and communication
 
 - `session_log` — player_id, date, session_type, what_you_did, rpe, pain_score, notes. The player
   creates rows and can then only read them.
-- `coach_note` — player_id, body, published_at
-- `red_flag` — **nullable player_id**, so a row is either global or player-specific
-- `protocol` — title, type (`WARMUP` | `RECOVERY`), pdf_object_key, video_asset_id
+- `exercise_log` — player_id, day_exercise_id, plan_week, unit (`LB` | `KG`), logged_at; unique per
+  player, exercise and week, with its sets in `exercise_log_set` (set_number, reps, weight; a null
+  weight is bodyweight). `PUT /api/v1/strength/day-exercises/{id}/logs/{planWeek} { unit, sets }`
+  is player only, for their own exercises and only weeks they have reached (`409` otherwise); no
+  sets deletes the log (`204`). `GET /api/v1/strength/training-days/{id}/logs?planWeek=` serves the
+  player and their coach.
+- `weekly_note` — player_id, plan_week (1-12, unique per player), body. Built in place of the
+  planned `coach_note`: the coach's message is tied to a week of the plan. `GET
+  /api/v1/strength/weekly-notes?playerProfileId=` returns a player only the weeks they have
+  reached, so notes written ahead never leak; the coach sees all twelve. `PUT
+  /api/v1/strength/players/{playerProfileId}/weekly-notes/{planWeek} { body }` writes one week (coach
+  only); an empty body deletes it. Each note carries `weekStartsOn`, derived from the plan start.
+- `red_flag` — **nullable player_id**: a row without one is an entry in the org's red flag
+  library, a row with one belongs to that player; title, body, sort_order. The library works like
+  cycle phase templates: the coach picks entries for each client and the pick is a one-time copy
+  into the player's rows, which the coach can then edit or extend with ones specific to that
+  player's condition. A player only ever sees their own rows, never the library. (V14's comment
+  still describes the first design, where library rows applied to every client.) `GET
+  /api/v1/strength/red-flags?playerProfileId=` returns the player's list; coach-only `GET`/`PUT
+  /api/v1/strength/red-flag-library` and `PUT /api/v1/strength/players/{playerProfileId}/red-flags`
+  replace each list whole — safe here because nothing references a red flag.
+- `daily_routine` — one row per org: warmup_video_asset_id, recovery_video_asset_id (both
+  `video_asset` kind `PROTOCOL`) and one PDF with its file details. Built in place of the planned
+  multi-row `protocol` table, since the product has exactly these three pieces. `GET
+  /api/v1/content/daily-routine`, `GET .../playback?part=WARMUP|RECOVERY` (its own entitlement,
+  like recording tips), and coach-only `POST .../video-upload-intent { part, sizeBytes, fileName }`,
+  `POST .../video { part, videoAssetId }`, `POST .../pdf-upload-intent`, `POST .../pdf`. Every PDF
+  confirm (daily routine, recording tips, RPE guide, program PDF) rejects an object key other than
+  the one its upload intent handed out, with `409`.
 - `notification` and `push_token` (user_id, expo_token, platform)
 
-**Booking** is not built. `coach_profile.booking_url` plus `player_profile.next_call_at`, with
-Cal.com embedded — the same approach as the mockup.
+**Booking** is a link, the way a recruiter sends one: the coach pastes the URL of their booking
+page (a Google Calendar appointment schedule, Calendly…) and the player's app opens it. `GET` and
+`PUT /api/v1/coach/booking-link { bookingUrl }` (coach only; https only, blank clears it) write
+`coach_profile.booking_url`, which `GET /api/v1/players/me/home` already returns in `coach`. The app
+does not read the coach's calendar, so it cannot know when the next call is: syncing with Google
+Calendar, a one-call-every-14-days rule and a "Your next call" date (`player_profile.next_call_at`,
+still unwritten) are deferred until that rule is defined.
 
 ### Recording tips
 

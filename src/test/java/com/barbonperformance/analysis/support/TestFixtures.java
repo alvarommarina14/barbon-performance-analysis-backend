@@ -1,5 +1,8 @@
 package com.barbonperformance.analysis.support;
 
+import com.barbonperformance.analysis.drills.domain.DrillCategory;
+import com.barbonperformance.analysis.drills.domain.LibraryItem;
+import com.barbonperformance.analysis.drills.domain.LibraryItems;
 import com.barbonperformance.analysis.organization.domain.Organization;
 import com.barbonperformance.analysis.organization.domain.Organizations;
 import com.barbonperformance.analysis.user.domain.AppUser;
@@ -9,6 +12,9 @@ import com.barbonperformance.analysis.user.domain.CoachProfiles;
 import com.barbonperformance.analysis.user.domain.PlayerProfile;
 import com.barbonperformance.analysis.user.domain.PlayerProfiles;
 import com.barbonperformance.analysis.user.domain.UserRole;
+import com.barbonperformance.analysis.video.domain.VideoAsset;
+import com.barbonperformance.analysis.video.domain.VideoAssetKind;
+import com.barbonperformance.analysis.video.domain.VideoAssets;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +29,25 @@ public class TestFixtures {
     private final CoachProfiles coachProfiles;
     private final PlayerProfiles playerProfiles;
     private final PasswordEncoder passwordEncoder;
+    private final VideoAssets videoAssets;
+    private final LibraryItems libraryItems;
 
     public TestFixtures(Organizations organizations, AppUsers users,
             CoachProfiles coachProfiles, PlayerProfiles playerProfiles,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, VideoAssets videoAssets, LibraryItems libraryItems) {
         this.organizations = organizations;
         this.users = users;
         this.coachProfiles = coachProfiles;
         this.playerProfiles = playerProfiles;
         this.passwordEncoder = passwordEncoder;
+        this.videoAssets = videoAssets;
+        this.libraryItems = libraryItems;
+    }
+
+    @Transactional
+    public LibraryItem createLibraryItem(String title) {
+        VideoAsset asset = videoAssets.save(new VideoAsset(organization(), VideoAssetKind.LIBRARY_DRILL));
+        return libraryItems.save(new LibraryItem(organization(), title, null, DrillCategory.FITNESS, asset));
     }
 
     public Organization organization() {

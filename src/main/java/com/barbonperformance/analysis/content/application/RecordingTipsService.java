@@ -1,7 +1,7 @@
 package com.barbonperformance.analysis.content.application;
 
 import com.barbonperformance.analysis.content.ContentProperties;
-import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmPdfRequest;
+import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmPdfUploadRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmVideoRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentResponse;
@@ -59,7 +59,8 @@ public class RecordingTipsService {
     @Transactional(readOnly = true)
     public RecordingTipsView get(UUID userId) {
         return store.findByOrgId(organizationId(userId)).map(this::describe)
-                .orElseGet(() -> new RecordingTipsView(null, null, null, null));
+                .orElseGet(() -> new RecordingTipsView(
+                        null, null, null, null, null, null, null, null, null, null, null));
     }
 
     // Its own entitlement, same as drills: org-wide instructional content has no submission to
@@ -94,8 +95,9 @@ public class RecordingTipsService {
             VideoUploadIntentRequest request) {
         CoachProfile coach = coach(coachUserId);
 
-        VideoAsset asset = videoAssets.save(
-                new VideoAsset(coach.getOrganization(), VideoAssetKind.RECORDING_TIPS));
+        VideoAsset asset = new VideoAsset(coach.getOrganization(), VideoAssetKind.RECORDING_TIPS);
+        asset.nameFile(request.fileName());
+        asset = videoAssets.save(asset);
 
         StreamGateway.DirectUpload upload = stream.createDirectUpload(
                 new StreamGateway.DirectUploadRequest(
@@ -139,10 +141,12 @@ public class RecordingTipsService {
     }
 
     @Transactional
-    public RecordingTipsView confirmPdf(UUID coachUserId, ConfirmPdfRequest request) {
+    public RecordingTipsView confirmPdf(UUID coachUserId, ConfirmPdfUploadRequest request) {
         CoachProfile coach = coach(coachUserId);
+        UploadedObjects.requireKey(request.objectKey(), PDF_KEY_TEMPLATE.formatted(coach.getOrganization().getId()));
         RecordingTips tips = tipsFor(coach.getOrganization());
-        tips.attachPdf(request.objectKey(), request.contentType(), coach.getUser());
+        tips.attachPdf(request.objectKey(), request.contentType(), request.fileName(),
+                request.sizeBytes(), coach.getUser());
         return describe(store.save(tips));
     }
 
@@ -158,7 +162,14 @@ public class RecordingTipsService {
         return new RecordingTipsView(
                 asset == null ? null : asset.getId(),
                 asset == null ? null : asset.getStatus(),
+                asset == null ? null : asset.getOriginalFileName(),
+                asset == null ? null : asset.getSizeBytes(),
+                asset == null ? null : asset.getDurationSeconds(),
+                asset == null ? null : asset.getCreatedAt(),
                 pdfUrl,
+                tips.getPdfFileName(),
+                tips.getPdfSizeBytes(),
+                tips.getPdfUploadedAt(),
                 tips.getUpdatedAt());
     }
 

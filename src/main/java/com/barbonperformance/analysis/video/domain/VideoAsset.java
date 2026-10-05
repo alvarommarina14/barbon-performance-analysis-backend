@@ -56,6 +56,9 @@ public class VideoAsset {
     @Column(name = "size_bytes")
     private Long sizeBytes;
 
+    @Column(name = "original_file_name")
+    private String originalFileName;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Instant createdAt;
 
@@ -78,6 +81,10 @@ public class VideoAsset {
 
     public boolean wasUploadedBy(UUID playerProfileId) {
         return uploadedByPlayer != null && uploadedByPlayer.getId().equals(playerProfileId);
+    }
+
+    public void nameFile(String originalFileName) {
+        this.originalFileName = originalFileName;
     }
 
     public void attachToStream(String streamUid) {
@@ -161,6 +168,10 @@ public class VideoAsset {
 
     public Long getSizeBytes() {
         return sizeBytes;
+    }
+
+    public String getOriginalFileName() {
+        return originalFileName;
     }
 
     public Instant getCreatedAt() {

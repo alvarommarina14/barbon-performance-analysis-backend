@@ -1,5 +1,7 @@
 package com.barbonperformance.analysis;
 
+import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginRequest;
+import com.barbonperformance.analysis.auth.application.dto.AuthDtos.LoginResponse;
 import com.barbonperformance.analysis.support.TestFixtures;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterAll;
@@ -78,8 +80,8 @@ public abstract class AbstractIntegrationTest {
         // Everything identity-related hangs off app_user, so one cascading truncate clears it.
         // organization is left alone: it is seeded by the baseline migration.
         jdbcTemplate.execute("TRUNCATE TABLE app_user CASCADE");
-        // video_asset hangs off organization, not app_user, so the cascade above misses it.
-        jdbcTemplate.execute("TRUNCATE TABLE video_asset CASCADE");
+        // These hang off organization, not app_user, so the cascade above misses them.
+        jdbcTemplate.execute("TRUNCATE TABLE video_asset, red_flag, daily_routine CASCADE");
         CLOUDFLARE.resetAll();
 
         this.client = RestTestClient.bindToServer()
@@ -89,5 +91,15 @@ public abstract class AbstractIntegrationTest {
 
     protected String bearer(String accessToken) {
         return "Bearer " + accessToken;
+    }
+
+    protected String bearerFor(String email, String password) {
+        LoginResponse session = client.post().uri("/api/v1/auth/login")
+                .body(new LoginRequest(email, password))
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(LoginResponse.class)
+                .getResponseBody();
+        return bearer(session.accessToken());
     }
 }

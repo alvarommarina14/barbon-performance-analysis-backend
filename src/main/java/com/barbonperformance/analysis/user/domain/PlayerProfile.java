@@ -20,8 +20,6 @@ import java.util.UUID;
 @Table(name = "player_profile")
 public class PlayerProfile {
 
-    public static final int CYCLE_WEEKS = 4;
-
     @Id
     @GeneratedValue
     private UUID id;
@@ -42,11 +40,8 @@ public class PlayerProfile {
     @Column(name = "membership_tier", nullable = false)
     private MembershipTier membershipTier = MembershipTier.BASE;
 
-    @Column(name = "current_week", nullable = false)
-    private int currentWeek = 1;
-
-    @Column(name = "cycle_started_at")
-    private LocalDate cycleStartedAt;
+    @Column(name = "plan_started_at")
+    private LocalDate planStartedAt;
 
     @Column(name = "program_pdf_key")
     private String programPdfKey;
@@ -94,23 +89,12 @@ public class PlayerProfile {
         this.membershipTier = membershipTier;
     }
 
-    public int getCurrentWeek() {
-        return currentWeek;
+    public LocalDate getPlanStartedAt() {
+        return planStartedAt;
     }
 
-    public void setCurrentWeek(int currentWeek) {
-        if (currentWeek < 1 || currentWeek > CYCLE_WEEKS) {
-            throw new IllegalArgumentException("current week must be between 1 and " + CYCLE_WEEKS);
-        }
-        this.currentWeek = currentWeek;
-    }
-
-    public LocalDate getCycleStartedAt() {
-        return cycleStartedAt;
-    }
-
-    public void setCycleStartedAt(LocalDate cycleStartedAt) {
-        this.cycleStartedAt = cycleStartedAt;
+    public void setPlanStartedAt(LocalDate planStartedAt) {
+        this.planStartedAt = planStartedAt;
     }
 
     public String getProgramPdfKey() {

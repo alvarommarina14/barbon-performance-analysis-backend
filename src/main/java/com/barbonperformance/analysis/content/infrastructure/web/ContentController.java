@@ -2,7 +2,7 @@ package com.barbonperformance.analysis.content.infrastructure.web;
 
 import com.barbonperformance.analysis.auth.domain.AuthenticatedUser;
 import com.barbonperformance.analysis.content.application.RecordingTipsService;
-import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmPdfRequest;
+import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmPdfUploadRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.ConfirmVideoRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentRequest;
 import com.barbonperformance.analysis.content.application.dto.ContentDtos.PdfUploadIntentResponse;
@@ -70,7 +70,7 @@ public class ContentController {
     @PreAuthorize("hasRole('COACH')")
     @Operation(summary = "Confirm the recording-tips PDF once it has finished uploading")
     RecordingTipsView confirmPdf(@AuthenticationPrincipal AuthenticatedUser principal,
-            @Valid @RequestBody ConfirmPdfRequest request) {
+            @Valid @RequestBody ConfirmPdfUploadRequest request) {
         return tips.confirmPdf(principal.id(), request);
     }
 }

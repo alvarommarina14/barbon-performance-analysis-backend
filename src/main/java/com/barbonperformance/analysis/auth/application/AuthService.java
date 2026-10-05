@@ -19,6 +19,7 @@ import com.barbonperformance.analysis.user.domain.AppUser;
 import com.barbonperformance.analysis.user.domain.AppUsers;
 import com.barbonperformance.analysis.user.domain.CoachProfile;
 import com.barbonperformance.analysis.user.domain.CoachProfiles;
+import com.barbonperformance.analysis.user.domain.PlanCalendar;
 import com.barbonperformance.analysis.user.domain.PlayerProfile;
 import com.barbonperformance.analysis.user.domain.PlayerProfiles;
 import com.barbonperformance.analysis.user.domain.UserRole;
@@ -160,7 +161,7 @@ public class AuthService {
                     .map(profile -> new PlayerSummary(
                             profile.getId(),
                             profile.getMembershipTier(),
-                            profile.getCurrentWeek(),
+                            PlanCalendar.planWeek(profile).orElse(null),
                             profile.getCoach() != null))
                     .orElse(null);
         } else if (user.getRole() == UserRole.COACH) {
