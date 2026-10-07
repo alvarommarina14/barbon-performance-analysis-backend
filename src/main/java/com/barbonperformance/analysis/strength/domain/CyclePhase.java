@@ -29,8 +29,9 @@ public class CyclePhase {
     @JoinColumn(name = "player_id")
     private PlayerProfile player;
 
-    @Column(name = "template_name")
-    private String templateName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_id")
+    private ProgramTemplate template;
 
     @Column(name = "week_number", nullable = false)
     private int weekNumber;
@@ -57,11 +58,11 @@ public class CyclePhase {
         // for JPA
     }
 
-    private CyclePhase(Organization organization, PlayerProfile player, String templateName, int weekNumber,
+    private CyclePhase(Organization organization, PlayerProfile player, ProgramTemplate template, int weekNumber,
             String phaseName, String goal, String setsReps, String rpeRange) {
         this.organization = organization;
         this.player = player;
-        this.templateName = templateName;
+        this.template = template;
         this.weekNumber = weekNumber;
         this.phaseName = phaseName;
         this.goal = goal;
@@ -74,9 +75,10 @@ public class CyclePhase {
         return new CyclePhase(organization, player, null, weekNumber, phaseName, goal, setsReps, rpeRange);
     }
 
-    public static CyclePhase forTemplate(Organization organization, String templateName, int weekNumber,
-            String phaseName, String goal, String setsReps, String rpeRange) {
-        return new CyclePhase(organization, null, templateName, weekNumber, phaseName, goal, setsReps, rpeRange);
+    public static CyclePhase forTemplate(ProgramTemplate template, int weekNumber, String phaseName, String goal,
+            String setsReps, String rpeRange) {
+        return new CyclePhase(template.getOrganization(), null, template, weekNumber, phaseName, goal, setsReps,
+                rpeRange);
     }
 
     public void updateDetails(String phaseName, String goal, String setsReps, String rpeRange) {
@@ -98,8 +100,8 @@ public class CyclePhase {
         return player;
     }
 
-    public String getTemplateName() {
-        return templateName;
+    public ProgramTemplate getTemplate() {
+        return template;
     }
 
     public int getWeekNumber() {

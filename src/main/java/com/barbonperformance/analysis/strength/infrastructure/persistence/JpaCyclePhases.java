@@ -27,23 +27,8 @@ class JpaCyclePhases implements CyclePhases {
     }
 
     @Override
-    public List<CyclePhase> findAllTemplateRowsByOrgId(UUID orgId) {
-        return jpa.findAllByOrganizationIdAndTemplateNameIsNotNullOrderByTemplateNameAscWeekNumberAsc(orgId);
-    }
-
-    @Override
-    public List<CyclePhase> findAllByOrgIdAndTemplateName(UUID orgId, String templateName) {
-        return jpa.findAllByOrganizationIdAndTemplateNameOrderByWeekNumber(orgId, templateName);
-    }
-
-    @Override
-    public boolean existsByOrgIdAndTemplateName(UUID orgId, String templateName) {
-        return jpa.existsByOrganizationIdAndTemplateName(orgId, templateName);
-    }
-
-    @Override
-    public void deleteAllByOrgIdAndTemplateName(UUID orgId, String templateName) {
-        jpa.deleteAllByOrganizationIdAndTemplateName(orgId, templateName);
+    public List<CyclePhase> findAllByTemplateId(UUID templateId) {
+        return jpa.findAllByTemplateIdOrderByWeekNumber(templateId);
     }
 
     @Override

@@ -31,7 +31,8 @@ public interface StreamGateway {
     record DirectUpload(String streamUid, String uploadUrl) {
     }
 
-    record Playback(String hlsUrl, String dashUrl, String token, Instant expiresAt) {
+    // watchUrl opens in any browser on its own, for a link that leaves the app (the program PDF).
+    record Playback(String hlsUrl, String dashUrl, String watchUrl, String token, Instant expiresAt) {
     }
 
     record DownloadResult(String url, boolean ready) {

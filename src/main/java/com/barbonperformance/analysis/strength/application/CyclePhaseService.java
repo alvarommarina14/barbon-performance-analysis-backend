@@ -2,7 +2,6 @@ package com.barbonperformance.analysis.strength.application;
 
 import com.barbonperformance.analysis.shared.domain.ConflictException;
 import com.barbonperformance.analysis.shared.domain.NotFoundException;
-import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ApplyCyclePhaseTemplateRequest;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.CyclePhaseInput;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.CyclePhaseView;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ReplaceCyclePhasesRequest;
@@ -64,26 +63,7 @@ public class CyclePhaseService {
         return save(toSave);
     }
 
-    @Transactional
-    public List<CyclePhaseView> applyTemplateToPlayer(UUID coachUserId, UUID playerProfileId,
-            ApplyCyclePhaseTemplateRequest request) {
-        PlayerProfile player = loadOwnedPlayer(coachUserId, playerProfileId);
-
-        List<CyclePhase> templateWeeks = cyclePhases.findAllByOrgIdAndTemplateName(
-                player.getOrganization().getId(), request.templateName());
-        if (templateWeeks.isEmpty()) {
-            throw new NotFoundException("Template \"" + request.templateName() + "\" not found");
-        }
-
-        List<CyclePhase> toSave = new ArrayList<>();
-        for (CyclePhase templateWeek : templateWeeks) {
-            toSave.add(upsertPlayerWeek(player, templateWeek.getWeekNumber(), templateWeek.getPhaseName(),
-                    templateWeek.getGoal(), templateWeek.getSetsReps(), templateWeek.getRpeRange()));
-        }
-        return save(toSave);
-    }
-
-    private CyclePhase upsertPlayerWeek(PlayerProfile player, int weekNumber, String phaseName, String goal,
+    CyclePhase upsertPlayerWeek(PlayerProfile player, int weekNumber, String phaseName, String goal,
             String setsReps, String rpeRange) {
         return cyclePhases.findByPlayerIdAndWeekNumber(player.getId(), weekNumber)
                 .map(existing -> {
@@ -101,7 +81,7 @@ public class CyclePhaseService {
                 .toList();
     }
 
-    private void requireExactlyRequiredWeeks(Stream<Integer> weekNumbers) {
+    static void requireExactlyRequiredWeeks(Stream<Integer> weekNumbers) {
         Set<Integer> weeks = weekNumbers.collect(Collectors.toSet());
         if (!weeks.equals(REQUIRED_WEEKS)) {
             throw new ConflictException("the cycle needs exactly weeks 1 through 4, once each");

@@ -8,6 +8,8 @@ public interface TrainingDays {
 
     List<TrainingDay> findAllByPlayerId(UUID playerProfileId);
 
+    List<TrainingDay> findAllByTemplateId(UUID templateId);
+
     Optional<TrainingDay> findById(UUID trainingDayId);
 
     void deleteAll(List<TrainingDay> trainingDays);

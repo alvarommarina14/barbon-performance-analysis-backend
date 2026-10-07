@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="UTF-8" />
+<title th:text="'Training Program — ' + ${doc.athleteName()}">Training Program</title>
+<style>
+  @page {
+    size: letter;
+    margin: 78px 40px 60px 40px;
+    @top-center { content: element(header); }
+    @bottom-center { content: element(footer); }
+  }
+  body { font-family: 'DM Sans', sans-serif; font-size: 9.5pt; color: #2b2b2b; line-height: 1.35; }
+  .header { position: running(header); margin: 0 -40px; }
+  .header .bar { background: #0a0a0a; padding: 9px 0 5px 0; text-align: center; }
+  .header .brand { font-family: 'Bebas Neue', sans-serif; font-size: 25pt; letter-spacing: 1px; color: #f5f5f5; }
+  .header .brand span { color: #c8ff00; }
+  .header .rule { height: 5px; background: #b4e000; }
+  .footer { position: running(footer); margin: 0 -40px; text-align: center; font-size: 8pt; color: #6b6b6b; }
+  .footer .rule { height: 4px; background: #b4e000; margin-bottom: 8px; }
+  .page-number::after { content: counter(page); }
+
+  .title-block { background: #ebebeb; border: 1px solid #dcdcdc; text-align: center; padding: 8px 10px; margin-bottom: 12px; page-break-after: avoid; }
+  .title-block h1 { font-size: 15pt; margin: 0; color: #1a1a1a; }
+  .title-block .sub { color: #6b6b6b; font-size: 9.5pt; }
+
+  .panel { border: 1px solid #dcdcdc; margin-bottom: 12px; }
+  .panel-head { background: #262626; color: #ffffff; font-weight: 700; font-size: 11pt; padding: 7px 12px; text-transform: uppercase; page-break-after: avoid; }
+  .panel-head.slate { background: #2f3a4a; }
+  .panel-head.protocol { background: #4a5260; }
+  .mark { display: inline-block; width: 9px; height: 9px; background: #c8ff00; margin-right: 6px; }
+  .mark.dot { border-radius: 5px; }
+  .alert { color: #ff4a4a; margin-right: 5px; }
+  .panel-head .note { text-transform: none; }
+  .panel-body { padding: 9px 14px; white-space: pre-line; }
+
+  .flag { background: #fff2f2; border-left: 2px solid #ff4a4a; padding: 5px 12px 5px 12px; border-top: 1px solid #f3dede; }
+  .flag .bullet { display: inline-block; width: 4px; height: 4px; border-radius: 2px; background: #ff4a4a; margin: 0 8px 2px 0; }
+
+  table { width: 100%; border-collapse: collapse; -fs-table-paginate: paginate; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th { background: #2f3a4a; color: #ffffff; font-weight: 700; padding: 5px 6px; border: 1px solid #4a5568; font-size: 9pt; }
+  th.dark { background: #262626; border-color: #3c3c3c; }
+  td { border: 1px solid #dcdcdc; padding: 5px 7px; vertical-align: middle; }
+  td.num { color: #8d8d8d; text-align: center; width: 18px; }
+  td.name { font-weight: 700; }
+  td.center { text-align: center; font-size: 8.5pt; }
+  td.week { text-align: center; font-size: 8pt; width: 72px; }
+  th.week { width: 72px; font-size: 8pt; }
+  td.cue { color: #7fa600; font-weight: 700; }
+  td.link { text-align: center; width: 34px; }
+  .cue { color: #7fa600; font-weight: 700; }
+  a { color: #7fa600; }
+
+  .schedule { background: #f0f0f0; border: 1px solid #dcdcdc; padding: 8px 14px; margin-top: -1px; white-space: pre-line; }
+
+  .rpe-week-1 td { background: #e3f5df; }
+  .rpe-week-2 td { background: #fdf3d8; }
+  .rpe-week-3 td { background: #fbe3e3; }
+  .rpe-week-4 td { background: #e1eaf6; }
+  .rpe-label { color: #7fa600; font-weight: 700; }
+
+  .new-page { page-break-before: always; }
+  .day { page-break-inside: auto; margin-top: 4px; }
+  .block { page-break-inside: auto; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="bar"><span class="brand">BARBON<span>PERFORMANCE</span></span></div>
+  <div class="rule"></div>
+</div>
+<div class="footer">
+  <div class="rule"></div>
+  <span th:text="${doc.organizationName()}">Barbon Performance</span>
+  <span th:if="${doc.contactEmail() != null}" th:text="'  |  ' + ${doc.contactEmail()}"></span>
+  <span>  |  Page <span class="page-number"></span></span>
+</div>
+
+<div class="title-block">
+  <h1>TRAINING PROGRAM</h1>
+  <div class="sub">
+    <span th:text="'Athlete: ' + ${doc.athleteName()}">Athlete</span>
+    <span th:if="${doc.athleteLevel() != null}" th:text="' | ' + ${doc.athleteLevel()}"></span>
+    <span th:if="${doc.coachName() != null}" th:text="' | Coach: ' + ${doc.coachName()}"></span>
+    <span th:text="' | Date: ' + ${issuedOn}"></span>
+  </div>
+</div>
+
+<div class="panel" th:if="${!doc.redFlags().isEmpty()}">
+  <div class="panel-head"><span class="alert">!</span>Red flags — read first</div>
+  <div class="flag" th:each="flag : ${doc.redFlags()}">
+    <span class="bullet"></span>
+    <strong th:text="${flag.title()} + (${flag.body() != null} ? ':' : '')">Title</strong>
+    <span th:if="${flag.body() != null}" th:text="${flag.body()}">Body</span>
+  </div>
+</div>
+
+<div th:if="${!doc.days().isEmpty()}" style="margin-bottom: 12px;">
+  <div class="panel" style="margin-bottom: 0;">
+    <div class="panel-head slate"><span class="mark"></span>
+      <span th:text="'Weekly structure — ' + ${doc.days().size()} + (${doc.days().size() == 1} ? ' session/week' : ' sessions/week')">Weekly structure</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th style="width: 70px;">Day</th><th>Session</th><th style="width: 100px;">Duration</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="day : ${doc.days()}">
+          <td class="name" th:text="${day.label()}">Day 1</td>
+          <td th:text="${day.title()}">Session</td>
+          <td class="center" th:text="${day.durationMinutes() != null} ? '~' + ${day.durationMinutes()} + ' min' : ''">~45 min</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="schedule" th:if="${doc.schedule() != null}"><strong>How to schedule:</strong> <span th:text="${doc.schedule()}">Schedule</span></div>
+</div>
+
+<div class="panel" th:if="${doc.about() != null}">
+  <div class="panel-head"><span class="mark dot"></span>About your program</div>
+  <div class="panel-body" th:text="${doc.about()}">About</div>
+</div>
+
+<div class="panel" th:if="${!doc.weeks().isEmpty()}">
+  <div class="panel-head"><span class="mark dot"></span><span th:text="${doc.weeks().size()} + '-week cycle'">4-week cycle</span></div>
+  <div class="panel-body">Repeat the cycle continuously: <th:block th:each="week, it : ${doc.weeks()}"><strong th:text="'Week ' + ${week.number()} + ' (' + ${week.phaseName()} + ')'">Week 1 (Base)</strong><span th:if="${!it.last}"> → </span></th:block>.
+<th:block th:each="week : ${doc.weeks()}"><th:block th:text="'Week ' + ${week.number()} + ': ' + ${week.goal()}"></th:block>
+</th:block></div>
+</div>
+
+<th:block th:if="${!doc.weeks().isEmpty()}">
+  <div class="title-block new-page">
+    <h1>RPE GUIDE — HOW TO CHOOSE THE RIGHT WEIGHT</h1>
+    <div class="sub">Rate of Perceived Exertion — your built-in load self-regulator</div>
+  </div>
+  <div class="panel">
+    <div class="panel-body">RPE stands for "Rate of Perceived Exertion." It's a simple way to measure how hard a set feels WITHOUT needing to know your max weight. Instead of telling you exactly how much to lift, RPE tells you how hard the set should FEEL.
+
+The key concept is <strong>"Reps Left in the Tank"</strong> — how many more reps could you have done with good technique before you had to stop? If you do 10 reps and feel like you could have done 2 or 3 more with good form, you had 2-3 reps left in the tank.
+
+<strong>How to use it:</strong> After each set, ask yourself — "How many more reps could I have done with PERFECT form?" If the answer matches the target for that week, you picked the right weight. If it was too easy, go heavier next set. If you couldn't complete the reps, go lighter.</div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="mark dot"></span>RPE table for your program</div>
+    <table>
+      <thead>
+        <tr><th class="dark" style="width: 90px;">Week</th><th class="dark" style="width: 80px;">RPE</th><th class="dark" style="width: 110px;">Sets × Reps</th><th class="dark">What it means</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="week : ${doc.weeks()}" th:class="'rpe-week-' + ${week.number()}">
+          <td class="name" style="text-align: center;" th:text="'Week ' + ${week.number()} + ' — ' + ${week.phaseName()}">Week 1 — Base</td>
+          <td class="center rpe-label" th:text="${week.rpeRange()}">5-6</td>
+          <td class="center" th:text="${week.setsReps()}">2×10</td>
+          <td th:text="${week.goal()}">Goal</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</th:block>
+
+<th:block th:each="day, dayIt : ${doc.days()}">
+  <div class="day" th:classappend="${dayIt.first or !day.isCardio()} ? 'new-page' : ''">
+    <div class="title-block">
+      <h1 th:text="${day.label()} + ' — ' + ${day.title()}">Day 1 — Strength</h1>
+      <div class="sub">
+        <span th:if="${day.durationMinutes() != null}" th:text="'~' + ${day.durationMinutes()} + ' min'"></span>
+        <span th:if="${day.durationMinutes() != null and day.focus() != null}"> | </span>
+        <span th:if="${day.focus() != null}" th:text="${day.focus()}"></span>
+      </div>
+    </div>
+
+    <div class="panel" th:if="${day.isCardio()}">
+      <div class="panel-head protocol"><span class="mark dot"></span>Protocol</div>
+      <div class="panel-body" th:text="${day.protocol() != null} ? ${day.protocol()} : 'Your coach will share this protocol.'">Protocol</div>
+    </div>
+
+    <div class="panel block" th:each="block : ${day.blocks()}">
+      <div class="panel-head" th:classappend="${block.variesByWeek()} ? 'slate' : ''">
+        <span class="mark" th:classappend="${block.variesByWeek()} ? '' : 'dot'"></span>
+        <span th:text="${block.title()}">Main work</span><span class="note" th:if="${block.note() != null}" th:text="' — ' + ${block.note()}"></span>
+      </div>
+      <table th:if="${!block.variesByWeek()}">
+        <thead>
+          <tr><th class="dark">#</th><th class="dark">Exercise</th><th class="dark" style="width: 80px;">Sets × Reps</th><th class="dark">Coaching cue</th><th class="dark">Notes</th><th class="dark">Video</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="exercise, it : ${block.exercises()}">
+            <td class="num" th:text="${it.count}">1</td>
+            <td class="name" th:text="${exercise.title()}">Exercise</td>
+            <td class="center" th:text="${exercise.setsReps()}">2 × 12</td>
+            <td class="cue" th:text="${exercise.cue()}">Cue</td>
+            <td th:text="${exercise.notes()}">Notes</td>
+            <td class="link"><a th:if="${exercise.videoUrl() != null}" th:href="${exercise.videoUrl()}">Link</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <table th:if="${block.variesByWeek()}">
+        <thead>
+          <tr>
+            <th>#</th><th>Exercise</th>
+            <th class="week" th:each="n : ${#numbers.sequence(1, 4)}" th:text="${doc.weekHeading(n)}">W1</th>
+            <th>Cue / Notes</th><th>Vid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="exercise, it : ${block.exercises()}">
+            <td class="num" th:text="${it.count}">1</td>
+            <td class="name" th:text="${exercise.title()}">Exercise</td>
+            <td class="week" th:each="setsReps : ${exercise.setsRepsByWeek()}" th:text="${setsReps}">3×8</td>
+            <td><div class="cue" th:if="${exercise.cue() != null}" th:text="${exercise.cue()}">Cue</div><div th:if="${exercise.notes() != null}" th:text="${exercise.notes()}">Notes</div></td>
+            <td class="link"><a th:if="${exercise.videoUrl() != null}" th:href="${exercise.videoUrl()}">Link</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</th:block>
+
+</body>
+</html>

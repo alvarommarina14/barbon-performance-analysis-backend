@@ -42,6 +42,7 @@ public class ExerciseLogService {
     public List<ExerciseLogView> listForDay(UUID userId, UUID trainingDayId, int planWeek) {
         requireWeekInPlan(planWeek);
         TrainingDay day = trainingDays.findById(trainingDayId)
+                .filter(found -> found.getPlayer() != null)
                 .orElseThrow(() -> new NotFoundException("Training day " + trainingDayId + " not found"));
         PlayerProfile player = access.readableBy(userId, day.getPlayer().getId());
         return logs.findAllForDay(player.getId(), day.getId(), planWeek).stream()
@@ -57,7 +58,8 @@ public class ExerciseLogService {
         requireWeekInPlan(planWeek);
         PlayerProfile player = access.ownPlayer(playerUserId);
         DayExercise exercise = dayExercises.findById(dayExerciseId)
-                .filter(e -> e.getTrainingDay().getPlayer().getId().equals(player.getId()))
+                .filter(e -> e.getTrainingDay().getPlayer() != null
+                        && e.getTrainingDay().getPlayer().getId().equals(player.getId()))
                 .orElseThrow(() -> new NotFoundException("Exercise " + dayExerciseId + " not found"));
         if (planWeek > PlanCalendar.unlockedWeeks(player)) {
             throw new ConflictException("week " + planWeek + " has not started yet");

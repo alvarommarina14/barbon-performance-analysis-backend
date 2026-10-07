@@ -22,6 +22,11 @@ class JpaTrainingDays implements TrainingDays {
     }
 
     @Override
+    public List<TrainingDay> findAllByTemplateId(UUID templateId) {
+        return jpa.findAllByTemplateIdOrderBySortOrder(templateId);
+    }
+
+    @Override
     public Optional<TrainingDay> findById(UUID trainingDayId) {
         return jpa.findById(trainingDayId);
     }

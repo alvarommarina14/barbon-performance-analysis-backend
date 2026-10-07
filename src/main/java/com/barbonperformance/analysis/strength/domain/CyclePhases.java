@@ -10,13 +10,7 @@ public interface CyclePhases {
 
     Optional<CyclePhase> findByPlayerIdAndWeekNumber(UUID playerProfileId, int weekNumber);
 
-    List<CyclePhase> findAllTemplateRowsByOrgId(UUID orgId);
-
-    List<CyclePhase> findAllByOrgIdAndTemplateName(UUID orgId, String templateName);
-
-    boolean existsByOrgIdAndTemplateName(UUID orgId, String templateName);
-
-    void deleteAllByOrgIdAndTemplateName(UUID orgId, String templateName);
+    List<CyclePhase> findAllByTemplateId(UUID templateId);
 
     List<CyclePhase> saveAll(List<CyclePhase> phases);
 }

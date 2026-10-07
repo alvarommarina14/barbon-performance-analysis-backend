@@ -23,6 +23,7 @@ ext {
     awsSdkVersion = '2.54.5'
     wiremockVersion = '3.13.2'
     archunitVersion = '1.4.1'
+    openhtmltopdfVersion = '1.1.93'
 }
 
 repositories {
@@ -51,6 +52,10 @@ dependencies {
     // R2 is S3-compatible, so the AWS S3 client talks to it unchanged.
     implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
     implementation 'software.amazon.awssdk:s3'
+
+    // The program PDF: Thymeleaf fills an HTML template, OpenHTMLtoPDF prints it (ADR 0007).
+    implementation 'org.thymeleaf:thymeleaf'
+    implementation "io.github.openhtmltopdf:openhtmltopdf-pdfbox:${openhtmltopdfVersion}"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"

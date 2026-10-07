@@ -37,15 +37,6 @@ public final class StrengthDtos {
             String rpeRange) {
     }
 
-    public record ReplaceCyclePhaseTemplateRequest(@NotNull @Valid List<CyclePhaseInput> weeks) {
-    }
-
-    public record CyclePhaseTemplateView(@NotNull String name, @NotNull List<CyclePhaseView> weeks) {
-    }
-
-    public record ApplyCyclePhaseTemplateRequest(@NotBlank String templateName) {
-    }
-
     // id names an existing day to update in place; without one the day is new. Updating in place
     // keeps the day's exercises and the player's logs, which a delete-and-recreate would cascade away.
     // There is no label: a day is named "Day N" after its position in the list.
@@ -54,7 +45,8 @@ public final class StrengthDtos {
             @NotBlank @Size(max = 200) String title,
             @Size(max = 500) String focus,
             Integer durationMinutes,
-            @NotNull TrainingDayKind kind) {
+            @NotNull TrainingDayKind kind,
+            @Size(max = 4000) String protocol) {
     }
 
     public record ReplaceTrainingDaysRequest(@NotNull @Valid List<TrainingDayInput> days) {
@@ -67,6 +59,7 @@ public final class StrengthDtos {
             String focus,
             Integer durationMinutes,
             @NotNull TrainingDayKind kind,
+            String protocol,
             int sortOrder,
             int exerciseCount) {
     }
@@ -78,10 +71,28 @@ public final class StrengthDtos {
             @Size(max = 50) String setsRepsWk2,
             @Size(max = 50) String setsRepsWk3,
             @Size(max = 50) String setsRepsWk4,
-            @Size(max = 500) String cueOverride) {
+            @Size(max = 500) String cueOverride,
+            @Size(max = 1000) String notes) {
     }
 
-    public record ReplaceDayExercisesRequest(@NotNull @Valid List<DayExerciseInput> exercises) {
+    // A block inside a day ("Injury prevention", "Main work"); the order of the list is the order of
+    // the blocks, and each block's exercises keep the order they are given in.
+    public record DaySectionInput(
+            UUID id,
+            @NotBlank @Size(max = 200) String title,
+            @Size(max = 300) String note,
+            @NotNull @Valid List<DayExerciseInput> exercises) {
+    }
+
+    public record ReplaceDaySectionsRequest(@NotNull @Valid List<DaySectionInput> sections) {
+    }
+
+    public record DaySectionView(
+            @NotNull UUID id,
+            @NotNull String title,
+            String note,
+            int sortOrder,
+            @NotNull List<DayExerciseView> exercises) {
     }
 
     public record DayExerciseView(
@@ -95,6 +106,7 @@ public final class StrengthDtos {
             Integer durationSeconds,
             String thumbnailUrl,
             String cueOverride,
+            String notes,
             String setsRepsWk1,
             String setsRepsWk2,
             String setsRepsWk3,

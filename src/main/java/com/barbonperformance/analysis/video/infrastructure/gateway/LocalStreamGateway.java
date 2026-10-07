@@ -114,7 +114,7 @@ class LocalStreamGateway implements StreamGateway {
     @Override
     public Playback signPlayback(String streamUid, Duration ttl) {
         String url = presignGet(streamUid, ttl, b -> b.responseContentType("video/mp4"));
-        return new Playback(url, url, "", Instant.now().plus(ttl));
+        return new Playback(url, url, url, "", Instant.now().plus(ttl));
     }
 
     @Override

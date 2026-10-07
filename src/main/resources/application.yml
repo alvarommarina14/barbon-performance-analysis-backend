@@ -94,3 +94,12 @@ analysis:
     s3-access-key: ${ANALYSIS_CONTENT_S3_ACCESS_KEY:bpa}
     s3-secret-key: ${ANALYSIS_CONTENT_S3_SECRET_KEY:bpa-development}
     presign-ttl: 2h
+  strength:
+    # The address this API is reached at from outside. The program PDF carries absolute links back
+    # to it — the document itself, and every exercise video — so it must be the public origin.
+    public-base-url: ${ANALYSIS_PUBLIC_BASE_URL:http://localhost:8080}
+    # Signs those links. Development key only; rotating it breaks the video links in every PDF
+    # already handed out.
+    link-secret: ${PROGRAM_LINK_SECRET:development-only-program-link-secret}
+    # A link to the PDF itself is short-lived: the document is regenerated on every open.
+    program-pdf-link-ttl: 2h

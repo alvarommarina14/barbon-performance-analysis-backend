@@ -30,6 +30,10 @@ public class DayExercise {
     private TrainingDay trainingDay;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "section_id", nullable = false)
+    private DaySection section;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "library_item_id", nullable = false)
     private LibraryItem libraryItem;
 
@@ -48,6 +52,9 @@ public class DayExercise {
     @Column(name = "cue_override")
     private String cueOverride;
 
+    @Column
+    private String notes;
+
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
@@ -61,28 +68,32 @@ public class DayExercise {
         // for JPA
     }
 
-    public DayExercise(Organization organization, TrainingDay trainingDay, LibraryItem libraryItem,
+    public DayExercise(Organization organization, DaySection section, LibraryItem libraryItem,
             String setsRepsWk1, String setsRepsWk2, String setsRepsWk3, String setsRepsWk4,
-            String cueOverride, int sortOrder) {
+            String cueOverride, String notes, int sortOrder) {
         this.organization = organization;
-        this.trainingDay = trainingDay;
+        this.trainingDay = section.getTrainingDay();
+        this.section = section;
         this.libraryItem = libraryItem;
         this.setsRepsWk1 = setsRepsWk1;
         this.setsRepsWk2 = setsRepsWk2;
         this.setsRepsWk3 = setsRepsWk3;
         this.setsRepsWk4 = setsRepsWk4;
         this.cueOverride = cueOverride;
+        this.notes = notes;
         this.sortOrder = sortOrder;
     }
 
-    public void revise(LibraryItem libraryItem, String setsRepsWk1, String setsRepsWk2, String setsRepsWk3,
-            String setsRepsWk4, String cueOverride, int sortOrder) {
+    public void revise(DaySection section, LibraryItem libraryItem, String setsRepsWk1, String setsRepsWk2,
+            String setsRepsWk3, String setsRepsWk4, String cueOverride, String notes, int sortOrder) {
+        this.section = section;
         this.libraryItem = libraryItem;
         this.setsRepsWk1 = setsRepsWk1;
         this.setsRepsWk2 = setsRepsWk2;
         this.setsRepsWk3 = setsRepsWk3;
         this.setsRepsWk4 = setsRepsWk4;
         this.cueOverride = cueOverride;
+        this.notes = notes;
         this.sortOrder = sortOrder;
     }
 
@@ -96,6 +107,10 @@ public class DayExercise {
 
     public TrainingDay getTrainingDay() {
         return trainingDay;
+    }
+
+    public DaySection getSection() {
+        return section;
     }
 
     public LibraryItem getLibraryItem() {
@@ -120,6 +135,10 @@ public class DayExercise {
 
     public String getCueOverride() {
         return cueOverride;
+    }
+
+    public String getNotes() {
+        return notes;
     }
 
     public int getSortOrder() {
