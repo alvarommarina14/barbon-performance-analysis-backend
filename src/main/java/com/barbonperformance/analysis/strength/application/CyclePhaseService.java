@@ -7,6 +7,7 @@ import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.Cycl
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ReplaceCyclePhasesRequest;
 import com.barbonperformance.analysis.strength.domain.CyclePhase;
 import com.barbonperformance.analysis.strength.domain.CyclePhases;
+import com.barbonperformance.analysis.strength.domain.WeekDetails;
 import com.barbonperformance.analysis.user.domain.AppUsers;
 import com.barbonperformance.analysis.user.domain.CoachProfile;
 import com.barbonperformance.analysis.user.domain.CoachProfiles;
@@ -57,21 +58,18 @@ public class CyclePhaseService {
 
         List<CyclePhase> toSave = new ArrayList<>();
         for (CyclePhaseInput input : request.phases()) {
-            toSave.add(upsertPlayerWeek(player, input.weekNumber(), input.phaseName(), input.goal(),
-                    input.rpeRange(), input.example()));
+            toSave.add(upsertPlayerWeek(player, input.weekNumber(), input.details()));
         }
         return save(toSave);
     }
 
-    CyclePhase upsertPlayerWeek(PlayerProfile player, int weekNumber, String phaseName, String goal,
-            String rpeRange, String example) {
+    CyclePhase upsertPlayerWeek(PlayerProfile player, int weekNumber, WeekDetails details) {
         return cyclePhases.findByPlayerIdAndWeekNumber(player.getId(), weekNumber)
                 .map(existing -> {
-                    existing.updateDetails(phaseName, goal, rpeRange, example);
+                    existing.updateDetails(details);
                     return existing;
                 })
-                .orElseGet(() -> CyclePhase.forPlayer(player.getOrganization(), player, weekNumber, phaseName,
-                        goal, rpeRange, example));
+                .orElseGet(() -> CyclePhase.forPlayer(player.getOrganization(), player, weekNumber, details));
     }
 
     private List<CyclePhaseView> save(List<CyclePhase> toSave) {
@@ -144,6 +142,6 @@ public class CyclePhaseService {
     static CyclePhaseView describe(CyclePhase phase) {
         return new CyclePhaseView(
                 phase.getId(), phase.getWeekNumber(), phase.getPhaseName(), phase.getGoal(),
-                phase.getRpeRange(), phase.getExample());
+                phase.getEffort(), phase.getRpeRange(), phase.getRepsLeft(), phase.getExample());
     }
 }

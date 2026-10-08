@@ -82,9 +82,14 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
                     .contains("MAIN WORK", "Goblet Squat", "3×8 @ RPE 7", "2×8 @ RPE 6", "W3 Intensity")
                     .contains("Day 2 — Steady-State Cardio", "Stationary bike, 40 min continuous.")
                     .contains("RPE GUIDE", "RPE 4-5", "Recover")
-                    .contains("Week 3 (Intensity)", "Deload weeks are non-negotiable")
-                    .contains("Example", "stop with 3-4 reps left.");
-            assertThat(text.split("Learn the movements", -1)).as("a week's goal is only in the RPE table").hasSize(2);
+                    .contains("Week 3 (Intensity)", "Deload weeks are non-negotiable");
+            // Table cells wrap wherever their width ends, so these read the text as one line.
+            String flat = text.replaceAll("\\s+", " ");
+            assertThat(flat)
+                    .contains("Example", "stop with 3-4 reps left.")
+                    .contains("Light/Moderate", "Effort: 5-6 out of 10", "Reps left in the tank",
+                            "You could do 3 to 4 more reps");
+            assertThat(flat.split("Learn the movements", -1)).as("a week's goal is only in the RPE table").hasSize(2);
             assertThat(text.split("3×10 @ RPE 7", -1)).as("an empty week repeats the week before it").hasSize(3);
             assertThat(linksIn(document)).hasSize(2)
                     .allMatch(url -> url.startsWith("http://localhost:8080/api/v1/public/exercise-videos/"));
@@ -162,11 +167,11 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
         client.put().uri("/api/v1/strength/players/{id}/cycle-phases", player.getId())
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
                 .body(new ReplaceCyclePhasesRequest(List.of(
-                        new CyclePhaseInput(1, "Base", "Learn the movements", "RPE 5-6",
-                                "If the program says 2×10, stop with 3-4 reps left."),
-                        new CyclePhaseInput(2, "Volume", "Build work capacity", "RPE 6-7", null),
-                        new CyclePhaseInput(3, "Intensity", "Build strength", "RPE 7-8", null),
-                        new CyclePhaseInput(4, "Deload", "Recover", "RPE 4-5", null))))
+                        new CyclePhaseInput(1, "Base", "Learn the movements", "Light/Moderate", "5-6",
+                                "You could do 3 to 4 more reps", "If the program says 2×10, stop with 3-4 reps left."),
+                        new CyclePhaseInput(2, "Volume", "Build work capacity", null, "RPE 6-7", null, null),
+                        new CyclePhaseInput(3, "Intensity", "Build strength", null, "RPE 7-8", null, null),
+                        new CyclePhaseInput(4, "Deload", "Recover", null, "RPE 4-5", null, null))))
                 .exchange()
                 .expectStatus().isOk();
 

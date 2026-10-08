@@ -318,10 +318,10 @@ class ProgramIT extends AbstractIntegrationTest {
         client.put().uri("/api/v1/strength/players/{id}/cycle-phases", playerProfileId)
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
                 .body(new ReplaceCyclePhasesRequest(List.of(
-                        new CyclePhaseInput(1, "Base", "Learn the movements", "RPE 5-6", null),
-                        new CyclePhaseInput(2, "Volume", "Build work capacity", "RPE 6-7", null),
-                        new CyclePhaseInput(3, "Intensity", "Build strength", "RPE 7-8", null),
-                        new CyclePhaseInput(4, "Deload", "Recover", "RPE 4-5", null))))
+                        new CyclePhaseInput(1, "Base", "Learn the movements", null, "RPE 5-6", null, null),
+                        new CyclePhaseInput(2, "Volume", "Build work capacity", null, "RPE 6-7", null, null),
+                        new CyclePhaseInput(3, "Intensity", "Build strength", null, "RPE 7-8", null, null),
+                        new CyclePhaseInput(4, "Deload", "Recover", null, "RPE 4-5", null, null))))
                 .exchange()
                 .expectStatus().isOk();
     }

@@ -126,8 +126,7 @@ public class ProgramDocumentService {
                         .map(flag -> new ProgramDocument.RedFlagEntry(flag.getTitle(), flag.getBody()))
                         .toList(),
                 cyclePhases.findAllByPlayerId(player.getId()).stream()
-                        .map(phase -> new ProgramDocument.Week(phase.getWeekNumber(), phase.getPhaseName(),
-                                phase.getGoal(), phase.getRpeRange(), phase.getExample()))
+                        .map(phase -> ProgramDocument.Week.of(phase.getWeekNumber(), phase.details()))
                         .toList(),
                 trainingDays.findAllByPlayerId(player.getId()).stream()
                         .map(this::describe)

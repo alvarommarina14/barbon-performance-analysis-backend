@@ -290,7 +290,9 @@ editing either side afterward never affects the other.
   The coach edits them in a visual editor that stores the same marks, and the mobile app shows
   the protocol and the notes in bold too.
 - `cycle_phase` — org_id, `player_id` or `template_id`, `week_number`, `phase_name`, `goal`,
-  `rpe_range`, `example` (the PDF's RPE table shows an Example column when any week has one).
+  `effort` ("Light/Moderate"), `rpe_range`, `reps_left` ("You could do 3 to 4 more reps"),
+  `example` — one row of the PDF's RPE table, which shows the Reps Left and Example columns only
+  when some week has them.
   Unique per owner and week. Sets and reps live on each exercise, not on the week
   (V21 dropped `sets_reps`).
 - `training_day` — org_id, `player_id` or `template_id`, title, focus, duration_minutes, `kind`

@@ -42,8 +42,14 @@ public class CyclePhase {
     @Column(nullable = false)
     private String goal;
 
+    @Column
+    private String effort;
+
     @Column(name = "rpe_range")
     private String rpeRange;
+
+    @Column(name = "reps_left")
+    private String repsLeft;
 
     @Column
     private String example;
@@ -59,33 +65,34 @@ public class CyclePhase {
     }
 
     private CyclePhase(Organization organization, PlayerProfile player, ProgramTemplate template, int weekNumber,
-            String phaseName, String goal, String rpeRange, String example) {
+            WeekDetails details) {
         this.organization = organization;
         this.player = player;
         this.template = template;
         this.weekNumber = weekNumber;
-        this.phaseName = phaseName;
-        this.goal = goal;
-        this.rpeRange = rpeRange;
-        this.example = example;
+        updateDetails(details);
     }
 
     public static CyclePhase forPlayer(Organization organization, PlayerProfile player, int weekNumber,
-            String phaseName, String goal, String rpeRange, String example) {
-        return new CyclePhase(organization, player, null, weekNumber, phaseName, goal, rpeRange, example);
+            WeekDetails details) {
+        return new CyclePhase(organization, player, null, weekNumber, details);
     }
 
-    public static CyclePhase forTemplate(ProgramTemplate template, int weekNumber, String phaseName, String goal,
-            String rpeRange, String example) {
-        return new CyclePhase(template.getOrganization(), null, template, weekNumber, phaseName, goal, rpeRange,
-                example);
+    public static CyclePhase forTemplate(ProgramTemplate template, int weekNumber, WeekDetails details) {
+        return new CyclePhase(template.getOrganization(), null, template, weekNumber, details);
     }
 
-    public void updateDetails(String phaseName, String goal, String rpeRange, String example) {
-        this.phaseName = phaseName;
-        this.goal = goal;
-        this.rpeRange = rpeRange;
-        this.example = example;
+    public void updateDetails(WeekDetails details) {
+        this.phaseName = details.phaseName();
+        this.goal = details.goal();
+        this.effort = details.effort();
+        this.rpeRange = details.rpeRange();
+        this.repsLeft = details.repsLeft();
+        this.example = details.example();
+    }
+
+    public WeekDetails details() {
+        return new WeekDetails(phaseName, goal, effort, rpeRange, repsLeft, example);
     }
 
     public UUID getId() {
@@ -116,8 +123,16 @@ public class CyclePhase {
         return goal;
     }
 
+    public String getEffort() {
+        return effort;
+    }
+
     public String getRpeRange() {
         return rpeRange;
+    }
+
+    public String getRepsLeft() {
+        return repsLeft;
     }
 
     public String getExample() {

@@ -90,8 +90,7 @@ public class ProgramTemplateService {
                 day.getTitle(), day.getFocus(), day.getDurationMinutes(), day.getKind(), day.getProtocol(),
                 day.getSortOrder()));
         cyclePhases.saveAll(cyclePhases.findAllByPlayerId(player.getId()).stream()
-                .map(week -> CyclePhase.forTemplate(template, week.getWeekNumber(), week.getPhaseName(),
-                        week.getGoal(), week.getRpeRange(), week.getExample()))
+                .map(week -> CyclePhase.forTemplate(template, week.getWeekNumber(), week.details()))
                 .toList());
         return describe(template);
     }
@@ -121,10 +120,9 @@ public class ProgramTemplateService {
         for (CyclePhaseInput input : request.phases()) {
             CyclePhase week = existing.get(input.weekNumber());
             if (week == null) {
-                week = CyclePhase.forTemplate(template, input.weekNumber(), input.phaseName(), input.goal(),
-                        input.rpeRange(), input.example());
+                week = CyclePhase.forTemplate(template, input.weekNumber(), input.details());
             } else {
-                week.updateDetails(input.phaseName(), input.goal(), input.rpeRange(), input.example());
+                week.updateDetails(input.details());
             }
             toSave.add(week);
         }
@@ -154,8 +152,7 @@ public class ProgramTemplateService {
                 day.getSortOrder()));
 
         cyclePhases.saveAll(cyclePhases.findAllByTemplateId(template.getId()).stream()
-                .map(week -> cyclePhaseService.upsertPlayerWeek(player, week.getWeekNumber(), week.getPhaseName(),
-                        week.getGoal(), week.getRpeRange(), week.getExample()))
+                .map(week -> cyclePhaseService.upsertPlayerWeek(player, week.getWeekNumber(), week.details()))
                 .toList());
 
         TrainingProgram cover = trainingProgramService.programOf(player);

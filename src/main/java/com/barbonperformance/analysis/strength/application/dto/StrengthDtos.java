@@ -2,6 +2,7 @@ package com.barbonperformance.analysis.strength.application.dto;
 
 import com.barbonperformance.analysis.drills.domain.DrillCategory;
 import com.barbonperformance.analysis.strength.domain.TrainingDayKind;
+import com.barbonperformance.analysis.strength.domain.WeekDetails;
 import com.barbonperformance.analysis.video.domain.VideoAssetStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -21,8 +22,14 @@ public final class StrengthDtos {
             @Min(1) @Max(4) int weekNumber,
             @NotBlank @Size(max = 100) String phaseName,
             @NotBlank @Size(max = 500) String goal,
+            @Size(max = 100) String effort,
             @Size(max = 50) String rpeRange,
+            @Size(max = 200) String repsLeft,
             @Size(max = 500) String example) {
+
+        public WeekDetails details() {
+            return new WeekDetails(phaseName, goal, effort, rpeRange, repsLeft, example);
+        }
     }
 
     public record ReplaceCyclePhasesRequest(@NotNull @Valid List<CyclePhaseInput> phases) {
@@ -33,7 +40,9 @@ public final class StrengthDtos {
             int weekNumber,
             @NotNull String phaseName,
             @NotNull String goal,
+            String effort,
             String rpeRange,
+            String repsLeft,
             String example) {
     }
 
