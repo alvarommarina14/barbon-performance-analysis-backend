@@ -2,7 +2,6 @@ package com.barbonperformance.analysis.strength.application;
 
 import com.barbonperformance.analysis.shared.domain.ConflictException;
 import com.barbonperformance.analysis.shared.domain.NotFoundException;
-import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ApplyCyclePhaseTemplateRequest;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.CyclePhaseInput;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.CyclePhaseView;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ReplaceCyclePhasesRequest;
@@ -59,39 +58,20 @@ public class CyclePhaseService {
         List<CyclePhase> toSave = new ArrayList<>();
         for (CyclePhaseInput input : request.phases()) {
             toSave.add(upsertPlayerWeek(player, input.weekNumber(), input.phaseName(), input.goal(),
-                    input.setsReps(), input.rpeRange()));
+                    input.rpeRange(), input.example()));
         }
         return save(toSave);
     }
 
-    @Transactional
-    public List<CyclePhaseView> applyTemplateToPlayer(UUID coachUserId, UUID playerProfileId,
-            ApplyCyclePhaseTemplateRequest request) {
-        PlayerProfile player = loadOwnedPlayer(coachUserId, playerProfileId);
-
-        List<CyclePhase> templateWeeks = cyclePhases.findAllByOrgIdAndTemplateName(
-                player.getOrganization().getId(), request.templateName());
-        if (templateWeeks.isEmpty()) {
-            throw new NotFoundException("Template \"" + request.templateName() + "\" not found");
-        }
-
-        List<CyclePhase> toSave = new ArrayList<>();
-        for (CyclePhase templateWeek : templateWeeks) {
-            toSave.add(upsertPlayerWeek(player, templateWeek.getWeekNumber(), templateWeek.getPhaseName(),
-                    templateWeek.getGoal(), templateWeek.getSetsReps(), templateWeek.getRpeRange()));
-        }
-        return save(toSave);
-    }
-
-    private CyclePhase upsertPlayerWeek(PlayerProfile player, int weekNumber, String phaseName, String goal,
-            String setsReps, String rpeRange) {
+    CyclePhase upsertPlayerWeek(PlayerProfile player, int weekNumber, String phaseName, String goal,
+            String rpeRange, String example) {
         return cyclePhases.findByPlayerIdAndWeekNumber(player.getId(), weekNumber)
                 .map(existing -> {
-                    existing.updateDetails(phaseName, goal, setsReps, rpeRange);
+                    existing.updateDetails(phaseName, goal, rpeRange, example);
                     return existing;
                 })
                 .orElseGet(() -> CyclePhase.forPlayer(player.getOrganization(), player, weekNumber, phaseName,
-                        goal, setsReps, rpeRange));
+                        goal, rpeRange, example));
     }
 
     private List<CyclePhaseView> save(List<CyclePhase> toSave) {
@@ -101,7 +81,7 @@ public class CyclePhaseService {
                 .toList();
     }
 
-    private void requireExactlyRequiredWeeks(Stream<Integer> weekNumbers) {
+    static void requireExactlyRequiredWeeks(Stream<Integer> weekNumbers) {
         Set<Integer> weeks = weekNumbers.collect(Collectors.toSet());
         if (!weeks.equals(REQUIRED_WEEKS)) {
             throw new ConflictException("the cycle needs exactly weeks 1 through 4, once each");
@@ -164,6 +144,6 @@ public class CyclePhaseService {
     static CyclePhaseView describe(CyclePhase phase) {
         return new CyclePhaseView(
                 phase.getId(), phase.getWeekNumber(), phase.getPhaseName(), phase.getGoal(),
-                phase.getSetsReps(), phase.getRpeRange());
+                phase.getRpeRange(), phase.getExample());
     }
 }

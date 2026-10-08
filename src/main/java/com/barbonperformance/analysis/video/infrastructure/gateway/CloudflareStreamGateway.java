@@ -105,8 +105,10 @@ class CloudflareStreamGateway implements StreamGateway {
                         .body(TOKEN),
                 "playback token");
 
-        String base = properties.deliveryBaseUrl() + "/" + result.token() + "/manifest/video";
-        return new Playback(base + ".m3u8", base + ".mpd", result.token(), Instant.now().plus(ttl));
+        String root = properties.deliveryBaseUrl() + "/" + result.token();
+        String base = root + "/manifest/video";
+        return new Playback(base + ".m3u8", base + ".mpd", root + "/watch", result.token(),
+                Instant.now().plus(ttl));
     }
 
     @Override

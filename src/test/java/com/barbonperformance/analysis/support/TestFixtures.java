@@ -50,6 +50,15 @@ public class TestFixtures {
         return libraryItems.save(new LibraryItem(organization(), title, null, DrillCategory.FITNESS, asset));
     }
 
+    @Transactional
+    public LibraryItem createReadyLibraryItem(String title, String cue, String streamUid) {
+        VideoAsset asset = new VideoAsset(organization(), VideoAssetKind.LIBRARY_DRILL);
+        asset.attachToStream(streamUid);
+        asset.markReady(streamUid, 30, null, 1024L);
+        return libraryItems.save(new LibraryItem(organization(), title, cue, DrillCategory.FITNESS,
+                videoAssets.save(asset)));
+    }
+
     public Organization organization() {
         return organizations.findBySlug(ORGANIZATION_SLUG).orElseThrow();
     }

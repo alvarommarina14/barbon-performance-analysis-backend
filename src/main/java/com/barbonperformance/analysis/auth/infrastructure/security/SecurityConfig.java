@@ -39,7 +39,9 @@ public class SecurityConfig {
             // Authenticated by an HMAC signature on the body, not by a bearer token.
             "/api/v1/webhooks/cloudflare-stream",
             // Authenticated by a shared secret in the query string, not by a bearer token.
-            "/api/v1/webhooks/tusd"
+            "/api/v1/webhooks/tusd",
+            // Authenticated by a signed token in the path: links printed in the program PDF.
+            "/api/v1/public/**"
     };
 
     @Bean

@@ -12,12 +12,5 @@ interface CyclePhaseJpaRepository extends JpaRepository<CyclePhase, UUID> {
 
     Optional<CyclePhase> findByPlayerIdAndWeekNumber(UUID playerProfileId, int weekNumber);
 
-    List<CyclePhase> findAllByOrganizationIdAndTemplateNameIsNotNullOrderByTemplateNameAscWeekNumberAsc(
-            UUID orgId);
-
-    List<CyclePhase> findAllByOrganizationIdAndTemplateNameOrderByWeekNumber(UUID orgId, String templateName);
-
-    boolean existsByOrganizationIdAndTemplateName(UUID orgId, String templateName);
-
-    void deleteAllByOrganizationIdAndTemplateName(UUID orgId, String templateName);
+    List<CyclePhase> findAllByTemplateIdOrderByWeekNumber(UUID templateId);
 }

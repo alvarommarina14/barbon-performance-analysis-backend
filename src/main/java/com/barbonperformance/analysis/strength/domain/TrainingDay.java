@@ -27,9 +27,13 @@ public class TrainingDay {
     @JoinColumn(name = "org_id", nullable = false)
     private Organization organization;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "player_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "player_id")
     private PlayerProfile player;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_id")
+    private ProgramTemplate template;
 
     @Column(name = "day_label", nullable = false)
     private String dayLabel;
@@ -47,6 +51,10 @@ public class TrainingDay {
     @Column(nullable = false)
     private TrainingDayKind kind;
 
+    // A cardio day is described by this free text instead of a list of exercises.
+    @Column
+    private String protocol;
+
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
@@ -60,23 +68,38 @@ public class TrainingDay {
         // for JPA
     }
 
-    public TrainingDay(Organization organization, PlayerProfile player, String title, String focus,
-            Integer durationMinutes, TrainingDayKind kind, int sortOrder) {
+    private TrainingDay(Organization organization, PlayerProfile player, ProgramTemplate template, String title,
+            String focus, Integer durationMinutes, TrainingDayKind kind, String protocol, int sortOrder) {
         this.organization = organization;
         this.player = player;
+        this.template = template;
         this.title = title;
         this.focus = focus;
         this.durationMinutes = durationMinutes;
         this.kind = kind;
+        this.protocol = protocol;
         place(sortOrder);
     }
 
+    public static TrainingDay forPlayer(PlayerProfile player, String title, String focus, Integer durationMinutes,
+            TrainingDayKind kind, String protocol, int sortOrder) {
+        return new TrainingDay(player.getOrganization(), player, null, title, focus, durationMinutes, kind, protocol,
+                sortOrder);
+    }
+
+    public static TrainingDay forTemplate(ProgramTemplate template, String title, String focus,
+            Integer durationMinutes, TrainingDayKind kind, String protocol, int sortOrder) {
+        return new TrainingDay(template.getOrganization(), null, template, title, focus, durationMinutes, kind,
+                protocol, sortOrder);
+    }
+
     public void revise(String title, String focus, Integer durationMinutes, TrainingDayKind kind,
-            int sortOrder) {
+            String protocol, int sortOrder) {
         this.title = title;
         this.focus = focus;
         this.durationMinutes = durationMinutes;
         this.kind = kind;
+        this.protocol = protocol;
         place(sortOrder);
     }
 
@@ -97,6 +120,10 @@ public class TrainingDay {
         return player;
     }
 
+    public ProgramTemplate getTemplate() {
+        return template;
+    }
+
     public String getDayLabel() {
         return dayLabel;
     }
@@ -115,6 +142,10 @@ public class TrainingDay {
 
     public TrainingDayKind getKind() {
         return kind;
+    }
+
+    public String getProtocol() {
+        return protocol;
     }
 
     public int getSortOrder() {

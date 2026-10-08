@@ -10,7 +10,9 @@ import com.barbonperformance.analysis.strength.application.dto.ExerciseLogDtos.L
 import com.barbonperformance.analysis.strength.application.dto.PlanDtos.SetPlanStartRequest;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.DayExerciseInput;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.DayExerciseView;
-import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ReplaceDayExercisesRequest;
+import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.DaySectionInput;
+import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.DaySectionView;
+import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ReplaceDaySectionsRequest;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.ReplaceTrainingDaysRequest;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.TrainingDayInput;
 import com.barbonperformance.analysis.strength.application.dto.StrengthDtos.TrainingDayView;
@@ -53,8 +55,8 @@ class ExerciseLogIT extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus().isOk();
 
-        day = saveDays(new TrainingDayInput(null, "Lower body", null, 45, TrainingDayKind.STRENGTH)).get(0);
-        exercise = saveExercises(day.id(), new DayExerciseInput(null, libraryItemId, "3x8", "3x8", "4x6", "2x8", null))
+        day = saveDays(new TrainingDayInput(null, "Lower body", null, 45, TrainingDayKind.STRENGTH, null)).get(0);
+        exercise = saveExercises(day.id(), new DayExerciseInput(null, libraryItemId, "3x8", "3x8", "4x6", "2x8", null, null))
                 .get(0);
     }
 
@@ -92,9 +94,9 @@ class ExerciseLogIT extends AbstractIntegrationTest {
         log(1, new LogExerciseRequest(WeightUnit.LB, List.of(new LoggedSetInput(10, new BigDecimal("135")))))
                 .expectStatus().isOk();
 
-        saveDays(new TrainingDayInput(day.id(), "Lower body — heavier", null, 50, TrainingDayKind.STRENGTH),
-                new TrainingDayInput(null, "Upper body", null, 40, TrainingDayKind.STRENGTH));
-        saveExercises(day.id(), new DayExerciseInput(exercise.id(), libraryItemId, "4x6", "4x6", "5x5", "2x8", "Brace"));
+        saveDays(new TrainingDayInput(day.id(), "Lower body — heavier", null, 50, TrainingDayKind.STRENGTH, null),
+                new TrainingDayInput(null, "Upper body", null, 40, TrainingDayKind.STRENGTH, null));
+        saveExercises(day.id(), new DayExerciseInput(exercise.id(), libraryItemId, "4x6", "4x6", "5x5", "2x8", "Brace", null));
 
         List<ExerciseLogView> seenByPlayer = client.get()
                 .uri("/api/v1/strength/training-days/{id}/logs?planWeek=1", day.id())
@@ -111,8 +113,8 @@ class ExerciseLogIT extends AbstractIntegrationTest {
     @Test
     void daysAreNumberedByTheirPositionAndRenumberedWhenReordered() {
         List<TrainingDayView> saved = saveDays(
-                new TrainingDayInput(null, "Upper body", null, 40, TrainingDayKind.STRENGTH),
-                new TrainingDayInput(day.id(), "Lower body", null, 45, TrainingDayKind.STRENGTH));
+                new TrainingDayInput(null, "Upper body", null, 40, TrainingDayKind.STRENGTH, null),
+                new TrainingDayInput(day.id(), "Lower body", null, 45, TrainingDayKind.STRENGTH, null));
 
         assertThat(saved).extracting(TrainingDayView::dayLabel, TrainingDayView::title)
                 .containsExactly(
@@ -149,13 +151,15 @@ class ExerciseLogIT extends AbstractIntegrationTest {
     }
 
     private List<DayExerciseView> saveExercises(UUID trainingDayId, DayExerciseInput... exercises) {
-        return client.put().uri("/api/v1/strength/training-days/{id}/exercises", trainingDayId)
+        List<DaySectionView> sections = client.put().uri("/api/v1/strength/training-days/{id}/sections", trainingDayId)
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
-                .body(new ReplaceDayExercisesRequest(List.of(exercises)))
+                .body(new ReplaceDaySectionsRequest(
+                        List.of(new DaySectionInput(null, "Main work", null, true, List.of(exercises)))))
                 .exchange()
                 .expectStatus().isOk()
-                .returnResult(new ParameterizedTypeReference<List<DayExerciseView>>() {
+                .returnResult(new ParameterizedTypeReference<List<DaySectionView>>() {
                 })
                 .getResponseBody();
+        return sections.get(0).exercises();
     }
 }

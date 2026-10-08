@@ -29,8 +29,9 @@ public class CyclePhase {
     @JoinColumn(name = "player_id")
     private PlayerProfile player;
 
-    @Column(name = "template_name")
-    private String templateName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_id")
+    private ProgramTemplate template;
 
     @Column(name = "week_number", nullable = false)
     private int weekNumber;
@@ -41,11 +42,11 @@ public class CyclePhase {
     @Column(nullable = false)
     private String goal;
 
-    @Column(name = "sets_reps")
-    private String setsReps;
-
     @Column(name = "rpe_range")
     private String rpeRange;
+
+    @Column
+    private String example;
 
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Instant createdAt;
@@ -57,33 +58,34 @@ public class CyclePhase {
         // for JPA
     }
 
-    private CyclePhase(Organization organization, PlayerProfile player, String templateName, int weekNumber,
-            String phaseName, String goal, String setsReps, String rpeRange) {
+    private CyclePhase(Organization organization, PlayerProfile player, ProgramTemplate template, int weekNumber,
+            String phaseName, String goal, String rpeRange, String example) {
         this.organization = organization;
         this.player = player;
-        this.templateName = templateName;
+        this.template = template;
         this.weekNumber = weekNumber;
         this.phaseName = phaseName;
         this.goal = goal;
-        this.setsReps = setsReps;
         this.rpeRange = rpeRange;
+        this.example = example;
     }
 
     public static CyclePhase forPlayer(Organization organization, PlayerProfile player, int weekNumber,
-            String phaseName, String goal, String setsReps, String rpeRange) {
-        return new CyclePhase(organization, player, null, weekNumber, phaseName, goal, setsReps, rpeRange);
+            String phaseName, String goal, String rpeRange, String example) {
+        return new CyclePhase(organization, player, null, weekNumber, phaseName, goal, rpeRange, example);
     }
 
-    public static CyclePhase forTemplate(Organization organization, String templateName, int weekNumber,
-            String phaseName, String goal, String setsReps, String rpeRange) {
-        return new CyclePhase(organization, null, templateName, weekNumber, phaseName, goal, setsReps, rpeRange);
+    public static CyclePhase forTemplate(ProgramTemplate template, int weekNumber, String phaseName, String goal,
+            String rpeRange, String example) {
+        return new CyclePhase(template.getOrganization(), null, template, weekNumber, phaseName, goal, rpeRange,
+                example);
     }
 
-    public void updateDetails(String phaseName, String goal, String setsReps, String rpeRange) {
+    public void updateDetails(String phaseName, String goal, String rpeRange, String example) {
         this.phaseName = phaseName;
         this.goal = goal;
-        this.setsReps = setsReps;
         this.rpeRange = rpeRange;
+        this.example = example;
     }
 
     public UUID getId() {
@@ -98,8 +100,8 @@ public class CyclePhase {
         return player;
     }
 
-    public String getTemplateName() {
-        return templateName;
+    public ProgramTemplate getTemplate() {
+        return template;
     }
 
     public int getWeekNumber() {
@@ -114,12 +116,12 @@ public class CyclePhase {
         return goal;
     }
 
-    public String getSetsReps() {
-        return setsReps;
-    }
-
     public String getRpeRange() {
         return rpeRange;
+    }
+
+    public String getExample() {
+        return example;
     }
 
     public Instant getCreatedAt() {

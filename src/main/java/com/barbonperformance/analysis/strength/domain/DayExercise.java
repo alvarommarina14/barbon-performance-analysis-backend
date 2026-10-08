@@ -11,6 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -28,6 +31,10 @@ public class DayExercise {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "training_day_id", nullable = false)
     private TrainingDay trainingDay;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "section_id", nullable = false)
+    private DaySection section;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "library_item_id", nullable = false)
@@ -48,6 +55,9 @@ public class DayExercise {
     @Column(name = "cue_override")
     private String cueOverride;
 
+    @Column
+    private String notes;
+
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
@@ -61,28 +71,32 @@ public class DayExercise {
         // for JPA
     }
 
-    public DayExercise(Organization organization, TrainingDay trainingDay, LibraryItem libraryItem,
+    public DayExercise(Organization organization, DaySection section, LibraryItem libraryItem,
             String setsRepsWk1, String setsRepsWk2, String setsRepsWk3, String setsRepsWk4,
-            String cueOverride, int sortOrder) {
+            String cueOverride, String notes, int sortOrder) {
         this.organization = organization;
-        this.trainingDay = trainingDay;
+        this.trainingDay = section.getTrainingDay();
+        this.section = section;
         this.libraryItem = libraryItem;
         this.setsRepsWk1 = setsRepsWk1;
         this.setsRepsWk2 = setsRepsWk2;
         this.setsRepsWk3 = setsRepsWk3;
         this.setsRepsWk4 = setsRepsWk4;
         this.cueOverride = cueOverride;
+        this.notes = notes;
         this.sortOrder = sortOrder;
     }
 
-    public void revise(LibraryItem libraryItem, String setsRepsWk1, String setsRepsWk2, String setsRepsWk3,
-            String setsRepsWk4, String cueOverride, int sortOrder) {
+    public void revise(DaySection section, LibraryItem libraryItem, String setsRepsWk1, String setsRepsWk2,
+            String setsRepsWk3, String setsRepsWk4, String cueOverride, String notes, int sortOrder) {
+        this.section = section;
         this.libraryItem = libraryItem;
         this.setsRepsWk1 = setsRepsWk1;
         this.setsRepsWk2 = setsRepsWk2;
         this.setsRepsWk3 = setsRepsWk3;
         this.setsRepsWk4 = setsRepsWk4;
         this.cueOverride = cueOverride;
+        this.notes = notes;
         this.sortOrder = sortOrder;
     }
 
@@ -96,6 +110,10 @@ public class DayExercise {
 
     public TrainingDay getTrainingDay() {
         return trainingDay;
+    }
+
+    public DaySection getSection() {
+        return section;
     }
 
     public LibraryItem getLibraryItem() {
@@ -118,8 +136,26 @@ public class DayExercise {
         return setsRepsWk4;
     }
 
+    // A week the coach left empty repeats the week before it, so an exercise prescribed the same every
+    // week is typed once. The clients apply the same rule (setsRepsByWeek in the core package).
+    public List<String> setsRepsByWeek() {
+        List<String> weeks = new ArrayList<>();
+        String previous = null;
+        for (String week : Arrays.asList(setsRepsWk1, setsRepsWk2, setsRepsWk3, setsRepsWk4)) {
+            if (week != null && !week.isBlank()) {
+                previous = week.strip();
+            }
+            weeks.add(previous);
+        }
+        return weeks;
+    }
+
     public String getCueOverride() {
         return cueOverride;
+    }
+
+    public String getNotes() {
+        return notes;
     }
 
     public int getSortOrder() {

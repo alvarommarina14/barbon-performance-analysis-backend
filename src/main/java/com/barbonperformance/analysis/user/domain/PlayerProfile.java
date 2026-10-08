@@ -43,9 +43,6 @@ public class PlayerProfile {
     @Column(name = "plan_started_at")
     private LocalDate planStartedAt;
 
-    @Column(name = "program_pdf_key")
-    private String programPdfKey;
-
     @Column(name = "next_call_at")
     private Instant nextCallAt;
 
@@ -95,14 +92,6 @@ public class PlayerProfile {
 
     public void setPlanStartedAt(LocalDate planStartedAt) {
         this.planStartedAt = planStartedAt;
-    }
-
-    public String getProgramPdfKey() {
-        return programPdfKey;
-    }
-
-    public void setProgramPdfKey(String programPdfKey) {
-        this.programPdfKey = programPdfKey;
     }
 
     public Instant getNextCallAt() {
