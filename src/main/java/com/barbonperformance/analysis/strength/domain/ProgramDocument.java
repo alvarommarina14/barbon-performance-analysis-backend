@@ -25,10 +25,15 @@ public record ProgramDocument(
                 .orElse("Week " + number);
     }
 
+    // The Example column only shows when the coach wrote one for some week.
+    public boolean hasRpeExamples() {
+        return weeks.stream().anyMatch(week -> week.example() != null && !week.example().isBlank());
+    }
+
     public record RedFlagEntry(String title, String body) {
     }
 
-    public record Week(int number, String phaseName, String goal, String setsReps, String rpeRange) {
+    public record Week(int number, String phaseName, String goal, String rpeRange, String example) {
     }
 
     public record Day(

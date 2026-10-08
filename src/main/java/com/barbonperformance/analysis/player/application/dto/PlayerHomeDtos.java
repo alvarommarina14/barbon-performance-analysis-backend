@@ -37,7 +37,6 @@ public final class PlayerHomeDtos {
             int weekNumber,
             @NotNull String phaseName,
             @NotNull String goal,
-            String setsReps,
             String rpeRange) {
     }
 }

@@ -42,11 +42,11 @@ public class CyclePhase {
     @Column(nullable = false)
     private String goal;
 
-    @Column(name = "sets_reps")
-    private String setsReps;
-
     @Column(name = "rpe_range")
     private String rpeRange;
+
+    @Column
+    private String example;
 
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Instant createdAt;
@@ -59,33 +59,33 @@ public class CyclePhase {
     }
 
     private CyclePhase(Organization organization, PlayerProfile player, ProgramTemplate template, int weekNumber,
-            String phaseName, String goal, String setsReps, String rpeRange) {
+            String phaseName, String goal, String rpeRange, String example) {
         this.organization = organization;
         this.player = player;
         this.template = template;
         this.weekNumber = weekNumber;
         this.phaseName = phaseName;
         this.goal = goal;
-        this.setsReps = setsReps;
         this.rpeRange = rpeRange;
+        this.example = example;
     }
 
     public static CyclePhase forPlayer(Organization organization, PlayerProfile player, int weekNumber,
-            String phaseName, String goal, String setsReps, String rpeRange) {
-        return new CyclePhase(organization, player, null, weekNumber, phaseName, goal, setsReps, rpeRange);
+            String phaseName, String goal, String rpeRange, String example) {
+        return new CyclePhase(organization, player, null, weekNumber, phaseName, goal, rpeRange, example);
     }
 
     public static CyclePhase forTemplate(ProgramTemplate template, int weekNumber, String phaseName, String goal,
-            String setsReps, String rpeRange) {
-        return new CyclePhase(template.getOrganization(), null, template, weekNumber, phaseName, goal, setsReps,
-                rpeRange);
+            String rpeRange, String example) {
+        return new CyclePhase(template.getOrganization(), null, template, weekNumber, phaseName, goal, rpeRange,
+                example);
     }
 
-    public void updateDetails(String phaseName, String goal, String setsReps, String rpeRange) {
+    public void updateDetails(String phaseName, String goal, String rpeRange, String example) {
         this.phaseName = phaseName;
         this.goal = goal;
-        this.setsReps = setsReps;
         this.rpeRange = rpeRange;
+        this.example = example;
     }
 
     public UUID getId() {
@@ -116,12 +116,12 @@ public class CyclePhase {
         return goal;
     }
 
-    public String getSetsReps() {
-        return setsReps;
-    }
-
     public String getRpeRange() {
         return rpeRange;
+    }
+
+    public String getExample() {
+        return example;
     }
 
     public Instant getCreatedAt() {

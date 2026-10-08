@@ -90,7 +90,7 @@ public class ProgramTemplateService {
                 day.getSortOrder()));
         cyclePhases.saveAll(cyclePhases.findAllByPlayerId(player.getId()).stream()
                 .map(week -> CyclePhase.forTemplate(template, week.getWeekNumber(), week.getPhaseName(),
-                        week.getGoal(), week.getSetsReps(), week.getRpeRange()))
+                        week.getGoal(), week.getRpeRange(), week.getExample()))
                 .toList());
         return describe(template);
     }
@@ -120,9 +120,9 @@ public class ProgramTemplateService {
             CyclePhase week = existing.get(input.weekNumber());
             if (week == null) {
                 week = CyclePhase.forTemplate(template, input.weekNumber(), input.phaseName(), input.goal(),
-                        input.setsReps(), input.rpeRange());
+                        input.rpeRange(), input.example());
             } else {
-                week.updateDetails(input.phaseName(), input.goal(), input.setsReps(), input.rpeRange());
+                week.updateDetails(input.phaseName(), input.goal(), input.rpeRange(), input.example());
             }
             toSave.add(week);
         }
@@ -153,7 +153,7 @@ public class ProgramTemplateService {
 
         cyclePhases.saveAll(cyclePhases.findAllByTemplateId(template.getId()).stream()
                 .map(week -> cyclePhaseService.upsertPlayerWeek(player, week.getWeekNumber(), week.getPhaseName(),
-                        week.getGoal(), week.getSetsReps(), week.getRpeRange()))
+                        week.getGoal(), week.getRpeRange(), week.getExample()))
                 .toList());
 
         TrainingProgram cover = trainingProgramService.programOf(player);

@@ -81,7 +81,8 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
                             "Knees bent, feet together", "2 × 12 ea", "Both sides.")
                     .contains("MAIN WORK", "Goblet Squat", "3×8 @ RPE 7", "2×8 @ RPE 6", "W3 Intensity")
                     .contains("Day 2 — Steady-State Cardio", "Stationary bike, 40 min continuous.")
-                    .contains("RPE GUIDE", "RPE 4-5", "Recover");
+                    .contains("RPE GUIDE", "RPE 4-5", "Recover")
+                    .contains("Example", "stop with 3-4 reps left.");
             assertThat(text.split("3×10 @ RPE 7", -1)).as("an empty week repeats the week before it").hasSize(3);
             assertThat(linksIn(document)).hasSize(2)
                     .allMatch(url -> url.startsWith("http://localhost:8080/api/v1/public/exercise-videos/"));
@@ -159,10 +160,11 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
         client.put().uri("/api/v1/strength/players/{id}/cycle-phases", player.getId())
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
                 .body(new ReplaceCyclePhasesRequest(List.of(
-                        new CyclePhaseInput(1, "Base", "Learn the movements", "2 × 8-10", "RPE 5-6"),
-                        new CyclePhaseInput(2, "Volume", "Build work capacity", "3 × 10-12", "RPE 6-7"),
-                        new CyclePhaseInput(3, "Intensity", "Build strength", "3 × 6-8", "RPE 7-8"),
-                        new CyclePhaseInput(4, "Deload", "Recover", "2 × 8", "RPE 4-5"))))
+                        new CyclePhaseInput(1, "Base", "Learn the movements", "RPE 5-6",
+                                "If the program says 2×10, stop with 3-4 reps left."),
+                        new CyclePhaseInput(2, "Volume", "Build work capacity", "RPE 6-7", null),
+                        new CyclePhaseInput(3, "Intensity", "Build strength", "RPE 7-8", null),
+                        new CyclePhaseInput(4, "Deload", "Recover", "RPE 4-5", null))))
                 .exchange()
                 .expectStatus().isOk();
 

@@ -73,7 +73,7 @@ public class PlayerHomeService {
 
     private static PhaseCard describe(CyclePhase phase) {
         return new PhaseCard(
-                phase.getWeekNumber(), phase.getPhaseName(), phase.getGoal(), phase.getSetsReps(),
+                phase.getWeekNumber(), phase.getPhaseName(), phase.getGoal(),
                 phase.getRpeRange());
     }
 }

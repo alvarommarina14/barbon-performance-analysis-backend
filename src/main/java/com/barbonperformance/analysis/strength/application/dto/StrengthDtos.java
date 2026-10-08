@@ -21,8 +21,8 @@ public final class StrengthDtos {
             @Min(1) @Max(4) int weekNumber,
             @NotBlank @Size(max = 100) String phaseName,
             @NotBlank @Size(max = 500) String goal,
-            @Size(max = 100) String setsReps,
-            @Size(max = 50) String rpeRange) {
+            @Size(max = 50) String rpeRange,
+            @Size(max = 500) String example) {
     }
 
     public record ReplaceCyclePhasesRequest(@NotNull @Valid List<CyclePhaseInput> phases) {
@@ -33,8 +33,8 @@ public final class StrengthDtos {
             int weekNumber,
             @NotNull String phaseName,
             @NotNull String goal,
-            String setsReps,
-            String rpeRange) {
+            String rpeRange,
+            String example) {
     }
 
     // id names an existing day to update in place; without one the day is new. Updating in place

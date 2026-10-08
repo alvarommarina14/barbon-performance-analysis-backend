@@ -147,14 +147,14 @@ The key concept is <strong>"Reps Left in the Tank"</strong> — how many more re
     <div class="panel-head"><span class="mark dot"></span>RPE table for your program</div>
     <table>
       <thead>
-        <tr><th class="dark" style="width: 90px;">Week</th><th class="dark" style="width: 80px;">RPE</th><th class="dark" style="width: 110px;">Sets × Reps</th><th class="dark">What it means</th></tr>
+        <tr><th class="dark" style="width: 90px;">Week</th><th class="dark" style="width: 80px;">RPE</th><th class="dark">What it means</th><th class="dark" th:if="${doc.hasRpeExamples()}">Example</th></tr>
       </thead>
       <tbody>
         <tr th:each="week : ${doc.weeks()}" th:class="'rpe-week-' + ${week.number()}">
           <td class="name" style="text-align: center;" th:text="'Week ' + ${week.number()} + ' — ' + ${week.phaseName()}">Week 1 — Base</td>
           <td class="center rpe-label" th:text="${week.rpeRange()}">5-6</td>
-          <td class="center" th:text="${week.setsReps()}">2×10</td>
           <td th:text="${week.goal()}">Goal</td>
+          <td th:if="${doc.hasRpeExamples()}" th:text="${week.example()}">Example</td>
         </tr>
       </tbody>
     </table>

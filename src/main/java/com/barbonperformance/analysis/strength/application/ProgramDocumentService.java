@@ -126,7 +126,7 @@ public class ProgramDocumentService {
                         .toList(),
                 cyclePhases.findAllByPlayerId(player.getId()).stream()
                         .map(phase -> new ProgramDocument.Week(phase.getWeekNumber(), phase.getPhaseName(),
-                                phase.getGoal(), phase.getSetsReps(), phase.getRpeRange()))
+                                phase.getGoal(), phase.getRpeRange(), phase.getExample()))
                         .toList(),
                 trainingDays.findAllByPlayerId(player.getId()).stream()
                         .map(this::describe)

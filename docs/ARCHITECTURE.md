@@ -285,7 +285,9 @@ editing either side afterward never affects the other.
 - `training_program` — the player's cover for the PDF, one row per player, created on first
   write: athlete_level, about ("About your program"), schedule (how to fit the days into a week).
 - `cycle_phase` — org_id, `player_id` or `template_id`, `week_number`, `phase_name`, `goal`,
-  `sets_reps`, `rpe_range`. Unique per owner and week.
+  `rpe_range`, `example` (the PDF's RPE table shows an Example column when any week has one).
+  Unique per owner and week. Sets and reps live on each exercise, not on the week
+  (V21 dropped `sets_reps`).
 - `training_day` — org_id, `player_id` or `template_id`, title, focus, duration_minutes, `kind`
   (`REHAB` | `STRENGTH` | `CARDIO`), protocol, sort_order. A cardio day is described by its
   free-text protocol instead of exercises. There is no stored label: a day is "Day

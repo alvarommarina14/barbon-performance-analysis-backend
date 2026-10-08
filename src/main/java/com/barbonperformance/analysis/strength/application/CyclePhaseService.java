@@ -58,20 +58,20 @@ public class CyclePhaseService {
         List<CyclePhase> toSave = new ArrayList<>();
         for (CyclePhaseInput input : request.phases()) {
             toSave.add(upsertPlayerWeek(player, input.weekNumber(), input.phaseName(), input.goal(),
-                    input.setsReps(), input.rpeRange()));
+                    input.rpeRange(), input.example()));
         }
         return save(toSave);
     }
 
     CyclePhase upsertPlayerWeek(PlayerProfile player, int weekNumber, String phaseName, String goal,
-            String setsReps, String rpeRange) {
+            String rpeRange, String example) {
         return cyclePhases.findByPlayerIdAndWeekNumber(player.getId(), weekNumber)
                 .map(existing -> {
-                    existing.updateDetails(phaseName, goal, setsReps, rpeRange);
+                    existing.updateDetails(phaseName, goal, rpeRange, example);
                     return existing;
                 })
                 .orElseGet(() -> CyclePhase.forPlayer(player.getOrganization(), player, weekNumber, phaseName,
-                        goal, setsReps, rpeRange));
+                        goal, rpeRange, example));
     }
 
     private List<CyclePhaseView> save(List<CyclePhase> toSave) {
@@ -144,6 +144,6 @@ public class CyclePhaseService {
     static CyclePhaseView describe(CyclePhase phase) {
         return new CyclePhaseView(
                 phase.getId(), phase.getWeekNumber(), phase.getPhaseName(), phase.getGoal(),
-                phase.getSetsReps(), phase.getRpeRange());
+                phase.getRpeRange(), phase.getExample());
     }
 }
