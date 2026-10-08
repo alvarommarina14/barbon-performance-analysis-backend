@@ -13,6 +13,7 @@ public record ProgramDocument(
         LocalDate issuedOn,
         String about,
         String schedule,
+        String cycleNote,
         List<RedFlagEntry> redFlags,
         List<Week> weeks,
         List<Day> days) {

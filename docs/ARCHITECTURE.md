@@ -280,10 +280,13 @@ weeks, training days, named blocks inside a day, exercises inside a block. `cycl
 constraint on each). Applying a template to a player is a one-time copy, never a live link —
 editing either side afterward never affects the other.
 
-- `program_template` — org_id, name (unique per org), about, schedule. V18 turned every old
+- `program_template` — org_id, name (unique per org), about, schedule, cycle_note. V18 turned every old
   cycle-phase template (four `cycle_phase` rows grouped by a `template_name`) into one of these.
 - `training_program` — the player's cover for the PDF, one row per player, created on first
-  write: athlete_level, about ("About your program"), schedule (how to fit the days into a week).
+  write: athlete_level, about ("About your program"), schedule (how to fit the days into a week),
+  cycle_note (the "4-week cycle" text under the generated Week 1 (Base) → … sequence).
+  These three texts appear only in the PDF, so they may mark bold with `**word**`; the renderer
+  escapes everything else before turning those marks into `<strong>`.
 - `cycle_phase` — org_id, `player_id` or `template_id`, `week_number`, `phase_name`, `goal`,
   `rpe_range`, `example` (the PDF's RPE table shows an Example column when any week has one).
   Unique per owner and week. Sets and reps live on each exercise, not on the week

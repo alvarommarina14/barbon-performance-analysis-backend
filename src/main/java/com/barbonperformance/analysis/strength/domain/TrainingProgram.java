@@ -38,6 +38,9 @@ public class TrainingProgram {
     @Column
     private String schedule;
 
+    @Column(name = "cycle_note")
+    private String cycleNote;
+
     protected TrainingProgram() {
         // for JPA
     }
@@ -47,10 +50,11 @@ public class TrainingProgram {
         this.player = player;
     }
 
-    public void revise(String athleteLevel, String about, String schedule) {
+    public void revise(String athleteLevel, String about, String schedule, String cycleNote) {
         this.athleteLevel = athleteLevel;
         this.about = about;
         this.schedule = schedule;
+        this.cycleNote = cycleNote;
     }
 
     public UUID getId() {
@@ -71,5 +75,9 @@ public class TrainingProgram {
 
     public String getSchedule() {
         return schedule;
+    }
+
+    public String getCycleNote() {
+        return cycleNote;
     }
 }

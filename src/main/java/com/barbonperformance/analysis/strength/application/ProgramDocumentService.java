@@ -121,6 +121,7 @@ public class ProgramDocumentService {
                 LocalDate.now(zoneOf(player)),
                 program == null ? null : program.getAbout(),
                 program == null ? null : program.getSchedule(),
+                program == null ? null : program.getCycleNote(),
                 redFlags.findAllByPlayerId(player.getId()).stream()
                         .map(flag -> new ProgramDocument.RedFlagEntry(flag.getTitle(), flag.getBody()))
                         .toList(),

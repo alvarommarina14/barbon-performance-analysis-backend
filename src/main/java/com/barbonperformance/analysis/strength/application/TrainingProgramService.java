@@ -25,7 +25,7 @@ public class TrainingProgramService {
         PlayerProfile player = access.readableBy(userId, playerProfileId);
         return programs.findByPlayerId(player.getId())
                 .map(TrainingProgramService::describe)
-                .orElse(new TrainingProgramView(null, null, null));
+                .orElse(new TrainingProgramView(null, null, null, null));
     }
 
     @Transactional
@@ -33,7 +33,7 @@ public class TrainingProgramService {
         PlayerProfile player = access.ownedByCoach(coachUserId, playerProfileId);
         TrainingProgram program = programOf(player);
         program.revise(blankToNull(request.athleteLevel()), blankToNull(request.about()),
-                blankToNull(request.schedule()));
+                blankToNull(request.schedule()), blankToNull(request.cycleNote()));
         return describe(programs.save(program));
     }
 
@@ -50,6 +50,7 @@ public class TrainingProgramService {
     }
 
     private static TrainingProgramView describe(TrainingProgram program) {
-        return new TrainingProgramView(program.getAthleteLevel(), program.getAbout(), program.getSchedule());
+        return new TrainingProgramView(program.getAthleteLevel(), program.getAbout(), program.getSchedule(),
+                program.getCycleNote());
     }
 }

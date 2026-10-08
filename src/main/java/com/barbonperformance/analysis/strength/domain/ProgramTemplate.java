@@ -32,21 +32,26 @@ public class ProgramTemplate {
     @Column
     private String schedule;
 
+    @Column(name = "cycle_note")
+    private String cycleNote;
+
     protected ProgramTemplate() {
         // for JPA
     }
 
-    public ProgramTemplate(Organization organization, String name, String about, String schedule) {
+    public ProgramTemplate(Organization organization, String name, String about, String schedule, String cycleNote) {
         this.organization = organization;
         this.name = name;
         this.about = about;
         this.schedule = schedule;
+        this.cycleNote = cycleNote;
     }
 
-    public void revise(String name, String about, String schedule) {
+    public void revise(String name, String about, String schedule, String cycleNote) {
         this.name = name;
         this.about = about;
         this.schedule = schedule;
+        this.cycleNote = cycleNote;
     }
 
     public UUID getId() {
@@ -67,5 +72,9 @@ public class ProgramTemplate {
 
     public String getSchedule() {
         return schedule;
+    }
+
+    public String getCycleNote() {
+        return cycleNote;
     }
 }

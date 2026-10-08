@@ -114,7 +114,7 @@ class ProgramIT extends AbstractIntegrationTest {
     void theCoachWritesTheCoverAndThePlayerReadsIt() {
         client.put().uri("/api/v1/strength/players/{id}/program", player.getId())
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
-                .body(new WriteTrainingProgramRequest("USTA 4.0", "Tennis longevity.", " "))
+                .body(new WriteTrainingProgramRequest("USTA 4.0", "Tennis longevity.", " ", null))
                 .exchange()
                 .expectStatus().isOk();
 
@@ -125,11 +125,11 @@ class ProgramIT extends AbstractIntegrationTest {
                 .returnResult(TrainingProgramView.class)
                 .getResponseBody();
 
-        assertThat(seen).isEqualTo(new TrainingProgramView("USTA 4.0", "Tennis longevity.", null));
+        assertThat(seen).isEqualTo(new TrainingProgramView("USTA 4.0", "Tennis longevity.", null, null));
 
         client.put().uri("/api/v1/strength/players/{id}/program", player.getId())
                 .header(HttpHeaders.AUTHORIZATION, otherCoachAuth)
-                .body(new WriteTrainingProgramRequest("USTA 5.0", null, null))
+                .body(new WriteTrainingProgramRequest("USTA 5.0", null, null, null))
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -143,7 +143,8 @@ class ProgramIT extends AbstractIntegrationTest {
         saveWeeks(player.getId());
         client.put().uri("/api/v1/strength/players/{id}/program", player.getId())
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
-                .body(new WriteTrainingProgramRequest("USTA 4.0", "Longevity.", "Order the days freely."))
+                .body(new WriteTrainingProgramRequest("USTA 4.0", "Longevity.", "Order the days freely.",
+                        "Never skip a deload."))
                 .exchange()
                 .expectStatus().isOk();
 
@@ -202,7 +203,8 @@ class ProgramIT extends AbstractIntegrationTest {
                 .expectStatus().isOk()
                 .returnResult(TrainingProgramView.class)
                 .getResponseBody();
-        assertThat(cover).isEqualTo(new TrainingProgramView(null, "Longevity.", "Order the days freely."));
+        assertThat(cover).isEqualTo(new TrainingProgramView(null, "Longevity.", "Order the days freely.",
+                "Never skip a deload."));
     }
 
     @Test
@@ -230,7 +232,7 @@ class ProgramIT extends AbstractIntegrationTest {
 
         client.put().uri("/api/v1/strength/program-templates/{id}", template.id())
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
-                .body(new UpdateProgramTemplateRequest("Tennis elbow v2", "Chain problem.", null))
+                .body(new UpdateProgramTemplateRequest("Tennis elbow v2", "Chain problem.", null, null))
                 .exchange()
                 .expectStatus().isOk();
         saveSections(templateDay);

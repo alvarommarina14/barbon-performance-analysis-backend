@@ -76,13 +76,15 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
             String text = new PDFTextStripper().getText(document);
             assertThat(text)
                     .contains("TRAINING PROGRAM", "Bill Van Mater", "USTA 4.0", "Federico Barbon")
-                    .contains("Sharp or electric pain", "Tennis longevity.", "Order the days however you want.")
+                    .contains("Sharp or electric pain", "Tennis longevity & <health>.", "Order the days however you want.")
                     .contains("Day 1 — Lower Body", "INJURY PREVENTION", "10-12 min", "Banded Clamshell",
                             "Knees bent, feet together", "2 × 12 ea", "Both sides.")
                     .contains("MAIN WORK", "Goblet Squat", "3×8 @ RPE 7", "2×8 @ RPE 6", "W3 Intensity")
                     .contains("Day 2 — Steady-State Cardio", "Stationary bike, 40 min continuous.")
                     .contains("RPE GUIDE", "RPE 4-5", "Recover")
+                    .contains("Week 3 (Intensity)", "Deload weeks are non-negotiable")
                     .contains("Example", "stop with 3-4 reps left.");
+            assertThat(text.split("Learn the movements", -1)).as("a week's goal is only in the RPE table").hasSize(2);
             assertThat(text.split("3×10 @ RPE 7", -1)).as("an empty week repeats the week before it").hasSize(3);
             assertThat(linksIn(document)).hasSize(2)
                     .allMatch(url -> url.startsWith("http://localhost:8080/api/v1/public/exercise-videos/"));
@@ -145,8 +147,8 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
 
         client.put().uri("/api/v1/strength/players/{id}/program", player.getId())
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
-                .body(new WriteTrainingProgramRequest("USTA 4.0", "Tennis longevity.",
-                        "Order the days however you want."))
+                .body(new WriteTrainingProgramRequest("USTA 4.0", "**Tennis** longevity & <health>.",
+                        "Order the days however you want.", "Deload weeks are non-negotiable."))
                 .exchange()
                 .expectStatus().isOk();
 

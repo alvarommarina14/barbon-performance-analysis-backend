@@ -17,10 +17,11 @@ public final class ProgramDtos {
     public record WriteTrainingProgramRequest(
             @Size(max = 100) String athleteLevel,
             @Size(max = 4000) String about,
-            @Size(max = 2000) String schedule) {
+            @Size(max = 2000) String schedule,
+            @Size(max = 2000) String cycleNote) {
     }
 
-    public record TrainingProgramView(String athleteLevel, String about, String schedule) {
+    public record TrainingProgramView(String athleteLevel, String about, String schedule, String cycleNote) {
     }
 
     // With fromPlayerProfileId the new template starts as a copy of that client's whole program.
@@ -32,7 +33,8 @@ public final class ProgramDtos {
     public record UpdateProgramTemplateRequest(
             @NotBlank @Size(max = 100) String name,
             @Size(max = 4000) String about,
-            @Size(max = 2000) String schedule) {
+            @Size(max = 2000) String schedule,
+            @Size(max = 2000) String cycleNote) {
     }
 
     public record ProgramTemplateSummary(@NotNull UUID id, @NotNull String name, int dayCount) {
@@ -43,6 +45,7 @@ public final class ProgramDtos {
             @NotNull String name,
             String about,
             String schedule,
+            String cycleNote,
             @NotNull List<CyclePhaseView> weeks,
             @NotNull List<TrainingDayView> days) {
     }

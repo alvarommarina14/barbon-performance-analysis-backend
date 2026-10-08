@@ -24,6 +24,7 @@ class HtmlProgramDocumentRenderer implements ProgramDocumentRenderer {
     private static final DateTimeFormatter ISSUED_ON = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH);
 
     private final TemplateEngine templates;
+    private final RichText richText = new RichText();
 
     HtmlProgramDocumentRenderer() {
         ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
@@ -40,6 +41,7 @@ class HtmlProgramDocumentRenderer implements ProgramDocumentRenderer {
     public byte[] render(ProgramDocument document) {
         Context context = new Context(Locale.ENGLISH);
         context.setVariable("doc", document);
+        context.setVariable("rich", richText);
         context.setVariable("issuedOn", ISSUED_ON.format(document.issuedOn()));
         String html = templates.process(TEMPLATE, context);
 

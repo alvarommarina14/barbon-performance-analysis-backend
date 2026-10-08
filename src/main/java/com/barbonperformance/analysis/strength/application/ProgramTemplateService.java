@@ -78,13 +78,14 @@ public class ProgramTemplateService {
         String name = requireFreeName(coach, request.name().strip(), null);
 
         if (request.fromPlayerProfileId() == null) {
-            return describe(templates.save(new ProgramTemplate(coach.getOrganization(), name, null, null)));
+            return describe(templates.save(new ProgramTemplate(coach.getOrganization(), name, null, null, null)));
         }
 
         PlayerProfile player = access.ownedByCoach(coachUserId, request.fromPlayerProfileId());
         TrainingProgram cover = trainingProgramService.programOf(player);
         ProgramTemplate template = templates.save(
-                new ProgramTemplate(coach.getOrganization(), name, cover.getAbout(), cover.getSchedule()));
+                new ProgramTemplate(coach.getOrganization(), name, cover.getAbout(), cover.getSchedule(),
+                        cover.getCycleNote()));
         copier.copyDays(trainingDays.findAllByPlayerId(player.getId()), day -> TrainingDay.forTemplate(template,
                 day.getTitle(), day.getFocus(), day.getDurationMinutes(), day.getKind(), day.getProtocol(),
                 day.getSortOrder()));
@@ -99,7 +100,8 @@ public class ProgramTemplateService {
     public ProgramTemplateView update(UUID coachUserId, UUID templateId, UpdateProgramTemplateRequest request) {
         ProgramTemplate template = load(coachUserId, templateId);
         String name = requireFreeName(access.coach(coachUserId), request.name().strip(), template.getName());
-        template.revise(name, blankToNull(request.about()), blankToNull(request.schedule()));
+        template.revise(name, blankToNull(request.about()), blankToNull(request.schedule()),
+                blankToNull(request.cycleNote()));
         return describe(templates.save(template));
     }
 
@@ -159,7 +161,8 @@ public class ProgramTemplateService {
         TrainingProgram cover = trainingProgramService.programOf(player);
         cover.revise(cover.getAthleteLevel(),
                 template.getAbout() != null ? template.getAbout() : cover.getAbout(),
-                template.getSchedule() != null ? template.getSchedule() : cover.getSchedule());
+                template.getSchedule() != null ? template.getSchedule() : cover.getSchedule(),
+                template.getCycleNote() != null ? template.getCycleNote() : cover.getCycleNote());
         trainingProgramService.save(cover);
     }
 
@@ -183,6 +186,7 @@ public class ProgramTemplateService {
                 template.getName(),
                 template.getAbout(),
                 template.getSchedule(),
+                template.getCycleNote(),
                 cyclePhases.findAllByTemplateId(template.getId()).stream()
                         .map(CyclePhaseService::describe)
                         .toList(),

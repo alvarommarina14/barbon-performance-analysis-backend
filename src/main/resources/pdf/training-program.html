@@ -116,19 +116,17 @@
       </tbody>
     </table>
   </div>
-  <div class="schedule" th:if="${doc.schedule() != null}"><strong>How to schedule:</strong> <span th:text="${doc.schedule()}">Schedule</span></div>
+  <div class="schedule" th:if="${doc.schedule() != null}"><strong>How to schedule:</strong> <span th:utext="${rich.html(doc.schedule())}">Schedule</span></div>
 </div>
 
 <div class="panel" th:if="${doc.about() != null}">
   <div class="panel-head"><span class="mark dot"></span>About your program</div>
-  <div class="panel-body" th:text="${doc.about()}">About</div>
+  <div class="panel-body" th:utext="${rich.html(doc.about())}">About</div>
 </div>
 
-<div class="panel" th:if="${!doc.weeks().isEmpty()}">
-  <div class="panel-head"><span class="mark dot"></span><span th:text="${doc.weeks().size()} + '-week cycle'">4-week cycle</span></div>
-  <div class="panel-body">Repeat the cycle continuously: <th:block th:each="week, it : ${doc.weeks()}"><strong th:text="'Week ' + ${week.number()} + ' (' + ${week.phaseName()} + ')'">Week 1 (Base)</strong><span th:if="${!it.last}"> → </span></th:block>.
-<th:block th:each="week : ${doc.weeks()}"><th:block th:text="'Week ' + ${week.number()} + ': ' + ${week.goal()}"></th:block>
-</th:block></div>
+<div class="panel" th:if="${!doc.weeks().isEmpty() or doc.cycleNote() != null}">
+  <div class="panel-head"><span class="mark dot"></span>4-week cycle</div>
+  <div class="panel-body"><th:block th:if="${!doc.weeks().isEmpty()}">Repeat the 4-week cycle continuously: <th:block th:each="week, it : ${doc.weeks()}"><strong th:text="'Week ' + ${week.number()} + ' (' + ${week.phaseName()} + ')'">Week 1 (Base)</strong><span th:if="${!it.last}"> → </span></th:block>. </th:block><span th:if="${doc.cycleNote() != null}" th:utext="${rich.html(doc.cycleNote())}">Deload weeks are non-negotiable.</span></div>
 </div>
 
 <th:block th:if="${!doc.weeks().isEmpty()}">
