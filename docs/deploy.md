@@ -31,9 +31,12 @@ The bucket needs no CORS rule: PDFs are uploaded from the coach app's main proce
 ## 2. Railway
 
 1. New Project → Deploy from GitHub repo → this repository, branch `main`. Railway picks up
-   `railway.json` and builds the `Dockerfile`.
+   `railway.json` and builds the `Dockerfile`. The first build fails on the missing variables;
+   that is expected.
 2. In the same project: New → Database → PostgreSQL.
-3. Backend service → Variables:
+3. Backend service → Settings → Networking → Generate Domain. Call it `https://<api-host>`; the
+   program PDF needs it before the first successful start.
+4. Backend service → Variables:
 
    | Variable | Value |
    |---|---|
@@ -46,14 +49,15 @@ The bucket needs no CORS rule: PDFs are uploaded from the coach app's main proce
    | `CLOUDFLARE_ACCOUNT_ID` | from step 1 |
    | `CLOUDFLARE_API_TOKEN` | from step 1 |
    | `CLOUDFLARE_DELIVERY_BASE_URL` | from step 1 |
-   | `CLOUDFLARE_WEBHOOK_SECRET` | `pending` for now — replaced in step 3 |
+   | `CLOUDFLARE_WEBHOOK_SECRET` | `pending` for now — replaced in section 3 |
    | `R2_ENDPOINT` | from step 1 |
    | `R2_BUCKET` | from step 1 |
    | `R2_ACCESS_KEY_ID` | from step 1 |
    | `R2_SECRET_ACCESS_KEY` | from step 1 |
+   | `ANALYSIS_PUBLIC_BASE_URL` | `https://<api-host>` from item 3 above, no trailing slash |
+   | `PROGRAM_LINK_SECRET` | another `openssl rand -base64 48`; never rotate it, it signs the links in PDFs already handed out |
 
    `PORT` is set by Railway; do not add it.
-4. Backend service → Settings → Networking → Generate Domain. Call it `https://<api-host>`.
 5. Wait for the deploy; `https://<api-host>/actuator/health` must answer `{"status":"UP"}`.
    Flyway creates the schema and the organisation on the first start.
 

@@ -37,3 +37,9 @@ analysis:
     s3-bucket: ${R2_BUCKET}
     s3-access-key: ${R2_ACCESS_KEY_ID}
     s3-secret-key: ${R2_SECRET_ACCESS_KEY}
+  strength:
+    # The program PDF links back to this API (the document and every exercise video), so this is
+    # the public https origin Railway gives the service.
+    public-base-url: ${ANALYSIS_PUBLIC_BASE_URL}
+    # Signs those links. Rotating it breaks the video links in every PDF already handed out.
+    link-secret: ${PROGRAM_LINK_SECRET}
