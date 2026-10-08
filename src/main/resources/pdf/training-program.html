@@ -33,6 +33,7 @@
   .alert { color: #ff4a4a; margin-right: 5px; }
   .panel-head .note { text-transform: none; }
   .panel-body { padding: 9px 14px; white-space: pre-line; }
+  .notes { white-space: pre-line; }
 
   .flag { background: #fff2f2; border-left: 2px solid #ff4a4a; padding: 5px 12px 5px 12px; border-top: 1px solid #f3dede; }
   .flag .bullet { display: inline-block; width: 4px; height: 4px; border-radius: 2px; background: #ff4a4a; margin: 0 8px 2px 0; }
@@ -172,7 +173,7 @@ The key concept is <strong>"Reps Left in the Tank"</strong> — how many more re
 
     <div class="panel" th:if="${day.isCardio()}">
       <div class="panel-head protocol"><span class="mark dot"></span>Protocol</div>
-      <div class="panel-body" th:text="${day.protocol() != null} ? ${day.protocol()} : 'Your coach will share this protocol.'">Protocol</div>
+      <div class="panel-body" th:utext="${day.protocol() != null} ? ${rich.html(day.protocol())} : 'Your coach will share this protocol.'">Protocol</div>
     </div>
 
     <div class="panel block" th:each="block : ${day.blocks()}">
@@ -190,7 +191,7 @@ The key concept is <strong>"Reps Left in the Tank"</strong> — how many more re
             <td class="name" th:text="${exercise.title()}">Exercise</td>
             <td class="center" th:text="${exercise.setsReps()}">2 × 12</td>
             <td class="cue" th:text="${exercise.cue()}">Cue</td>
-            <td th:text="${exercise.notes()}">Notes</td>
+            <td class="notes" th:utext="${rich.html(exercise.notes())}">Notes</td>
             <td class="link"><a th:if="${exercise.videoUrl() != null}" th:href="${exercise.videoUrl()}">Link</a></td>
           </tr>
         </tbody>
@@ -208,7 +209,7 @@ The key concept is <strong>"Reps Left in the Tank"</strong> — how many more re
             <td class="num" th:text="${it.count}">1</td>
             <td class="name" th:text="${exercise.title()}">Exercise</td>
             <td class="week" th:each="setsReps : ${exercise.setsRepsByWeek()}" th:text="${setsReps}">3×8</td>
-            <td><div class="cue" th:if="${exercise.cue() != null}" th:text="${exercise.cue()}">Cue</div><div th:if="${exercise.notes() != null}" th:text="${exercise.notes()}">Notes</div></td>
+            <td><div class="cue" th:if="${exercise.cue() != null}" th:text="${exercise.cue()}">Cue</div><div class="notes" th:if="${exercise.notes() != null}" th:utext="${rich.html(exercise.notes())}">Notes</div></td>
             <td class="link"><a th:if="${exercise.videoUrl() != null}" th:href="${exercise.videoUrl()}">Link</a></td>
           </tr>
         </tbody>

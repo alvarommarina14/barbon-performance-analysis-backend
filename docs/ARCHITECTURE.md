@@ -285,8 +285,10 @@ editing either side afterward never affects the other.
 - `training_program` — the player's cover for the PDF, one row per player, created on first
   write: athlete_level, about ("About your program"), schedule (how to fit the days into a week),
   cycle_note (the "4-week cycle" text under the generated Week 1 (Base) → … sequence).
-  These three texts appear only in the PDF, so they may mark bold with `**word**`; the renderer
-  escapes everything else before turning those marks into `<strong>`.
+  These three texts, a cardio day's protocol and an exercise's notes may mark bold with
+  `**word**`; the renderer escapes everything else before turning those marks into `<strong>`.
+  The coach edits them in a visual editor that stores the same marks, and the mobile app shows
+  the protocol and the notes in bold too.
 - `cycle_phase` — org_id, `player_id` or `template_id`, `week_number`, `phase_name`, `goal`,
   `rpe_range`, `example` (the PDF's RPE table shows an Example column when any week has one).
   Unique per owner and week. Sets and reps live on each exercise, not on the week
