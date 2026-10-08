@@ -1,0 +1,45 @@
+# Production profile (Railway). Every secret below has no default on purpose: a missing variable
+# stops the app at startup instead of letting it run on the development values in application.yml.
+# The variables and where each one comes from are listed in docs/deploy.md.
+
+spring:
+  datasource:
+    # Railway's Postgres plugin exposes PG* variables; its DATABASE_URL is not in JDBC form.
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+
+server:
+  port: ${PORT:8080}
+  # Railway terminates TLS at its proxy; trust its X-Forwarded-* headers for scheme and host.
+  forward-headers-strategy: framework
+
+springdoc:
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    com.barbonperformance.analysis: INFO
+
+analysis:
+  security:
+    jwt-secret: ${JWT_SECRET}
+  video:
+    provider: cloudflare
+    account-id: ${CLOUDFLARE_ACCOUNT_ID}
+    api-token: ${CLOUDFLARE_API_TOKEN}
+    webhook-secret: ${CLOUDFLARE_WEBHOOK_SECRET}
+    delivery-base-url: ${CLOUDFLARE_DELIVERY_BASE_URL}
+  content:
+    s3-endpoint: ${R2_ENDPOINT}
+    s3-public-endpoint: ${R2_ENDPOINT}
+    s3-bucket: ${R2_BUCKET}
+    s3-access-key: ${R2_ACCESS_KEY_ID}
+    s3-secret-key: ${R2_SECRET_ACCESS_KEY}
+  strength:
+    # The program PDF links back to this API (the document and every exercise video), so this is
+    # the public https origin Railway gives the service.
+    public-base-url: ${ANALYSIS_PUBLIC_BASE_URL}
+    # Signs those links. Rotating it breaks the video links in every PDF already handed out.
+    link-secret: ${PROGRAM_LINK_SECRET}
