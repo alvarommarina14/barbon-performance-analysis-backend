@@ -37,7 +37,8 @@ class ProgramCopier {
     private void copyContent(TrainingDay from, TrainingDay to) {
         List<DaySection> fromSections = daySections.findAllByTrainingDayId(from.getId());
         List<DaySection> toSections = daySections.saveAll(fromSections.stream()
-                .map(section -> new DaySection(to, section.getTitle(), section.getNote(), section.getSortOrder()))
+                .map(section -> new DaySection(to, section.getTitle(), section.getNote(),
+                        section.variesByWeek(), section.getSortOrder()))
                 .toList());
         Map<UUID, DaySection> sectionCopies = new HashMap<>();
         for (int i = 0; i < fromSections.size(); i++) {

@@ -76,11 +76,13 @@ public final class StrengthDtos {
     }
 
     // A block inside a day ("Injury prevention", "Main work"); the order of the list is the order of
-    // the blocks, and each block's exercises keep the order they are given in.
+    // the blocks, and each block's exercises keep the order they are given in. A block that doesn't
+    // vary by week keeps only week 1 of each exercise.
     public record DaySectionInput(
             UUID id,
             @NotBlank @Size(max = 200) String title,
             @Size(max = 300) String note,
+            @NotNull Boolean variesByWeek,
             @NotNull @Valid List<DayExerciseInput> exercises) {
     }
 
@@ -91,6 +93,7 @@ public final class StrengthDtos {
             @NotNull UUID id,
             @NotNull String title,
             String note,
+            boolean variesByWeek,
             int sortOrder,
             @NotNull List<DayExerciseView> exercises) {
     }

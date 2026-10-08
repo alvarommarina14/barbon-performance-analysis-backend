@@ -33,6 +33,9 @@ public class DaySection {
     @Column
     private String note;
 
+    @Column(name = "varies_by_week", nullable = false)
+    private boolean variesByWeek;
+
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
@@ -40,17 +43,19 @@ public class DaySection {
         // for JPA
     }
 
-    public DaySection(TrainingDay trainingDay, String title, String note, int sortOrder) {
+    public DaySection(TrainingDay trainingDay, String title, String note, boolean variesByWeek, int sortOrder) {
         this.organization = trainingDay.getOrganization();
         this.trainingDay = trainingDay;
         this.title = title;
         this.note = note;
+        this.variesByWeek = variesByWeek;
         this.sortOrder = sortOrder;
     }
 
-    public void revise(String title, String note, int sortOrder) {
+    public void revise(String title, String note, boolean variesByWeek, int sortOrder) {
         this.title = title;
         this.note = note;
+        this.variesByWeek = variesByWeek;
         this.sortOrder = sortOrder;
     }
 
@@ -68,6 +73,10 @@ public class DaySection {
 
     public String getNote() {
         return note;
+    }
+
+    public boolean variesByWeek() {
+        return variesByWeek;
     }
 
     public int getSortOrder() {

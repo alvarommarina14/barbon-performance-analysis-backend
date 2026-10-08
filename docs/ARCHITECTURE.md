@@ -291,8 +291,9 @@ editing either side afterward never affects the other.
   free-text protocol instead of exercises. There is no stored label: a day is "Day
   {sort_order + 1}", so adding, removing or reordering days renumbers them.
 - `day_section` — a block inside a day: training_day_id, title ("Injury prevention", "Main
-  work"), note ("10-12 min"), sort_order. V18 put every existing exercise list into one "Main
-  work" block.
+  work"), note ("10-12 min"), varies_by_week, sort_order. V18 put every existing exercise list
+  into one "Main work" block. A block that doesn't vary by week (V20) keeps only week 1 of its
+  exercises.
 - `day_exercise` — org_id, training_day_id, section_id, library_item_id (reuses
   `video_library_item` from Drills, category `FITNESS`; no second video pipeline),
   sets_reps_wk1..wk4, cue_override (the short cue), notes (the longer note), sort_order. An empty

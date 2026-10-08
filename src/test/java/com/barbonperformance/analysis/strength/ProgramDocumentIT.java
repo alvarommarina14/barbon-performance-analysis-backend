@@ -183,10 +183,10 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
         client.put().uri("/api/v1/strength/training-days/{id}/sections", days.get(0).id())
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
                 .body(new ReplaceDaySectionsRequest(List.of(
-                        new DaySectionInput(null, "Injury prevention", "10-12 min", List.of(
+                        new DaySectionInput(null, "Injury prevention", "10-12 min", false, List.of(
                                 new DayExerciseInput(null, clamshell.getId(), "2 × 12 ea", null, null, null, null,
                                         "Both sides."))),
-                        new DaySectionInput(null, "Main work", null, List.of(
+                        new DaySectionInput(null, "Main work", null, true, List.of(
                                 new DayExerciseInput(null, squat.getId(), "3×8 @ RPE 7", "3×10 @ RPE 7", null,
                                         "2×8 @ RPE 6", null, null))))))
                 .exchange()

@@ -77,14 +77,14 @@ public class DaySectionService {
             String title = input.title().strip();
             String note = blankToNull(input.note());
             if (input.id() == null) {
-                sections.add(new DaySection(day, title, note, sectionOrder++));
+                sections.add(new DaySection(day, title, note, input.variesByWeek(), sectionOrder++));
                 continue;
             }
             DaySection section = existingSections.remove(input.id());
             if (section == null) {
                 throw new NotFoundException("Day section " + input.id() + " not found");
             }
-            section.revise(title, note, sectionOrder++);
+            section.revise(title, note, input.variesByWeek(), sectionOrder++);
             sections.add(section);
         }
         sections = daySections.saveAll(sections);
@@ -99,18 +99,21 @@ public class DaySectionService {
                         .orElseThrow(() -> new NotFoundException(
                                 "Exercise " + input.libraryItemId() + " not found"));
                 String notes = blankToNull(input.notes());
+                boolean weekly = section.variesByWeek();
+                String wk2 = weekly ? input.setsRepsWk2() : null;
+                String wk3 = weekly ? input.setsRepsWk3() : null;
+                String wk4 = weekly ? input.setsRepsWk4() : null;
                 if (input.id() == null) {
                     exercises.add(new DayExercise(coach.getOrganization(), section, item,
-                            input.setsRepsWk1(), input.setsRepsWk2(), input.setsRepsWk3(), input.setsRepsWk4(),
-                            input.cueOverride(), notes, exerciseOrder++));
+                            input.setsRepsWk1(), wk2, wk3, wk4, input.cueOverride(), notes, exerciseOrder++));
                     continue;
                 }
                 DayExercise exercise = existingExercises.remove(input.id());
                 if (exercise == null) {
                     throw new NotFoundException("Day exercise " + input.id() + " not found");
                 }
-                exercise.revise(section, item, input.setsRepsWk1(), input.setsRepsWk2(), input.setsRepsWk3(),
-                        input.setsRepsWk4(), input.cueOverride(), notes, exerciseOrder++);
+                exercise.revise(section, item, input.setsRepsWk1(), wk2, wk3, wk4, input.cueOverride(), notes,
+                        exerciseOrder++);
                 exercises.add(exercise);
             }
         }
@@ -128,7 +131,7 @@ public class DaySectionService {
                         Collectors.mapping(DaySectionService::describe, Collectors.toList())));
         return daySections.findAllByTrainingDayId(trainingDayId).stream()
                 .map(section -> new DaySectionView(section.getId(), section.getTitle(), section.getNote(),
-                        section.getSortOrder(), exercisesBySection.getOrDefault(section.getId(), List.of())))
+                        section.variesByWeek(), section.getSortOrder(), exercisesBySection.getOrDefault(section.getId(), List.of())))
                 .toList();
     }
 

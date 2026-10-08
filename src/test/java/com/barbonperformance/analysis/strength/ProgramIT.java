@@ -62,19 +62,24 @@ class ProgramIT extends AbstractIntegrationTest {
         TrainingDayView day = saveDays(player.getId(), strength(null, "Lower body")).get(0);
 
         List<DaySectionView> first = saveSections(day.id(),
-                new DaySectionInput(null, "Injury prevention", "10-12 min",
+                new DaySectionInput(null, "Injury prevention", "10-12 min", false,
                         List.of(exercise(null, clamshell, "2 × 12 ea", "Both sides."))),
-                new DaySectionInput(null, "Main work", null,
+                new DaySectionInput(null, "Main work", null, true,
                         List.of(exercise(null, squat, "3×8 @ RPE 7", null))));
 
         assertThat(first).extracting(DaySectionView::title, DaySectionView::note)
                 .containsExactly(tuple("Injury prevention", "10-12 min"), tuple("Main work", null));
         assertThat(first.get(0).exercises()).extracting(DayExerciseView::title, DayExerciseView::notes)
                 .containsExactly(tuple("Banded Clamshell", "Both sides."));
+        assertThat(first).extracting(DaySectionView::variesByWeek).containsExactly(false, true);
+        assertThat(first.get(0).exercises().get(0))
+                .extracting(DayExerciseView::setsRepsWk1, DayExerciseView::setsRepsWk2, DayExerciseView::setsRepsWk4)
+                .as("a block that doesn't vary by week keeps only week 1")
+                .containsExactly("2 × 12 ea", null, null);
 
         DayExerciseView squatRow = first.get(1).exercises().get(0);
         List<DaySectionView> second = saveSections(day.id(),
-                new DaySectionInput(first.get(0).id(), "Warm-up", null,
+                new DaySectionInput(first.get(0).id(), "Warm-up", null, true,
                         List.of(exercise(squatRow.id(), squat, "2×8", null))));
 
         assertThat(second).extracting(DaySectionView::id, DaySectionView::title)
@@ -133,7 +138,7 @@ class ProgramIT extends AbstractIntegrationTest {
     void aClientsProgramSavedAsATemplateCanBeAppliedToAnotherClient() {
         TrainingDayView day = saveDays(player.getId(), strength(null, "Lower body"),
                 new TrainingDayInput(null, "Norwegian 4×4", null, 35, TrainingDayKind.CARDIO, "4 rounds.")).get(0);
-        saveSections(day.id(), new DaySectionInput(null, "Main work", null,
+        saveSections(day.id(), new DaySectionInput(null, "Main work", null, true,
                 List.of(exercise(null, squat, "3×8 @ RPE 7", "KB at chest."))));
         saveWeeks(player.getId());
         client.put().uri("/api/v1/strength/players/{id}/program", player.getId())
@@ -214,7 +219,7 @@ class ProgramIT extends AbstractIntegrationTest {
                 .returnResult(ProgramTemplateView.class)
                 .getResponseBody();
         UUID templateDay = withDays.days().get(0).id();
-        saveSections(templateDay, new DaySectionInput(null, "A. Pain modulation", "start here if flared",
+        saveSections(templateDay, new DaySectionInput(null, "A. Pain modulation", "start here if flared", true,
                 List.of(exercise(null, clamshell, "4 × 30s", null))));
 
         client.post().uri("/api/v1/strength/players/{id}/program/apply-template", player.getId())

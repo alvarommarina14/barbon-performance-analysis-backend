@@ -154,7 +154,7 @@ class ExerciseLogIT extends AbstractIntegrationTest {
         List<DaySectionView> sections = client.put().uri("/api/v1/strength/training-days/{id}/sections", trainingDayId)
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
                 .body(new ReplaceDaySectionsRequest(
-                        List.of(new DaySectionInput(null, "Main work", null, List.of(exercises)))))
+                        List.of(new DaySectionInput(null, "Main work", null, true, List.of(exercises)))))
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(new ParameterizedTypeReference<List<DaySectionView>>() {

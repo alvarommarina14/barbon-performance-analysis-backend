@@ -1,0 +1,1 @@
+ALTER TABLE day_section ADD COLUMN varies_by_week BOOLEAN NOT NULL DEFAULT TRUE;
