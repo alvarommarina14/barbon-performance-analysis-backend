@@ -61,6 +61,8 @@
   .rpe-week-3 td { background: #fbe3e3; }
   .rpe-week-4 td { background: #e1eaf6; }
   .rpe-label { color: #7fa600; font-weight: 700; }
+  .rpe-effort { font-size: 8pt; color: #555555; }
+  .reps-left { font-weight: 700; }
 
   .new-page { page-break-before: always; }
   .day { page-break-inside: auto; margin-top: 4px; }
@@ -146,12 +148,13 @@ The key concept is <strong>"Reps Left in the Tank"</strong> — how many more re
     <div class="panel-head"><span class="mark dot"></span>RPE table for your program</div>
     <table>
       <thead>
-        <tr><th class="dark" style="width: 90px;">Week</th><th class="dark" style="width: 80px;">RPE</th><th class="dark">What it means</th><th class="dark" th:if="${doc.hasRpeExamples()}">Example</th></tr>
+        <tr><th class="dark" style="width: 80px;">Week</th><th class="dark" style="width: 115px;">RPE</th><th class="dark" style="width: 100px;" th:if="${doc.hasRepsLeft()}">Reps left in the tank</th><th class="dark">What it means</th><th class="dark" th:if="${doc.hasRpeExamples()}">Example</th></tr>
       </thead>
       <tbody>
         <tr th:each="week : ${doc.weeks()}" th:class="'rpe-week-' + ${week.number()}">
           <td class="name" style="text-align: center;" th:text="'Week ' + ${week.number()} + ' — ' + ${week.phaseName()}">Week 1 — Base</td>
-          <td class="center rpe-label" th:text="${week.rpeRange()}">5-6</td>
+          <td class="center"><div class="rpe-label" th:if="${week.effort() != null}" th:text="${week.effort()}">Light/Moderate</div><div class="rpe-effort" th:if="${week.rpeRange() != null}" th:text="${week.effort() != null} ? 'Effort: ' + ${week.rpeRange()} + ' out of 10' : ${week.rpeRange()}">Effort: 5-6 out of 10</div></td>
+          <td class="center reps-left" th:if="${doc.hasRepsLeft()}" th:text="${week.repsLeft()}">You could do 3 to 4 more reps</td>
           <td th:text="${week.goal()}">Goal</td>
           <td th:if="${doc.hasRpeExamples()}" th:text="${week.example()}">Example</td>
         </tr>
