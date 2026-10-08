@@ -32,7 +32,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -158,9 +157,7 @@ public class ProgramDocumentService {
         String cue = exercise.getCueOverride() != null ? exercise.getCueOverride() : item.getCue();
         String videoUrl = item.getVideoAsset().isReady() ? links.exerciseVideo(item.getId()) : null;
         return new ProgramDocument.Exercise(item.getTitle(), cue, exercise.getNotes(),
-                Arrays.asList(exercise.getSetsRepsWk1(), exercise.getSetsRepsWk2(),
-                        exercise.getSetsRepsWk3(), exercise.getSetsRepsWk4()),
-                videoUrl);
+                exercise.setsRepsByWeek(), videoUrl);
     }
 
     private static ZoneId zoneOf(PlayerProfile player) {

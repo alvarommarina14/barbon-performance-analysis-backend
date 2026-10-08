@@ -78,10 +78,11 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
                     .contains("TRAINING PROGRAM", "Bill Van Mater", "USTA 4.0", "Federico Barbon")
                     .contains("Sharp or electric pain", "Tennis longevity.", "Order the days however you want.")
                     .contains("Day 1 — Lower Body", "INJURY PREVENTION", "10-12 min", "Banded Clamshell",
-                            "Knees bent, feet together", "Both sides.")
-                    .contains("MAIN WORK", "Goblet Squat", "3×8 @ RPE 7", "4×6 @ RPE 8", "W3 Intensity")
+                            "Knees bent, feet together", "2 × 12 ea", "Both sides.")
+                    .contains("MAIN WORK", "Goblet Squat", "3×8 @ RPE 7", "2×8 @ RPE 6", "W3 Intensity")
                     .contains("Day 2 — Steady-State Cardio", "Stationary bike, 40 min continuous.")
                     .contains("RPE GUIDE", "RPE 4-5", "Recover");
+            assertThat(text.split("3×10 @ RPE 7", -1)).as("an empty week repeats the week before it").hasSize(3);
             assertThat(linksIn(document)).hasSize(2)
                     .allMatch(url -> url.startsWith("http://localhost:8080/api/v1/public/exercise-videos/"));
         }
@@ -183,11 +184,11 @@ class ProgramDocumentIT extends AbstractIntegrationTest {
                 .header(HttpHeaders.AUTHORIZATION, coachAuth)
                 .body(new ReplaceDaySectionsRequest(List.of(
                         new DaySectionInput(null, "Injury prevention", "10-12 min", List.of(
-                                new DayExerciseInput(null, clamshell.getId(), "2 × 12 ea", "2 × 12 ea",
-                                        "2 × 12 ea", "2 × 12 ea", null, "Both sides."))),
+                                new DayExerciseInput(null, clamshell.getId(), "2 × 12 ea", null, null, null, null,
+                                        "Both sides."))),
                         new DaySectionInput(null, "Main work", null, List.of(
-                                new DayExerciseInput(null, squat.getId(), "3×8 @ RPE 7", "3×10 @ RPE 7",
-                                        "4×6 @ RPE 8", "2×8 @ RPE 6", null, null))))))
+                                new DayExerciseInput(null, squat.getId(), "3×8 @ RPE 7", "3×10 @ RPE 7", null,
+                                        "2×8 @ RPE 6", null, null))))))
                 .exchange()
                 .expectStatus().isOk();
     }

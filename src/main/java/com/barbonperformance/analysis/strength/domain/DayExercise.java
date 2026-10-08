@@ -11,6 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -131,6 +134,20 @@ public class DayExercise {
 
     public String getSetsRepsWk4() {
         return setsRepsWk4;
+    }
+
+    // A week the coach left empty repeats the week before it, so an exercise prescribed the same every
+    // week is typed once. The clients apply the same rule (setsRepsByWeek in the core package).
+    public List<String> setsRepsByWeek() {
+        List<String> weeks = new ArrayList<>();
+        String previous = null;
+        for (String week : Arrays.asList(setsRepsWk1, setsRepsWk2, setsRepsWk3, setsRepsWk4)) {
+            if (week != null && !week.isBlank()) {
+                previous = week.strip();
+            }
+            weeks.add(previous);
+        }
+        return weeks;
     }
 
     public String getCueOverride() {

@@ -295,7 +295,8 @@ editing either side afterward never affects the other.
   work" block.
 - `day_exercise` — org_id, training_day_id, section_id, library_item_id (reuses
   `video_library_item` from Drills, category `FITNESS`; no second video pipeline),
-  sets_reps_wk1..wk4, cue_override (the short cue), notes (the longer note), sort_order
+  sets_reps_wk1..wk4, cue_override (the short cue), notes (the longer note), sort_order. An empty
+  week repeats the week before it — the PDF and both clients read it that way.
 
 The `strength` module owns all of them. The coach manages a client's program and the org's
 templates from `apps/coach`:
